@@ -639,9 +639,213 @@
       #right { width: 100%; }
       #mobile-toggle { display: flex; }
     }
+
+    /* ═══════════════════════════════════════════════════════
+       FILE LOADER
+    ═══════════════════════════════════════════════════════ */
+    #file-loader-section {
+      flex-shrink: 0;
+      border-bottom: 1px solid var(--left-border);
+      padding: 10px 16px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .file-loader-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+    .file-loader-row {
+      display: flex;
+      gap: 6px;
+    }
+    #file-selector {
+      flex: 1;
+      background: var(--input-bg);
+      border: 1px solid var(--input-border);
+      border-radius: var(--radius-xs);
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 12px;
+      padding: 6px 8px;
+      outline: none;
+      cursor: pointer;
+      transition: border-color .15s;
+    }
+    #file-selector:focus { border-color: var(--accent); }
+    #file-selector option { background: #1e293b; }
+    #load-file-btn {
+      padding: 6px 12px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-xs);
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background .15s;
+      flex-shrink: 0;
+    }
+    #load-file-btn:hover { background: var(--accent-hover); }
+    #load-file-btn:disabled { opacity: .5; cursor: not-allowed; }
+    #file-status-row {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    #file-status-row.visible { display: flex; }
+    .file-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #0f3460;
+      border: 1px solid #1d4ed8;
+      color: #93c5fd;
+      border-radius: 99px;
+      padding: 2px 9px;
+      font-size: 11px;
+      font-weight: 500;
+    }
+    #changed-badge {
+      display: none;
+      align-items: center;
+      gap: 3px;
+      background: #431407;
+      border: 1px solid #c2410c;
+      color: #fb923c;
+      border-radius: 99px;
+      padding: 2px 9px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    #changed-badge.visible { display: inline-flex; }
+
+    /* Save button in toolbar */
+    .tool-btn-save {
+      padding: 0 12px;
+      height: 34px;
+      border-radius: var(--radius-xs);
+      border: 1px solid #bfdbfe;
+      background: #eff6ff;
+      color: #1d4ed8;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: inherit;
+      gap: 4px;
+      transition: all .15s;
+      white-space: nowrap;
+    }
+    .tool-btn-save:hover { background: #dbeafe; border-color: #93c5fd; }
+    .tool-btn-save:disabled { opacity: .4; cursor: not-allowed; }
+
+    /* ═══════════════════════════════════════════════════════
+       LOCK SCREEN
+    ═══════════════════════════════════════════════════════ */
+    #lock-screen {
+      position: fixed;
+      inset: 0;
+      background: #0f172a;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+    #lock-screen.hidden { display: none; }
+    .lock-logo {
+      font-size: 28px;
+      font-weight: 700;
+      color: #f1f5f9;
+      letter-spacing: -0.01em;
+      margin-bottom: 4px;
+    }
+    .lock-logo span { color: #3b82f6; }
+    .lock-subtitle {
+      font-size: 14px;
+      color: #64748b;
+      margin-bottom: 24px;
+    }
+    .lock-input-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      width: 280px;
+    }
+    #lock-code-input {
+      width: 100%;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      color: #f1f5f9;
+      font-family: inherit;
+      font-size: 18px;
+      padding: 12px 16px;
+      text-align: center;
+      letter-spacing: 4px;
+      outline: none;
+      transition: border-color .15s;
+    }
+    #lock-code-input:focus { border-color: #3b82f6; }
+    #lock-error {
+      font-size: 12px;
+      color: #f87171;
+      height: 16px;
+      text-align: center;
+    }
+    #lock-submit-btn {
+      width: 100%;
+      padding: 12px;
+      background: #3b82f6;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    #lock-submit-btn:hover { background: #2563eb; }
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      20%      { transform: translateX(-8px); }
+      40%      { transform: translateX(8px); }
+      60%      { transform: translateX(-6px); }
+      80%      { transform: translateX(6px); }
+    }
+    .shake { animation: shake .4s ease; }
   </style>
 </head>
 <body>
+
+<!-- ═══════════════════════════════════════════════════════
+     LOCK SCREEN
+═══════════════════════════════════════════════════════ -->
+<div id="lock-screen">
+  <div class="lock-logo"><span>MYP</span> Studio</div>
+  <div class="lock-subtitle">접근 코드를 입력해주세요</div>
+  <div class="lock-input-wrap">
+    <input
+      type="password"
+      id="lock-code-input"
+      placeholder="••••••••"
+      autocomplete="off"
+      onkeydown="if(event.key==='Enter') submitAccessCode()"
+    />
+    <div id="lock-error"></div>
+    <button id="lock-submit-btn" onclick="submitAccessCode()">입력</button>
+  </div>
+</div>
 
 <!-- ═══════════════════════════════════════════════════════
      LEFT PANEL
@@ -665,6 +869,30 @@
     </button>
     <div id="sysprompt-body">
       <textarea id="sysprompt-text" placeholder="AI에게 추가 지시사항을 입력하세요 (선택사항)"></textarea>
+    </div>
+  </div>
+
+  <!-- File loader -->
+  <div id="file-loader-section">
+    <div class="file-loader-label">📁 프로젝트 파일</div>
+    <div class="file-loader-row">
+      <select id="file-selector">
+        <option value="">— 파일 선택 —</option>
+        <option value="index.html">index.html (랜딩)</option>
+        <option value="step1.html">step1.html (정보 입력)</option>
+        <option value="step2-loading.html">step2-loading.html (AI 로딩)</option>
+        <option value="step2.html">step2.html (스타일 선택)</option>
+        <option value="step3-frames.html">step3-frames.html (프레임 배치)</option>
+        <option value="step3.html">step3.html (레이아웃 커스텀)</option>
+        <option value="step4.html">step4.html (모듈 설정)</option>
+        <option value="step5.html">step5.html (견적 확인)</option>
+        <option value="complete.html">complete.html (완료)</option>
+      </select>
+      <button id="load-file-btn" onclick="loadSelectedFile()">불러오기</button>
+    </div>
+    <div id="file-status-row">
+      <div class="file-badge">✦ 편집 중: <span id="file-badge-name"></span></div>
+      <div id="changed-badge">변경됨 ●</div>
     </div>
   </div>
 
@@ -706,6 +934,7 @@
       <button class="tab-btn" id="tab-code" onclick="switchTab('code')">코드</button>
     </div>
     <div class="toolbar-spacer"></div>
+    <button class="tool-btn-save" id="save-file-btn" onclick="saveCurrentFile()" title="파일 저장" disabled>💾 저장</button>
     <button class="tool-btn" onclick="copyCode()" title="코드 복사">⎘</button>
     <button class="tool-btn" onclick="downloadHTML()" title="HTML 다운로드">↓</button>
     <button class="tool-btn" onclick="openInNewTab()" title="새 탭에서 열기">⎋</button>
@@ -780,6 +1009,11 @@
       </div>
     </div>
 
+    <div class="field">
+      <label>GitHub 토큰</label>
+      <input type="password" id="settings-github-token" placeholder="ghp_..." autocomplete="off" />
+    </div>
+
     <div class="settings-actions">
       <button class="btn-modal btn-cancel" onclick="closeSettings()">취소</button>
       <button class="btn-modal btn-save" onclick="saveSettings()">저장</button>
@@ -801,20 +1035,33 @@ let contextEnabled = false;
 let syspromptOpen = false;
 let currentTab = 'preview';
 let isGenerating = false;
+let loadedFileName = null;  // currently loaded popup designer file
+let hasUnsavedChanges = false; // AI has modified the loaded file
 
 /* ═════════════════════════════════════════════════════════════
    INIT
 ═════════════════════════════════════════════════════════════ */
 window.addEventListener('DOMContentLoaded', () => {
+  // ── Lock screen check ──
+  const authToken = sessionStorage.getItem('myp_studio_auth');
+  if (authToken === 'MYP1101') {
+    document.getElementById('lock-screen').classList.add('hidden');
+  } else {
+    // Focus input after brief delay
+    setTimeout(() => document.getElementById('lock-code-input').focus(), 100);
+  }
+
   // Load settings
   const apiKey = localStorage.getItem('myp_studio_api_key') || '';
   const model  = localStorage.getItem('myp_studio_model') || 'claude-sonnet-4-5';
   const temp   = localStorage.getItem('myp_studio_temp') || '0.7';
+  const ghToken = localStorage.getItem('myp_studio_github_token') || '';
 
   document.getElementById('settings-api-key').value = apiKey;
   document.getElementById('settings-model').value = model;
   document.getElementById('settings-temp').value = temp;
   document.getElementById('temp-val').textContent = temp;
+  document.getElementById('settings-github-token').value = ghToken;
 
   // Load chat history
   const saved = localStorage.getItem('myp_studio_chat');
@@ -857,12 +1104,15 @@ function handleSettingsOverlayClick(e) {
   if (e.target === document.getElementById('settings-overlay')) closeSettings();
 }
 function saveSettings() {
-  const key  = document.getElementById('settings-api-key').value.trim();
-  const model = document.getElementById('settings-model').value;
-  const temp  = document.getElementById('settings-temp').value;
+  const key     = document.getElementById('settings-api-key').value.trim();
+  const model   = document.getElementById('settings-model').value;
+  const temp    = document.getElementById('settings-temp').value;
+  const ghToken = document.getElementById('settings-github-token').value.trim();
   if (key) localStorage.setItem('myp_studio_api_key', key);
   localStorage.setItem('myp_studio_model', model);
   localStorage.setItem('myp_studio_temp', temp);
+  if (ghToken) localStorage.setItem('myp_studio_github_token', ghToken);
+  else localStorage.removeItem('myp_studio_github_token');
   closeSettings();
   showToast('설정이 저장되었습니다');
 }
@@ -947,6 +1197,13 @@ async function handleGenerate() {
     switchTab('preview');
     persistChat();
 
+    // If editing a loaded file, mark as changed
+    if (loadedFileName) {
+      hasUnsavedChanges = true;
+      document.getElementById('changed-badge').classList.add('visible');
+      document.getElementById('save-file-btn').disabled = false;
+    }
+
   } catch (err) {
     console.error(err);
     const errId = Date.now() + 1;
@@ -981,6 +1238,12 @@ function setGeneratingUI(on) {
    BUILD MESSAGES
 ═════════════════════════════════════════════════════════════ */
 function buildMessages(newPrompt) {
+  // When a file is loaded, always inject full code as context regardless of toggle
+  if (loadedFileName && currentCode) {
+    const ctxPrompt = `현재 편집 중인 파일 (${loadedFileName})의 전체 코드:\n\`\`\`html\n${currentCode}\n\`\`\`\n\n수정 요청: ${newPrompt}`;
+    return [{ role: 'user', content: ctxPrompt }];
+  }
+
   if (!contextEnabled || chatHistory.length === 0) {
     return [{ role: 'user', content: newPrompt }];
   }
@@ -1018,9 +1281,14 @@ function buildMessages(newPrompt) {
 async function callAnthropic(apiKey, messages) {
   const userSysPrompt = document.getElementById('sysprompt-text').value.trim();
 
-  const systemParts = [
-    'You are an expert web developer. Generate complete, self-contained HTML with inline CSS and JS. Return ONLY the raw HTML code starting with <!DOCTYPE html>. No explanations, no markdown fences, no extra text.',
-  ];
+  let baseSystemPrompt;
+  if (loadedFileName) {
+    baseSystemPrompt = `You are editing an existing HTML file (${loadedFileName}). The current code is provided in the user message. Return ONLY the complete updated HTML starting with <!DOCTYPE html>. Preserve all existing structure, styles, and functionality unless explicitly asked to change them. No explanations, no markdown fences, no extra text.`;
+  } else {
+    baseSystemPrompt = 'You are an expert web developer. Generate complete, self-contained HTML with inline CSS and JS. Return ONLY the raw HTML code starting with <!DOCTYPE html>. No explanations, no markdown fences, no extra text.';
+  }
+
+  const systemParts = [baseSystemPrompt];
   if (userSysPrompt) systemParts.unshift(userSysPrompt);
   const systemPrompt = systemParts.join('\n\n');
 
@@ -1203,7 +1471,7 @@ function downloadHTML() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'generated-' + Date.now() + '.html';
+  a.download = loadedFileName || ('generated-' + Date.now() + '.html');
   a.click();
   URL.revokeObjectURL(url);
   showToast('HTML 파일이 다운로드되었습니다 ✓');
@@ -1214,6 +1482,147 @@ function openInNewTab() {
   const blob = new Blob([currentCode], { type: 'text/html' });
   const url = URL.createObjectURL(blob);
   window.open(url, '_blank');
+}
+
+/* ═════════════════════════════════════════════════════════════
+   FILE LOADER
+═════════════════════════════════════════════════════════════ */
+async function loadSelectedFile() {
+  const select = document.getElementById('file-selector');
+  const filename = select.value;
+  if (!filename) {
+    showToast('파일을 선택해주세요', true);
+    return;
+  }
+
+  const btn = document.getElementById('load-file-btn');
+  btn.disabled = true;
+  btn.textContent = '불러오는 중...';
+
+  try {
+    const resp = await fetch(filename + '?_=' + Date.now());
+    if (!resp.ok) throw new Error(`파일을 찾을 수 없습니다: ${filename}`);
+    const html = await resp.text();
+
+    // Set state
+    loadedFileName = filename;
+    hasUnsavedChanges = false;
+    currentCode = html;
+
+    // Auto-enable context
+    contextEnabled = true;
+    document.getElementById('context-switch').classList.add('on');
+
+    // Show in preview and code view
+    renderCode(html);
+    renderPreview(html);
+    hideEmptyState();
+
+    // Update file status badge
+    document.getElementById('file-badge-name').textContent = filename;
+    document.getElementById('file-status-row').classList.add('visible');
+    document.getElementById('changed-badge').classList.remove('visible');
+    document.getElementById('save-file-btn').disabled = true;
+
+    // Update placeholder
+    document.getElementById('prompt-textarea').placeholder =
+      `${filename} 수정사항을 입력하세요... (Ctrl+Enter)`;
+
+    showToast(`✓ ${filename} 불러오기 완료`);
+    switchTab('preview');
+
+  } catch (err) {
+    showToast(err.message, true);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '불러오기';
+  }
+}
+
+async function saveCurrentFile() {
+  if (!currentCode) { showToast('저장할 코드가 없습니다', true); return; }
+  const filename = loadedFileName || ('generated-' + Date.now() + '.html');
+  const ghToken = localStorage.getItem('myp_studio_github_token') || '';
+
+  if (!ghToken) {
+    // Fallback: download
+    showToast('GitHub 토큰이 없어 다운로드로 저장됩니다', false);
+    const blob = new Blob([currentCode], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+    hasUnsavedChanges = false;
+    document.getElementById('changed-badge').classList.remove('visible');
+    document.getElementById('save-file-btn').disabled = true;
+    return;
+  }
+
+  const btn = document.getElementById('save-file-btn');
+  btn.disabled = true;
+  btn.textContent = '저장 중...';
+
+  try {
+    const owner = 'kman-cmyk';
+    const repo  = 'popup-designer';
+    const apiBase = 'https://api.github.com/repos/' + owner + '/' + repo + '/contents/' + filename;
+    const headers = {
+      'Authorization': 'token ' + ghToken,
+      'Accept': 'application/vnd.github.v3+json',
+      'Content-Type': 'application/json',
+    };
+
+    // 1. GET current SHA
+    let sha = null;
+    const getResp = await fetch(apiBase, { headers });
+    if (getResp.ok) {
+      const data = await getResp.json();
+      sha = data.sha;
+    } else if (getResp.status !== 404) {
+      const err = await getResp.json();
+      throw new Error(err.message || `GET failed: ${getResp.status}`);
+    }
+
+    // 2. PUT new content
+    const encoded = btoa(unescape(encodeURIComponent(currentCode)));
+    const body = {
+      message: `Update ${filename} via MYP Studio`,
+      content: encoded,
+    };
+    if (sha) body.sha = sha;
+
+    const putResp = await fetch(apiBase, {
+      method: 'PUT',
+      headers,
+      body: JSON.stringify(body),
+    });
+
+    if (!putResp.ok) {
+      const err = await putResp.json();
+      throw new Error(err.message || `PUT failed: ${putResp.status}`);
+    }
+
+    // Clear changed indicator
+    hasUnsavedChanges = false;
+    document.getElementById('changed-badge').classList.remove('visible');
+
+    showToast('✓ 저장됨', false);
+    setTimeout(() => showToast('배포 중... 약 1분 후 반영됩니다', false), 1500);
+
+  } catch (err) {
+    showToast('저장 실패: ' + err.message, true);
+    btn.disabled = false;
+  } finally {
+    btn.textContent = '💾 저장';
+    if (!hasUnsavedChanges) btn.disabled = true;
+    else btn.disabled = false;
+  }
+}
+
+function getGithubToken() {
+  return localStorage.getItem('myp_studio_github_token') || '';
 }
 
 /* ═════════════════════════════════════════════════════════════
@@ -1270,6 +1679,29 @@ function escapeHtml(str) {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
+}
+
+/* ═════════════════════════════════════════════════════════════
+   LOCK SCREEN
+═════════════════════════════════════════════════════════════ */
+function submitAccessCode() {
+  const input = document.getElementById('lock-code-input');
+  const error = document.getElementById('lock-error');
+  const code  = input.value;
+
+  if (code === 'MYP1101') {
+    sessionStorage.setItem('myp_studio_auth', 'MYP1101');
+    document.getElementById('lock-screen').classList.add('hidden');
+    error.textContent = '';
+  } else {
+    error.textContent = '올바르지 않은 코드입니다';
+    input.classList.remove('shake');
+    // Force reflow to restart animation
+    void input.offsetWidth;
+    input.classList.add('shake');
+    input.value = '';
+    input.focus();
+  }
 }
 </script>
 
