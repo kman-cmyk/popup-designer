@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>makeyourplace — 팝업스토어 AI 설계</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Pretendard',sans-serif;background:#fff;color:#111;line-height:1.6}
+
+    /* NAV */
+    nav{display:flex;align-items:center;justify-content:space-between;padding:0 48px;height:64px;border-bottom:1px solid #f0f0f0;position:sticky;top:0;background:#fff;z-index:100}
+    .nav-logo{font-size:18px;font-weight:800;color:#111;text-decoration:none}
+    .nav-links{display:flex;gap:32px;list-style:none}
+    .nav-links a{font-size:14px;color:#555;text-decoration:none;font-weight:500}
+    .nav-links a:hover{color:#111}
+    .nav-cta{background:#3B82F6;color:#fff;border:none;padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;text-decoration:none}
+    .nav-cta:hover{background:#2563EB}
+
+    /* HERO */
+    .hero{text-align:center;padding:100px 24px 80px;max-width:800px;margin:0 auto}
+    .hero h1{font-size:48px;font-weight:800;line-height:1.2;letter-spacing:-0.02em;margin-bottom:12px}
+    .hero h1 span{color:#3B82F6}
+    .hero p{font-size:16px;color:#666;margin-bottom:40px;line-height:1.7}
+    .hero-btns{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+    .btn-primary{background:#3B82F6;color:#fff;border:none;padding:14px 28px;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;text-decoration:none;display:inline-block}
+    .btn-primary:hover{background:#2563EB}
+    .btn-outline{background:#fff;color:#111;border:2px solid #E5E7EB;padding:14px 28px;border-radius:10px;font-size:16px;font-weight:600;cursor:pointer;font-family:inherit;text-decoration:none;display:inline-block}
+    .btn-outline:hover{border-color:#3B82F6;color:#3B82F6}
+
+    /* SERVICES */
+    .section{padding:80px 48px;max-width:1200px;margin:0 auto}
+    .section-title{font-size:14px;font-weight:600;color:#999;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px}
+    .section h2{font-size:32px;font-weight:800;margin-bottom:48px;letter-spacing:-0.01em}
+    .services-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:32px}
+    .service-card{padding:32px;border:1px solid #F0F0F0;border-radius:16px}
+    .service-icon{width:44px;height:44px;background:#EFF6FF;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:20px;font-size:22px}
+    .service-card h3{font-size:18px;font-weight:700;margin-bottom:10px}
+    .service-card p{font-size:14px;color:#666;line-height:1.7}
+
+    /* PORTFOLIO */
+    .portfolio-section{padding:80px 48px;background:#FAFAFA}
+    .portfolio-inner{max-width:1200px;margin:0 auto}
+    .portfolio-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px}
+    .portfolio-header h2{font-size:28px;font-weight:800}
+    .more-link{font-size:14px;color:#3B82F6;text-decoration:none;font-weight:600}
+    .portfolio-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+    .portfolio-card{border-radius:16px;overflow:hidden;position:relative;aspect-ratio:16/10;cursor:pointer}
+    .portfolio-card-bg{width:100%;height:100%;background:linear-gradient(135deg,#2D4A3E 0%,#1A2E25 100%);display:flex;align-items:flex-end;padding:24px}
+    .portfolio-card:nth-child(2) .portfolio-card-bg{background:linear-gradient(135deg,#3D2E1E 0%,#2A1F15 100%)}
+    .portfolio-card-badge{font-size:11px;color:rgba(255,255,255,0.6);font-weight:600;text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:4px}
+    .portfolio-card-name{font-size:20px;color:#fff;font-weight:700}
+    .portfolio-card-num{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:120px;font-weight:900;color:rgba(255,255,255,0.08);pointer-events:none;user-select:none;line-height:1}
+
+    /* CONTACT */
+    .contact-section{padding:80px 48px;max-width:1200px;margin:0 auto;text-align:center}
+    .contact-section h2{font-size:28px;font-weight:800;margin-bottom:8px}
+    .contact-section p{font-size:15px;color:#666;margin-bottom:48px}
+    .contact-form{max-width:560px;margin:0 auto;text-align:left}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+    .form-group{display:flex;flex-direction:column;gap:6px}
+    .form-group label{font-size:13px;font-weight:600;color:#444}
+    .form-group input,.form-group textarea{border:1px solid #E5E7EB;border-radius:8px;padding:12px 14px;font-size:14px;font-family:inherit;outline:none;transition:border-color 0.15s}
+    .form-group input:focus,.form-group textarea:focus{border-color:#3B82F6}
+    .form-group textarea{min-height:120px;resize:vertical}
+    .contact-submit{width:100%;background:#3B82F6;color:#fff;border:none;padding:16px;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:8px}
+    .contact-submit:hover{background:#2563EB}
+
+    /* FOOTER */
+    footer{background:#111;color:#888;padding:48px;margin-top:0}
+    .footer-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:32px;align-items:start}
+    .footer-logo{font-size:18px;font-weight:800;color:#fff;margin-bottom:8px}
+    .footer-copy{font-size:12px;color:#555}
+    .footer-col h4{font-size:13px;font-weight:700;color:#fff;margin-bottom:12px}
+    .footer-col p,.footer-col a{font-size:13px;color:#888;text-decoration:none;display:block;line-height:1.8}
+
+    /* GEAR */
+    .gear-btn{position:fixed;bottom:24px;right:24px;width:44px;height:44px;background:#fff;border:1px solid #E5E7EB;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,0.1);z-index:200;transition:transform 0.2s}
+    .gear-btn:hover{transform:rotate(45deg)}
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:300;align-items:center;justify-content:center}
+    .modal-overlay.open{display:flex}
+    .modal{background:#fff;border-radius:16px;padding:32px;width:400px;max-width:90vw}
+    .modal h3{font-size:18px;font-weight:700;margin-bottom:8px}
+    .modal p{font-size:13px;color:#666;margin-bottom:20px}
+    .modal input{width:100%;border:1px solid #E5E7EB;border-radius:8px;padding:12px 14px;font-size:14px;font-family:inherit;outline:none;margin-bottom:16px}
+    .modal input:focus{border-color:#3B82F6}
+    .modal-btns{display:flex;gap:8px}
+    .modal-save{flex:1;background:#3B82F6;color:#fff;border:none;padding:12px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit}
+    .modal-cancel{flex:1;background:#F5F5F5;color:#444;border:none;padding:12px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
+
+    @media(max-width:768px){
+      nav{padding:0 20px}
+      .nav-links{display:none}
+      .hero h1{font-size:32px}
+      .section{padding:48px 20px}
+      .services-grid{grid-template-columns:1fr}
+      .portfolio-grid{grid-template-columns:1fr}
+      .portfolio-section{padding:48px 20px}
+      .contact-section{padding:48px 20px}
+      .form-row{grid-template-columns:1fr}
+      footer{padding:32px 20px}
+      .footer-inner{grid-template-columns:1fr 1fr}
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">makeyourplace</a>
+  <ul class="nav-links">
+    <li><a href="#">서비스 소개</a></li>
+    <li><a href="#">포트폴리오</a></li>
+    <li><a href="#">전문 상담</a></li>
+    <li><a href="#">고객지원</a></li>
+  </ul>
+  <a href="step1.html" class="nav-cta">팝업 설계 시작하기</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <h1>생각만 하던 팝업스토어,<br><span>가장 완벽하게</span> 현실이 됩니다.</h1>
+  <p>브랜드 아이덴티티를 살은 공간 기획부터 가구 선별, 현장 시공까지,<br>makeyourplace가 당신의 공간 경험을 디자인합니다.</p>
+  <div class="hero-btns">
+    <a href="step1.html" class="btn-primary">팝업 설계 시작하기</a>
+    <a href="#contact" class="btn-outline">상담 신청하기</a>
+  </div>
+</div>
+
+<!-- SERVICES -->
+<div class="section">
+  <div class="section-title">서비스 범위</div>
+  <div class="services-grid">
+    <div class="service-card">
+      <div class="service-icon">🏗</div>
+      <h3>공간 기획 및 설계</h3>
+      <p>브랜드의 메시지를 가장 효과적으로 전달할 수 있는 동선과 공간 구성을 제안합니다.</p>
+    </div>
+    <div class="service-card">
+      <div class="service-icon">🔧</div>
+      <h3>모듈러 렌탈 서비스</h3>
+      <p>반복된 공장에서 제작하여 고품질의 고품질 모듈 가구와 비품을 부담없는 가격으로 제공합니다.</p>
+    </div>
+    <div class="service-card">
+      <div class="service-icon">✨</div>
+      <h3>원스톱 실행</h3>
+      <p>디자인부터 설치, 철거까지 모든 과정을 makeyourplace 팀이 직접 관리합니다.</p>
+    </div>
+  </div>
+</div>
+
+<!-- PORTFOLIO -->
+<div class="portfolio-section">
+  <div class="portfolio-inner">
+    <div class="portfolio-header">
+      <h2>Portfolio<br><small style="font-size:14px;font-weight:500;color:#999">우리가 만들어 온 공간들</small></h2>
+      <a href="#" class="more-link">전체 보기 →</a>
+    </div>
+    <div class="portfolio-grid">
+      <div class="portfolio-card">
+        <div class="portfolio-card-bg">
+          <div>
+            <span class="portfolio-card-badge">라이프스타일 팝업</span>
+            <div class="portfolio-card-name">라이프스타일 브랜드 A</div>
+          </div>
+        </div>
+      </div>
+      <div class="portfolio-card">
+        <div class="portfolio-card-bg">
+          <div class="portfolio-card-num">2</div>
+          <div>
+            <span class="portfolio-card-badge">코스메틱 팝업</span>
+            <div class="portfolio-card-name">코스메틱 브랜드 B</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CONTACT -->
+<div class="contact-section" id="contact">
+  <h2>무료 견적 상담</h2>
+  <p>프로젝트의 기본적인 정보를 알려주시면 담당자가 24시간 이내 연락 드립니다.</p>
+  <div class="contact-form">
+    <div class="form-row">
+      <div class="form-group">
+        <label>기업/브랜드명</label>
+        <input type="text" placeholder="예: 메이크유어플레이스">
+      </div>
+      <div class="form-group">
+        <label>담당자 성함</label>
+        <input type="text" placeholder="이름을 입력해주세요">
+      </div>
+    </div>
+    <div class="form-group" style="margin-bottom:16px">
+      <label>연락처</label>
+      <input type="text" placeholder="010-0000-0000">
+    </div>
+    <div class="form-group" style="margin-bottom:16px">
+      <label>프로젝트 상세 내용</label>
+      <textarea placeholder="팝업 시기, 기간, 진행하시려는 현장 등을 최대한 자세하게 작성해주세요."></textarea>
+    </div>
+    <button class="contact-submit">상담 신청 완료하기</button>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div>
+      <div class="footer-logo">makeyourplace</div>
+      <div class="footer-copy">© 2025 makeyourplace. All rights reserved.</div>
+    </div>
+    <div class="footer-col">
+      <h4>Address</h4>
+      <p>서울특별시 성동구 성수이로 7길 70, 110</p>
+    </div>
+    <div class="footer-col">
+      <h4>Contact</h4>
+      <p>02 123 4567 | info@makeyourplace.kr</p>
+    </div>
+    <div class="footer-col">
+      <h4>Social</h4>
+      <a href="#">Instagram</a>
+      <a href="#">LinkedIn</a>
+    </div>
+  </div>
+</footer>
+
+<!-- GEAR -->
+<button class="gear-btn" onclick="openModal()">⚙</button>
+
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal">
+    <h3>API 키 설정</h3>
+    <p>Claude API 키를 입력하면 AI 기능이 활성화됩니다. 키는 브라우저에만 저장됩니다.</p>
+    <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-..." value="">
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="document.getElementById('modalOverlay').classList.remove('open')">취소</button>
+      <button class="modal-save" onclick="saveApiKey()">저장</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function openModal(){
+  document.getElementById('apiKeyInput').value = localStorage.getItem('apiKey')||'';
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function closeModal(e){
+  if(e.target===document.getElementById('modalOverlay'))
+    document.getElementById('modalOverlay').classList.remove('open');
+}
+function saveApiKey(){
+  const k=document.getElementById('apiKeyInput').value.trim();
+  if(k) localStorage.setItem('apiKey',k);
+  document.getElementById('modalOverlay').classList.remove('open');
+  alert('API 키가 저장되었습니다.');
+}
+</script>
+</body>
+</html>

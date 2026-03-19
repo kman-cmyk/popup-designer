@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STEP 5. 견적 확인 — makeyourplace</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Pretendard',sans-serif;background:#fff;color:#111;min-height:100vh;display:flex;flex-direction:column}
+
+    /* NAV */
+    nav{display:flex;align-items:center;justify-content:space-between;padding:0 48px;height:56px;border-bottom:1px solid #F0F0F0}
+    .nav-logo{font-size:16px;font-weight:800;color:#111;text-decoration:none}
+    .step-breadcrumb{display:flex;gap:8px;align-items:center;font-size:13px;font-weight:600}
+    .step-breadcrumb .step-label{color:#CCC}
+    .step-breadcrumb .step-label.active{color:#3B82F6;background:#EFF6FF;padding:4px 12px;border-radius:20px}
+
+    /* CONTENT */
+    .content{flex:1;max-width:1100px;margin:0 auto;padding:48px 24px;width:100%}
+    .content h1{font-size:32px;font-weight:800;text-align:center;margin-bottom:8px;letter-spacing:-0.01em}
+    .content .subtitle{font-size:15px;color:#666;text-align:center;margin-bottom:48px}
+
+    /* LAYOUT */
+    .main-layout{display:grid;grid-template-columns:1fr 280px;gap:32px;align-items:start}
+
+    /* TABLE SECTION */
+    .table-section{margin-bottom:32px}
+    .section-title{font-size:15px;font-weight:700;color:#111;margin-bottom:16px;padding-left:12px;border-left:3px solid #3B82F6}
+    .quote-table{width:100%;border-collapse:collapse}
+    .quote-table th{background:#F9FAFB;padding:12px 16px;font-size:13px;font-weight:700;color:#555;text-align:left;border-bottom:2px solid #E5E7EB}
+    .quote-table td{padding:14px 16px;font-size:14px;color:#333;border-bottom:1px solid #F0F0F0}
+    .quote-table tr:last-child td{border-bottom:none}
+    .qty-badge{display:inline-block;background:#F0F0F0;border-radius:4px;padding:2px 8px;font-size:12px;font-weight:700;color:#555}
+
+    /* CALENDAR SECTION */
+    .calendars-row{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+    .calendar-wrap h3{font-size:14px;font-weight:700;margin-bottom:12px;color:#333}
+    .cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;font-size:14px;font-weight:700}
+    .cal-nav{width:28px;height:28px;border:1px solid #E5E7EB;border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;background:#fff}
+    .cal-nav:hover{border-color:#3B82F6}
+    .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+    .cal-day-name{font-size:11px;font-weight:700;color:#AAA;text-align:center;padding:4px 0}
+    .cal-day{font-size:12px;text-align:center;padding:6px 2px;border-radius:6px;cursor:pointer;transition:all 0.15s}
+    .cal-day:hover:not(.empty):not(.past){background:#EFF6FF;color:#3B82F6}
+    .cal-day.available{color:#3B82F6;font-weight:600}
+    .cal-day.selected{background:#3B82F6;color:#fff;font-weight:700;border-radius:50%}
+    .cal-day.today{font-weight:700;color:#EF4444}
+    .cal-day.empty{cursor:default}
+    .cal-day.past{color:#DDD;cursor:not-allowed}
+    .cal-note{font-size:11px;color:#AAA;margin-top:8px}
+
+    /* RIGHT PANEL */
+    .cost-panel{background:#FAFAFA;border:1px solid #E5E7EB;border-radius:16px;padding:24px;position:sticky;top:20px}
+    .cost-panel h3{font-size:15px;font-weight:700;margin-bottom:20px;color:#111}
+    .cost-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;font-size:14px}
+    .cost-row-label{color:#555}
+    .cost-row-val{font-weight:600;color:#111}
+    .cost-divider{height:1px;background:#E5E7EB;margin:16px 0}
+    .cost-total{display:flex;justify-content:space-between;align-items:center}
+    .cost-total-label{font-size:15px;font-weight:700;color:#111}
+    .cost-total-val{font-size:24px;font-weight:800;color:#111}
+    .cost-total-val span{font-size:14px;font-weight:600}
+    .btn-complete{width:100%;background:#3B82F6;color:#fff;border:none;padding:16px;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:20px;transition:background 0.15s}
+    .btn-complete:hover{background:#2563EB}
+    .btn-back{width:100%;background:#fff;color:#555;border:1px solid #E5E7EB;padding:14px;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:10px;transition:all 0.15s}
+    .btn-back:hover{border-color:#3B82F6;color:#3B82F6}
+    .cost-note{font-size:11px;color:#AAA;line-height:1.6;margin-top:12px}
+
+    /* FOOTER */
+    footer{padding:20px 48px;border-top:1px solid #F0F0F0;font-size:12px;color:#CCC;display:flex;justify-content:space-between}
+    footer a{color:#CCC;text-decoration:none}
+
+    /* GEAR */
+    .gear-btn{position:fixed;bottom:24px;right:24px;width:44px;height:44px;background:#fff;border:1px solid #E5E7EB;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,0.1);z-index:200;transition:transform 0.2s}
+    .gear-btn:hover{transform:rotate(45deg)}
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:300;align-items:center;justify-content:center}
+    .modal-overlay.open{display:flex}
+    .modal{background:#fff;border-radius:16px;padding:32px;width:400px;max-width:90vw}
+    .modal h3{font-size:18px;font-weight:700;margin-bottom:8px}
+    .modal p{font-size:13px;color:#666;margin-bottom:20px}
+    .modal input{width:100%;border:1px solid #E5E7EB;border-radius:8px;padding:12px 14px;font-size:14px;font-family:inherit;outline:none;margin-bottom:16px}
+    .modal input:focus{border-color:#3B82F6}
+    .modal-btns{display:flex;gap:8px}
+    .modal-save{flex:1;background:#3B82F6;color:#fff;border:none;padding:12px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit}
+    .modal-cancel{flex:1;background:#F5F5F5;color:#444;border:none;padding:12px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
+
+    @media(max-width:900px){
+      .main-layout{grid-template-columns:1fr}
+      nav{padding:0 20px}
+      .content{padding:32px 16px}
+      .calendars-row{grid-template-columns:1fr}
+      footer{padding:16px 20px;flex-direction:column;gap:4px}
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">makeyourplace</a>
+  <div class="step-breadcrumb">
+    <span class="step-label">STEP 04</span>
+    <span style="color:#E5E7EB">›</span>
+    <span class="step-label active">STEP 05 견적 확인</span>
+  </div>
+</nav>
+
+<div class="content">
+  <h1>최종 견적을 확인해주세요</h1>
+  <p class="subtitle">선택하신 프레임과 모듈에 따른 상세 내역 및 일정입니다.</p>
+
+  <div class="main-layout">
+    <div>
+      <!-- TABLE -->
+      <div class="table-section">
+        <div class="section-title">선택 내역 자동 집계</div>
+        <table class="quote-table">
+          <thead>
+            <tr>
+              <th>구분</th>
+              <th>상세 항목</th>
+              <th>수량</th>
+            </tr>
+          </thead>
+          <tbody id="quoteTableBody"></tbody>
+        </table>
+      </div>
+
+      <!-- CALENDARS -->
+      <div class="table-section">
+        <div class="section-title">설치 및 수거 일정 선택</div>
+        <div class="calendars-row">
+          <div class="calendar-wrap">
+            <h3>설치 예정일</h3>
+            <div id="calInstall"></div>
+          </div>
+          <div class="calendar-wrap">
+            <h3>수거 예정일</h3>
+            <div id="calPickup"></div>
+          </div>
+        </div>
+        <div class="cal-note">* 설치 및 수거 시간은 담당자 배치에 따라 최소 확정됩니다.</div>
+      </div>
+    </div>
+
+    <!-- COST PANEL -->
+    <div class="cost-panel">
+      <h3>렌탈 비용 산출 내역</h3>
+      <div id="costRows"></div>
+      <div class="cost-divider"></div>
+      <div class="cost-total">
+        <span class="cost-total-label">최종 견적 금액</span>
+        <span class="cost-total-val"><span>₩ </span><span id="totalFinalPrice">0</span></span>
+      </div>
+      <button class="btn-complete" onclick="goComplete()">견적 신청 완료하기</button>
+      <button class="btn-back" onclick="window.location.href='step3-frames.html'">이전 단계로</button>
+      <div class="cost-note">위 가격은 세금계산서 및 영수증을 기재하면 이래일로 발송되지않습니다.<br>문의사항: support@makeyourplace.com</div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <span>© 2023 makeyourplace. All rights reserved.</span>
+  <span><a href="#">이용약관</a> &nbsp; <a href="#">개인정보처리방침</a> &nbsp; <a href="#">고객센터</a></span>
+</footer>
+
+<button class="gear-btn" onclick="openModal()">⚙</button>
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal">
+    <h3>API 키 설정</h3>
+    <p>Claude API 키를 입력하면 AI 기능이 활성화됩니다.</p>
+    <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-...">
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="document.getElementById('modalOverlay').classList.remove('open')">취소</button>
+      <button class="modal-save" onclick="saveApiKey()">저장</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Module pricing ──
+const MODULE_PRICES = {
+  // Korean names (new format from step3-frames)
+  '선반': 10000, '행거': 15000, '디스플레이박스': 20000, '카운터': 25000,
+  // Legacy English names
+  shelf: 10000, hanger: 15000, display: 20000, counter: 25000,
+};
+const FRAME_RENTAL = 50000;
+const DAYS = ['일','월','화','수','목','금','토'];
+
+let installDate = null;
+let pickupDate = null;
+let installMonth = new Date();
+let pickupMonth = new Date();
+
+function calcCosts() {
+  const layout = JSON.parse(localStorage.getItem('layoutData') || '[]');
+  const moduleData = JSON.parse(localStorage.getItem('moduleData') || '{}');
+  const selectedModules = moduleData.selectedModules || [];
+
+  const frameCount = layout.length || 2;
+  const frameRental = frameCount * FRAME_RENTAL;
+
+  // Count modules by type from layout (supports both Korean and legacy English names)
+  const modCounts = {};
+  layout.forEach(f => (f.modules || []).forEach(m => {
+    if (m.type) modCounts[m.type] = (modCounts[m.type] || 0) + 1;
+  }));
+
+  let moduleCost = 0;
+  Object.entries(modCounts).forEach(([type, cnt]) => {
+    moduleCost += cnt * (MODULE_PRICES[type] || 0);
+  });
+
+  // Extra selected modules from library
+  const extraCost = selectedModules.reduce((s, m) => s + (m.price || 0), 0);
+
+  const subtotal = frameRental + moduleCost + extraCost;
+  const delivery = 120000;
+  const vat = Math.round(subtotal * 0.1);
+  const total = subtotal + delivery + vat;
+
+  return { frameCount, frameRental, modCounts, moduleCost, extraCost, delivery, vat, total };
+}
+
+function renderTable() {
+  const { frameCount, modCounts } = calcCosts();
+  const layout = JSON.parse(localStorage.getItem('layoutData') || '[]');
+  const style = JSON.parse(localStorage.getItem('selectedStyle') || '{}');
+  const tbody = document.getElementById('quoteTableBody');
+  const rows = [];
+
+  // Frame
+  rows.push({ type:'프레임', desc:`알루미늄 모듈러 프레임 A타입`, qty:`${frameCount} SET` });
+
+  // Modules
+  const typeNames = {
+    shelf:'선반 모듈', hanger:'행거 모듈', display:'디스플레이 박스 (Black)', counter:'카운터 모듈',
+    '선반':'선반 모듈', '행거':'행거 모듈', '디스플레이박스':'디스플레이 박스 (Black)', '카운터':'카운터 모듈',
+  };
+  Object.entries(modCounts).forEach(([type, cnt]) => {
+    if (cnt > 0) rows.push({ type:'모듈', desc:typeNames[type] || type, qty:`${cnt} EA` });
+  });
+
+  // Extra
+  const moduleData = JSON.parse(localStorage.getItem('moduleData') || '{}');
+  (moduleData.selectedModules || []).forEach(m => {
+    rows.push({ type:'옵션', desc:m.name, qty:'1 EA' });
+  });
+
+  // LED default
+  rows.push({ type:'옵션', desc:'상단 LED 소프트라이트', qty:'8 EA' });
+
+  tbody.innerHTML = rows.map(r => `
+    <tr>
+      <td>${r.type}</td>
+      <td>${r.desc}</td>
+      <td><span class="qty-badge">${r.qty}</span></td>
+    </tr>`).join('');
+}
+
+function renderCostPanel() {
+  const c = calcCosts();
+  const rows = document.getElementById('costRows');
+  const installDays = installDate && pickupDate
+    ? Math.max(1, Math.ceil((pickupDate - installDate) / 86400000))
+    : 3;
+  const extDay = Math.max(0, installDays - 3);
+
+  rows.innerHTML = `
+    <div class="cost-row">
+      <span class="cost-row-label">기본 대여료 (3일 기준)</span>
+      <span class="cost-row-val">₩${(c.frameRental + c.moduleCost).toLocaleString()}</span>
+    </div>
+    <div class="cost-row">
+      <span class="cost-row-label">연장 대여료 (1일 추가)</span>
+      <span class="cost-row-val">₩${(extDay * 50000).toLocaleString()}</span>
+    </div>
+    <div class="cost-row">
+      <span class="cost-row-label">배송 및 설치비</span>
+      <span class="cost-row-val">₩${c.delivery.toLocaleString()}</span>
+    </div>
+    <div class="cost-row">
+      <span class="cost-row-label">부가가치세 (10%)</span>
+      <span class="cost-row-val">₩${c.vat.toLocaleString()}</span>
+    </div>`;
+
+  document.getElementById('totalFinalPrice').textContent = c.total.toLocaleString();
+}
+
+// ── Calendar ──
+function buildCalendar(containerId, monthRef, selectedRef, onSelect) {
+  const container = document.getElementById(containerId);
+  const y = monthRef.getFullYear();
+  const m = monthRef.getMonth();
+  const monthNames = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  const today = new Date(); today.setHours(0,0,0,0);
+
+  // available dates: weekdays in next 60 days
+  const available = new Set();
+  for (let d = new Date(today); d <= new Date(today.getTime() + 60*86400000); d.setDate(d.getDate()+1)) {
+    if (d.getDay() !== 0 && d.getDay() !== 6) available.add(d.toDateString());
+  }
+
+  let html = `<div class="cal-header">
+    <div class="cal-nav" data-dir="-1" data-cal="${containerId}">‹</div>
+    <span>${y}년 ${monthNames[m]}</span>
+    <div class="cal-nav" data-dir="1" data-cal="${containerId}">›</div>
+  </div>
+  <div class="cal-grid">`;
+
+  DAYS.forEach(d => { html += `<div class="cal-day-name">${d}</div>`; });
+
+  const firstDay = new Date(y, m, 1).getDay();
+  for (let i = 0; i < firstDay; i++) html += `<div class="cal-day empty"></div>`;
+
+  const daysInMonth = new Date(y, m+1, 0).getDate();
+  for (let d = 1; d <= daysInMonth; d++) {
+    const date = new Date(y, m, d);
+    const ds = date.toDateString();
+    const isPast = date < today;
+    const isAvail = available.has(ds);
+    const isSel = selectedRef && date.toDateString() === selectedRef.toDateString();
+    const isToday = date.toDateString() === today.toDateString();
+    let cls = 'cal-day';
+    if (isSel) cls += ' selected';
+    else if (isAvail) cls += ' available';
+    else if (isPast) cls += ' past';
+    if (isToday && !isSel) cls += ' today';
+    html += `<div class="${cls}" data-date="${ds}">${d}</div>`;
+  }
+  html += '</div>';
+  container.innerHTML = html;
+
+  // Events
+  container.querySelectorAll('.cal-day[data-date]').forEach(el => {
+    el.addEventListener('click', () => {
+      const ds = el.dataset.date;
+      const date = new Date(ds);
+      if (date < today) return;
+      onSelect(date);
+    });
+  });
+  container.querySelectorAll('.cal-nav').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const dir = parseInt(btn.dataset.dir);
+      if (containerId === 'calInstall') {
+        installMonth = new Date(installMonth.getFullYear(), installMonth.getMonth() + dir, 1);
+        buildCalendar('calInstall', installMonth, installDate, selectInstall);
+      } else {
+        pickupMonth = new Date(pickupMonth.getFullYear(), pickupMonth.getMonth() + dir, 1);
+        buildCalendar('calPickup', pickupMonth, pickupDate, selectPickup);
+      }
+    });
+  });
+}
+
+function selectInstall(date) {
+  installDate = date;
+  buildCalendar('calInstall', installMonth, installDate, selectInstall);
+  renderCostPanel();
+}
+function selectPickup(date) {
+  pickupDate = date;
+  buildCalendar('calPickup', pickupMonth, pickupDate, selectPickup);
+  renderCostPanel();
+}
+
+function goComplete() {
+  if (!installDate) { alert('설치 예정일을 선택해주세요.'); return; }
+  if (!pickupDate) { alert('수거 예정일을 선택해주세요.'); return; }
+  if (pickupDate <= installDate) { alert('수거일은 설치일 이후여야 합니다.'); return; }
+
+  const costs = calcCosts();
+  localStorage.setItem('quoteData', JSON.stringify({
+    installDate: installDate.toLocaleDateString('ko-KR'),
+    pickupDate: pickupDate.toLocaleDateString('ko-KR'),
+    total: costs.total,
+    timestamp: new Date().toLocaleString('ko-KR'),
+  }));
+  window.location.href = 'complete.html';
+}
+
+window.addEventListener('load', () => {
+  installMonth = new Date();
+  pickupMonth = new Date();
+  buildCalendar('calInstall', installMonth, installDate, selectInstall);
+  buildCalendar('calPickup', pickupMonth, pickupDate, selectPickup);
+  renderTable();
+  renderCostPanel();
+});
+
+function openModal(){
+  document.getElementById('apiKeyInput').value = localStorage.getItem('apiKey')||'';
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function closeModal(e){
+  if(e.target===document.getElementById('modalOverlay'))
+    document.getElementById('modalOverlay').classList.remove('open');
+}
+function saveApiKey(){
+  const k=document.getElementById('apiKeyInput').value.trim();
+  if(k) localStorage.setItem('apiKey',k);
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+</script>
+</body>
+</html>

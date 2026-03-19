@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STEP 4. 레이아웃 커스텀 — makeyourplace</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%;font-family:'Pretendard',sans-serif;background:#fff;color:#111;overflow:hidden}
+
+    /* TOP BAR */
+    .topbar{display:flex;align-items:center;height:52px;border-bottom:1px solid #E5E7EB;background:#fff;padding:0 20px;gap:16px;flex-shrink:0}
+    .topbar-logo{font-size:15px;font-weight:800;color:#111;text-decoration:none}
+    .topbar-sep{color:#E5E7EB;font-size:18px;margin:0 4px}
+    .topbar-title{font-size:14px;font-weight:600;color:#555}
+    .topbar-spacer{flex:1}
+    .topbar-btn{padding:8px 16px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:all 0.15s}
+    .topbar-btn-outline{background:#fff;color:#111;border:1px solid #E5E7EB}
+    .topbar-btn-outline:hover{border-color:#3B82F6;color:#3B82F6}
+    .topbar-btn-primary{background:#3B82F6;color:#fff;border:none}
+    .topbar-btn-primary:hover{background:#2563EB}
+
+    /* LAYOUT */
+    .workspace{display:flex;height:calc(100vh - 52px)}
+
+    /* LEFT PANEL */
+    .left-panel{width:200px;border-right:1px solid #E5E7EB;display:flex;flex-direction:column;overflow:hidden;flex-shrink:0;background:#fff}
+    .panel-header{padding:12px 16px;font-size:12px;font-weight:700;color:#111;border-bottom:1px solid #F0F0F0}
+    .panel-sub{font-size:11px;color:#AAA;font-weight:400;margin-top:2px}
+    .frame-list{flex:1;overflow-y:auto;padding:8px}
+    .frame-list::-webkit-scrollbar{width:4px}
+    .frame-list::-webkit-scrollbar-thumb{background:#E5E7EB;border-radius:2px}
+    .frame-item{border:1px solid #E5E7EB;border-radius:10px;padding:10px;margin-bottom:8px;cursor:pointer;transition:all 0.15s;position:relative}
+    .frame-item:hover{border-color:#3B82F6}
+    .frame-item.active{border-color:#3B82F6;background:#EFF6FF}
+    .frame-item-name{font-size:12px;font-weight:700;color:#111;margin-bottom:6px}
+    .frame-item-size{font-size:10px;font-weight:600;color:#fff;background:#555;border-radius:4px;padding:2px 6px;display:inline-block}
+    .frame-item.active .frame-item-size{background:#3B82F6}
+    .frame-thumb{width:100%;height:60px;background:#F9FAFB;border-radius:6px;margin-top:8px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+    .frame-thumb-inner{width:24px;height:72px;border:2px solid #3B82F6;border-radius:3px;position:relative}
+    .frame-item-del{position:absolute;top:8px;right:8px;width:20px;height:20px;border-radius:50%;background:#FEE2E2;color:#EF4444;border:none;cursor:pointer;font-size:11px;display:none;align-items:center;justify-content:center}
+    .frame-item:hover .frame-item-del{display:flex}
+    .add-frame-btn{width:calc(100% - 16px);margin:8px;background:#F0F7FF;color:#3B82F6;border:1px dashed #93C5FD;border-radius:10px;padding:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s}
+    .add-frame-btn:hover{background:#DBEAFE}
+
+    /* CANVAS SETTINGS */
+    .canvas-settings{padding:12px 16px;border-top:1px solid #F0F0F0}
+    .settings-title{font-size:11px;font-weight:700;color:#666;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.06em}
+    .setting-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;font-size:12px;color:#555}
+    .toggle{width:32px;height:18px;background:#E5E7EB;border-radius:9px;position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0}
+    .toggle.on{background:#3B82F6}
+    .toggle::after{content:'';width:14px;height:14px;background:#fff;border-radius:50%;position:absolute;top:2px;left:2px;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.2)}
+    .toggle.on::after{transform:translateX(14px)}
+
+    /* STATUS BAR */
+    .status-bar{padding:0 16px;height:28px;border-top:1px solid #F0F0F0;font-size:11px;color:#AAA;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+    .status-live{color:#22C55E;font-weight:700}
+
+    /* CENTER CANVAS */
+    .center-panel{flex:1;background:#F4F5F7;display:flex;flex-direction:column;overflow:hidden}
+    .canvas-toolbar{display:flex;align-items:center;justify-content:center;gap:8px;padding:8px 16px;background:#fff;border-bottom:1px solid #E5E7EB;flex-shrink:0}
+    .tool-btn{width:32px;height:32px;border:1px solid #E5E7EB;background:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;transition:all 0.15s}
+    .tool-btn:hover{border-color:#3B82F6;color:#3B82F6}
+    .tool-btn.danger:hover{border-color:#EF4444;color:#EF4444}
+    .canvas-area{flex:1;overflow:auto;padding:40px;display:flex;gap:20px;align-items:flex-start;justify-content:center}
+    .canvas-area::-webkit-scrollbar{width:6px;height:6px}
+    .canvas-area::-webkit-scrollbar-thumb{background:#D1D5DB;border-radius:3px}
+    .canvas-note{position:absolute;bottom:12px;right:12px;font-size:10px;color:#AAA;pointer-events:none}
+
+    /* FRAME CANVAS */
+    .canvas-wrapper{position:relative}
+    .canvas-frame-label{font-size:11px;font-weight:700;color:#666;text-align:center;margin-bottom:8px;letter-spacing:0.04em}
+    .canvas-frame{width:120px;height:360px;background:#fff;border:2px solid #E5E7EB;border-radius:6px;position:relative;overflow:hidden;cursor:pointer;transition:border-color 0.15s}
+    .canvas-frame.active{border-color:#3B82F6;box-shadow:0 0 0 3px rgba(59,130,246,0.15)}
+    .canvas-frame-inner{position:absolute;inset:0;display:flex;flex-direction:column}
+
+    /* MODULE SLOTS IN CANVAS */
+    .module-slot{width:100%;display:flex;align-items:center;justify-content:center;border-bottom:1px solid rgba(0,0,0,0.06);cursor:pointer;position:relative;font-size:9px;font-weight:700;color:rgba(255,255,255,0.9);letter-spacing:0.03em}
+    .module-slot:last-child{border-bottom:none}
+    .module-slot:hover::after{content:'클릭';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.5);color:#fff;font-size:8px;padding:2px 5px;border-radius:3px;pointer-events:none}
+    .slot-shelf{background:rgba(59,130,246,0.15);border-left:3px solid #3B82F6;color:#3B82F6}
+    .slot-hanger{background:rgba(168,85,247,0.15);border-left:3px solid #A855F7;color:#A855F7}
+    .slot-display{background:rgba(34,197,94,0.15);border-left:3px solid #22C55E;color:#22C55E}
+    .slot-counter{background:rgba(245,158,11,0.15);border-left:3px solid #F59E0B;color:#F59E0B}
+    .slot-empty{background:#F9FAFB;border-left:3px solid #E5E7EB;color:#CCC}
+    .canvas-scale-note{text-align:center;font-size:10px;color:#AAA;margin-top:8px}
+
+    /* RIGHT PANEL */
+    .right-panel{width:220px;border-left:1px solid #E5E7EB;display:flex;flex-direction:column;overflow:hidden;flex-shrink:0;background:#fff}
+    .right-panel-header{padding:12px 16px;font-size:12px;font-weight:700;color:#111;border-bottom:1px solid #F0F0F0}
+    .props-body{flex:1;overflow-y:auto;padding:16px}
+    .prop-group{margin-bottom:16px}
+    .prop-label{font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px}
+    .prop-input{width:100%;border:1px solid #E5E7EB;border-radius:6px;padding:8px 10px;font-size:13px;font-family:inherit;outline:none}
+    .prop-input:focus{border-color:#3B82F6}
+    .prop-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .prop-select{width:100%;border:1px solid #E5E7EB;border-radius:6px;padding:8px 10px;font-size:12px;font-family:inherit;outline:none;background:#fff;cursor:pointer}
+    .prop-select:focus{border-color:#3B82F6}
+
+    /* LAYERS */
+    .layers-section{padding:12px 16px;border-top:1px solid #F0F0F0}
+    .layers-title{font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px}
+    .layer-item{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;cursor:pointer;font-size:12px;color:#555;transition:background 0.1s}
+    .layer-item:hover{background:#F9FAFB}
+    .layer-item.active{background:#EFF6FF;color:#3B82F6;font-weight:600}
+    .layer-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+    .layer-name{flex:1}
+    .layer-vis{font-size:12px;color:#CCC;cursor:pointer}
+    .layer-vis:hover{color:#666}
+
+    /* MODULE SLOT SELECTOR */
+    .slot-type-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
+    .slot-type-btn{padding:8px 4px;border-radius:6px;border:1px solid transparent;font-size:11px;font-weight:700;cursor:pointer;text-align:center;font-family:inherit;transition:all 0.15s}
+    .slot-type-btn:hover{opacity:0.8}
+    .slot-type-btn.active-slot{border:2px solid currentColor;opacity:1}
+
+    /* AI SUGGEST BTN */
+    .ai-suggest-btn{width:100%;background:#F0F7FF;color:#3B82F6;border:1px solid #DBEAFE;border-radius:8px;padding:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:12px;transition:background 0.15s}
+    .ai-suggest-btn:hover{background:#DBEAFE}
+
+    /* GEAR */
+    .gear-btn{position:fixed;bottom:24px;right:24px;width:40px;height:40px;background:#fff;border:1px solid #E5E7EB;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,0.1);z-index:200;transition:transform 0.2s}
+    .gear-btn:hover{transform:rotate(45deg)}
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:300;align-items:center;justify-content:center}
+    .modal-overlay.open{display:flex}
+    .modal{background:#fff;border-radius:16px;padding:32px;width:400px;max-width:90vw}
+    .modal h3{font-size:18px;font-weight:700;margin-bottom:8px}
+    .modal p{font-size:13px;color:#666;margin-bottom:20px}
+    .modal input{width:100%;border:1px solid #E5E7EB;border-radius:8px;padding:12px 14px;font-size:14px;font-family:inherit;outline:none;margin-bottom:16px}
+    .modal input:focus{border-color:#3B82F6}
+    .modal-btns{display:flex;gap:8px}
+    .modal-save{flex:1;background:#3B82F6;color:#fff;border:none;padding:12px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit}
+    .modal-cancel{flex:1;background:#F5F5F5;color:#444;border:none;padding:12px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="index.html" class="topbar-logo">makeyourplace</a>
+  <span class="topbar-sep">|</span>
+  <span class="topbar-title">STEP 4. 레이아웃 커스텀</span>
+  <div class="topbar-spacer"></div>
+  <button class="topbar-btn topbar-btn-outline" onclick="window.location.href='step3-frames.html'">이전 단계</button>
+  <button class="topbar-btn topbar-btn-primary" onclick="saveAndNext()">저장 후 다음</button>
+</div>
+
+<div class="workspace">
+
+  <!-- LEFT -->
+  <div class="left-panel">
+    <div class="panel-header">
+      프레임 목록
+      <div class="panel-sub">캔버스 내 프레임을 드래그하여 배치하세요.</div>
+    </div>
+    <div class="frame-list" id="frameList"></div>
+    <button class="add-frame-btn" onclick="addFrame()">+ 프레임 추가</button>
+    <div class="canvas-settings">
+      <div class="settings-title">캔버스 설정</div>
+      <div class="setting-row">
+        <span>그리드 보이기</span>
+        <div class="toggle on" id="toggleGrid" onclick="this.classList.toggle('on')"></div>
+      </div>
+      <div class="setting-row">
+        <span>스냅 투 그리드</span>
+        <div class="toggle on" id="toggleSnap" onclick="this.classList.toggle('on')"></div>
+      </div>
+    </div>
+    <div class="status-bar">
+      <span id="canvasInfo">캔버스: 크기 800×600px</span>
+      <span class="status-live" id="saveStatus">● 저장됨 14:32:01</span>
+    </div>
+  </div>
+
+  <!-- CENTER -->
+  <div class="center-panel">
+    <div class="canvas-toolbar">
+      <div class="tool-btn" title="선택">↖</div>
+      <div class="tool-btn" title="이동">✥</div>
+      <div class="tool-btn" title="확대">＋</div>
+      <div class="tool-btn" title="축소">－</div>
+      <div class="tool-btn danger" title="삭제" onclick="deleteActiveFrame()">🗑</div>
+    </div>
+    <div class="canvas-area" id="canvasArea">
+      <!-- frames rendered here -->
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="right-panel">
+    <div class="right-panel-header">속성 편집</div>
+    <div class="props-body">
+      <button class="ai-suggest-btn" onclick="aiSuggestLayout()">✦ AI 레이아웃 제안</button>
+
+      <div class="prop-group">
+        <div class="prop-label">프레임 이름</div>
+        <input class="prop-input" id="propName" placeholder="이름 입력" oninput="updateFrameName()">
+      </div>
+      <div class="prop-group">
+        <div class="prop-row">
+          <div>
+            <div class="prop-label">X 위치 (px)</div>
+            <input class="prop-input" id="propX" type="number" value="200">
+          </div>
+          <div>
+            <div class="prop-label">Y 위치 (px)</div>
+            <input class="prop-input" id="propY" type="number" value="100">
+          </div>
+        </div>
+      </div>
+      <div class="prop-group">
+        <div class="prop-label">회전 (S)</div>
+        <select class="prop-select" id="propRotate">
+          <option>0°</option>
+          <option>90°</option>
+          <option>180°</option>
+          <option>270°</option>
+        </select>
+      </div>
+
+      <div class="prop-group" id="slotProps" style="display:none">
+        <div class="prop-label">선택된 슬롯 타입</div>
+        <div class="slot-type-grid">
+          <button class="slot-type-btn" style="background:#EFF6FF;color:#3B82F6" onclick="changeSlotType('shelf',this)">선반</button>
+          <button class="slot-type-btn" style="background:#F5F3FF;color:#A855F7" onclick="changeSlotType('hanger',this)">행거</button>
+          <button class="slot-type-btn" style="background:#F0FDF4;color:#22C55E" onclick="changeSlotType('display',this)">디스플레이박스</button>
+          <button class="slot-type-btn" style="background:#FFFBEB;color:#F59E0B" onclick="changeSlotType('counter',this)">카운터</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="layers-section">
+      <div class="layers-title">현재 레이어</div>
+      <div id="layerList"></div>
+    </div>
+  </div>
+
+</div>
+
+<button class="gear-btn" onclick="openModal()">⚙</button>
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal">
+    <h3>API 키 설정</h3>
+    <p>Claude API 키를 입력하면 AI 기능이 활성화됩니다.</p>
+    <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-...">
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="document.getElementById('modalOverlay').classList.remove('open')">취소</button>
+      <button class="modal-save" onclick="saveApiKey()">저장</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Data ──
+let frames = [];
+let activeFrameIdx = 0;
+let activeSlot = null; // {frameIdx, slotIdx}
+
+const DEFAULT_MODULES = [
+  { type:'shelf', label:'선반' },
+  { type:'shelf', label:'선반' },
+  { type:'hanger', label:'행거' },
+  { type:'display', label:'디스플레이박스' },
+  { type:'counter', label:'카운터' },
+];
+
+const SLOT_CLASSES = {
+  shelf: 'slot-shelf', hanger: 'slot-hanger',
+  display: 'slot-display', counter: 'slot-counter', empty: 'slot-empty'
+};
+const SLOT_LABELS = {
+  shelf:'선반', hanger:'행거', display:'디스플레이박스', counter:'카운터', empty:''
+};
+
+function initFrames() {
+  const saved = JSON.parse(localStorage.getItem('layoutData') || 'null');
+  if (saved && saved.length) {
+    frames = saved;
+  } else {
+    frames = [
+      { id:1, name:'MAIN FRAME A', modules:[...DEFAULT_MODULES] },
+      { id:2, name:'SIDE FRAME B', modules:[{type:'shelf',label:'선반'},{type:'hanger',label:'행거'},{type:'shelf',label:'선반'},{type:'display',label:'디스플레이박스'}] },
+    ];
+  }
+  renderAll();
+}
+
+function renderAll() {
+  renderFrameList();
+  renderCanvas();
+  renderLayers();
+  updateProps();
+}
+
+function renderFrameList() {
+  const list = document.getElementById('frameList');
+  list.innerHTML = '';
+  frames.forEach((f, i) => {
+    const el = document.createElement('div');
+    el.className = 'frame-item' + (i === activeFrameIdx ? ' active' : '');
+    el.onclick = () => { activeFrameIdx = i; activeSlot = null; renderAll(); };
+    el.innerHTML = `
+      <button class="frame-item-del" onclick="deleteFrame(${i}, event)">✕</button>
+      <div class="frame-item-name">${f.name}</div>
+      <span class="frame-item-size">600 × 1800</span>
+      <div class="frame-thumb">
+        <div class="frame-thumb-inner"></div>
+      </div>`;
+    list.appendChild(el);
+  });
+  document.getElementById('canvasInfo').textContent = `캔버스: 크기 800×600px · 프레임 ${frames.length}`;
+}
+
+function renderCanvas() {
+  const area = document.getElementById('canvasArea');
+  area.innerHTML = '';
+  frames.forEach((f, fi) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'canvas-wrapper';
+    const label = document.createElement('div');
+    label.className = 'canvas-frame-label';
+    label.textContent = f.name;
+    const frame = document.createElement('div');
+    frame.className = 'canvas-frame' + (fi === activeFrameIdx ? ' active' : '');
+    frame.onclick = () => { activeFrameIdx = fi; activeSlot = null; document.getElementById('slotProps').style.display='none'; renderAll(); };
+
+    const inner = document.createElement('div');
+    inner.className = 'canvas-frame-inner';
+    const totalH = f.modules.length || 1;
+    f.modules.forEach((m, mi) => {
+      const slot = document.createElement('div');
+      slot.className = 'module-slot ' + (SLOT_CLASSES[m.type] || 'slot-empty');
+      slot.style.flex = '1';
+      slot.style.minHeight = '0';
+      if (activeSlot && activeSlot.frameIdx === fi && activeSlot.slotIdx === mi) {
+        slot.style.outline = '2px solid #3B82F6';
+      }
+      slot.textContent = SLOT_LABELS[m.type] || '';
+      slot.onclick = (e) => {
+        e.stopPropagation();
+        activeFrameIdx = fi;
+        activeSlot = { frameIdx: fi, slotIdx: mi };
+        document.getElementById('slotProps').style.display = '';
+        renderAll();
+      };
+      inner.appendChild(slot);
+    });
+    frame.appendChild(inner);
+    wrap.appendChild(label);
+    wrap.appendChild(frame);
+    const note = document.createElement('div');
+    note.className = 'canvas-scale-note';
+    note.textContent = '600×1800';
+    wrap.appendChild(note);
+    area.appendChild(wrap);
+  });
+
+  // Scale note
+  const scaleNote = document.createElement('div');
+  scaleNote.style.cssText = 'position:absolute;bottom:8px;right:16px;font-size:10px;color:#CCC;pointer-events:none';
+  scaleNote.textContent = `Scale 1:100 (600×1800 units)`;
+  area.style.position = 'relative';
+  area.appendChild(scaleNote);
+}
+
+function renderLayers() {
+  const list = document.getElementById('layerList');
+  list.innerHTML = '';
+  frames.forEach((f, i) => {
+    const el = document.createElement('div');
+    el.className = 'layer-item' + (i === activeFrameIdx ? ' active' : '');
+    el.onclick = () => { activeFrameIdx = i; renderAll(); };
+    el.innerHTML = `
+      <div class="layer-dot" style="background:${i === activeFrameIdx ? '#3B82F6' : '#999'}"></div>
+      <span class="layer-name">${f.name}</span>
+      <span class="layer-vis">👁</span>`;
+    list.appendChild(el);
+  });
+}
+
+function updateProps() {
+  const f = frames[activeFrameIdx];
+  if (!f) return;
+  document.getElementById('propName').value = f.name;
+}
+
+function updateFrameName() {
+  if (!frames[activeFrameIdx]) return;
+  frames[activeFrameIdx].name = document.getElementById('propName').value;
+  renderFrameList();
+  renderCanvas();
+  renderLayers();
+}
+
+function addFrame() {
+  const id = Date.now();
+  frames.push({
+    id, name: `CENTER FRAME ${String.fromCharCode(65 + frames.length)}`,
+    modules: [
+      {type:'shelf',label:'선반'},{type:'hanger',label:'행거'},
+      {type:'shelf',label:'선반'},{type:'display',label:'디스플레이박스'},
+    ]
+  });
+  activeFrameIdx = frames.length - 1;
+  renderAll();
+  autoSave();
+}
+
+function deleteFrame(idx, e) {
+  e.stopPropagation();
+  if (frames.length <= 1) { alert('최소 1개의 프레임이 필요합니다.'); return; }
+  frames.splice(idx, 1);
+  if (activeFrameIdx >= frames.length) activeFrameIdx = frames.length - 1;
+  renderAll();
+  autoSave();
+}
+
+function deleteActiveFrame() {
+  deleteFrame(activeFrameIdx, { stopPropagation: ()=>{} });
+}
+
+function changeSlotType(type, btn) {
+  if (!activeSlot) return;
+  frames[activeSlot.frameIdx].modules[activeSlot.slotIdx].type = type;
+  frames[activeSlot.frameIdx].modules[activeSlot.slotIdx].label = SLOT_LABELS[type];
+  document.querySelectorAll('.slot-type-btn').forEach(b => b.classList.remove('active-slot'));
+  btn.classList.add('active-slot');
+  renderCanvas();
+  autoSave();
+}
+
+function autoSave() {
+  localStorage.setItem('layoutData', JSON.stringify(frames));
+  const now = new Date();
+  const t = now.toTimeString().slice(0,8);
+  document.getElementById('saveStatus').textContent = `● 저장됨 ${t}`;
+}
+
+async function aiSuggestLayout() {
+  const apiKey = localStorage.getItem('apiKey');
+  const step1 = JSON.parse(localStorage.getItem('step1Data') || '{}');
+  const style = JSON.parse(localStorage.getItem('selectedStyle') || '{}');
+
+  if (!apiKey) {
+    alert('API 키를 먼저 설정해주세요. (우측 하단 ⚙ 버튼)');
+    return;
+  }
+
+  const btn = document.querySelector('.ai-suggest-btn');
+  btn.textContent = '⏳ AI 분석 중...';
+  btn.disabled = true;
+
+  const prompt = `팝업스토어 레이아웃 제안:
+공간: ${step1.area || '미입력'}, 스타일: ${style.nameKo || '미니멀 모던'}
+2~4개 프레임의 모듈 배치를 JSON으로만 반환해주세요:
+[{"name":"프레임명","modules":[{"type":"shelf","label":"레이블"},...]},...]
+type은 shelf/hanger/display/counter 중 하나.`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-calls': 'true',
+      },
+      body: JSON.stringify({ model:'claude-sonnet-4-6', max_tokens:800,
+        messages:[{role:'user',content:prompt}] })
+    });
+    const data = await res.json();
+    let text = (data.content?.[0]?.text || '').trim();
+    const m = text.match(/\[[\s\S]*\]/);
+    if (m) text = m[0];
+    const suggested = JSON.parse(text);
+    frames = suggested.map((f, i) => ({ id: i+1, name: f.name, modules: f.modules }));
+    activeFrameIdx = 0;
+    renderAll();
+    autoSave();
+  } catch(e) {
+    alert('AI 제안 오류: ' + e.message);
+  }
+  btn.textContent = '✦ AI 레이아웃 제안';
+  btn.disabled = false;
+}
+
+function saveAndNext() {
+  autoSave();
+  window.location.href = 'step4.html';
+}
+
+// Init
+window.addEventListener('load', () => { initFrames(); });
+
+function openModal(){
+  document.getElementById('apiKeyInput').value = localStorage.getItem('apiKey')||'';
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function closeModal(e){
+  if(e.target===document.getElementById('modalOverlay'))
+    document.getElementById('modalOverlay').classList.remove('open');
+}
+function saveApiKey(){
+  const k=document.getElementById('apiKeyInput').value.trim();
+  if(k) localStorage.setItem('apiKey',k);
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+</script>
+</body>
+</html>

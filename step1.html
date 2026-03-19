@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STEP 1. 정보 입력 — makeyourplace</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Pretendard',sans-serif;background:#fff;color:#111;min-height:100vh;display:flex;flex-direction:column}
+
+    /* NAV */
+    nav{display:flex;align-items:center;justify-content:space-between;padding:0 48px;height:60px;border-bottom:1px solid #F0F0F0}
+    .nav-logo{font-size:16px;font-weight:800;color:#111;text-decoration:none}
+    .nav-help{font-size:14px;color:#666;cursor:pointer}
+    .nav-help:hover{color:#3B82F6}
+
+    /* STEP PROGRESS */
+    .step-bar{border-bottom:1px solid #F0F0F0;padding:0 48px}
+    .step-list{display:flex;gap:0;max-width:600px}
+    .step-item{flex:1;padding:14px 0;font-size:13px;font-weight:600;color:#BBB;border-bottom:3px solid transparent;text-align:center;position:relative}
+    .step-item.active{color:#3B82F6;border-bottom-color:#3B82F6}
+    .step-item.done{color:#999}
+
+    /* CONTENT */
+    .content{flex:1;max-width:680px;margin:0 auto;padding:48px 24px 80px;width:100%}
+    .content h1{font-size:32px;font-weight:800;margin-bottom:8px;letter-spacing:-0.01em}
+    .content .subtitle{font-size:15px;color:#666;margin-bottom:48px}
+
+    /* SECTIONS */
+    .form-section{margin-bottom:40px}
+    .form-section-title{font-size:15px;font-weight:700;color:#111;margin-bottom:16px;padding-left:12px;border-left:3px solid #3B82F6}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .form-group{display:flex;flex-direction:column;gap:6px}
+    .form-group label{font-size:13px;font-weight:600;color:#444}
+    .form-group input,.form-group select,.form-group textarea{border:1px solid #E5E7EB;border-radius:8px;padding:12px 14px;font-size:14px;font-family:inherit;outline:none;transition:border-color 0.15s;color:#111;background:#fff}
+    .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:#3B82F6}
+    .form-group input::placeholder,.form-group textarea::placeholder{color:#AAAAAA}
+    .form-group textarea{min-height:100px;resize:vertical}
+    .form-group select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
+
+    /* CTA */
+    .cta-wrap{margin-top:48px;text-align:center}
+    .btn-next{width:100%;background:#3B82F6;color:#fff;border:none;padding:18px;border-radius:12px;font-size:18px;font-weight:700;cursor:pointer;font-family:inherit;transition:background 0.15s}
+    .btn-next:hover{background:#2563EB}
+    .cta-note{font-size:12px;color:#AAA;margin-top:12px}
+
+    /* FOOTER */
+    footer{padding:20px 48px;border-top:1px solid #F0F0F0;font-size:12px;color:#CCC;display:flex;justify-content:space-between}
+    footer a{color:#CCC;text-decoration:none}
+    footer a:hover{color:#666}
+
+    /* GEAR */
+    .gear-btn{position:fixed;bottom:24px;right:24px;width:44px;height:44px;background:#fff;border:1px solid #E5E7EB;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,0.1);z-index:200;transition:transform 0.2s}
+    .gear-btn:hover{transform:rotate(45deg)}
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:300;align-items:center;justify-content:center}
+    .modal-overlay.open{display:flex}
+    .modal{background:#fff;border-radius:16px;padding:32px;width:400px;max-width:90vw}
+    .modal h3{font-size:18px;font-weight:700;margin-bottom:8px}
+    .modal p{font-size:13px;color:#666;margin-bottom:20px}
+    .modal input{width:100%;border:1px solid #E5E7EB;border-radius:8px;padding:12px 14px;font-size:14px;font-family:inherit;outline:none;margin-bottom:16px}
+    .modal input:focus{border-color:#3B82F6}
+    .modal-btns{display:flex;gap:8px}
+    .modal-save{flex:1;background:#3B82F6;color:#fff;border:none;padding:12px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit}
+    .modal-cancel{flex:1;background:#F5F5F5;color:#444;border:none;padding:12px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
+
+    @media(max-width:768px){
+      nav{padding:0 20px}
+      .step-bar{padding:0 20px}
+      .content{padding:32px 20px 60px}
+      .form-row{grid-template-columns:1fr}
+      footer{padding:16px 20px;flex-direction:column;gap:4px}
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">makeyourplace</a>
+  <span class="nav-help">도움이 필요하신가요?</span>
+</nav>
+
+<div class="step-bar">
+  <div class="step-list">
+    <div class="step-item active">STEP 1. 정보 입력</div>
+    <div class="step-item">STEP 2. 스타일 선택</div>
+    <div class="step-item">STEP 3. 레이아웃</div>
+    <div class="step-item">STEP 4. 모듈 설정</div>
+    <div class="step-item">STEP 5. 견적 확인</div>
+  </div>
+</div>
+
+<div class="content">
+  <h1>공간 정보를 알려주세요.</h1>
+  <p class="subtitle">정확한 맞춤 제안을 위해 상세한 정보를 입력해주세요.</p>
+
+  <div class="form-section">
+    <div class="form-section-title">공간 면적 및 형태</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>전용 면적 (평/㎡)</label>
+        <input type="text" id="area" placeholder="예: 25평 또는 82㎡">
+      </div>
+      <div class="form-group">
+        <label>공간 형태</label>
+        <select id="spaceType">
+          <option value="">공간 타입을 선택하세요</option>
+          <option value="정사각형">정사각형</option>
+          <option value="직사각형">직사각형</option>
+          <option value="L자형">L자형</option>
+          <option value="기타">기타</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-section">
+    <div class="form-section-title">브랜드 무드</div>
+    <div class="form-group">
+      <label>원하시는 분위기</label>
+      <textarea id="mood" placeholder="예: 모던하고 미니멀한 느낌, 따뜻한 우드톤 등"></textarea>
+    </div>
+  </div>
+
+  <div class="form-section">
+    <div class="form-section-title">제품 정보</div>
+    <div class="form-group">
+      <label>주요 취급 품목 또는 비치 가구</label>
+      <input type="text" id="products" placeholder="가장 중요하게 생각하는 제품군을 입력해주세요">
+    </div>
+  </div>
+
+  <div class="form-section">
+    <div class="form-section-title">예산 및 기간</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>예상 예산 범위</label>
+        <input type="text" id="budget" placeholder="예: 2,000만원 내외">
+      </div>
+      <div class="form-group">
+        <label>희망 완료 기간</label>
+        <input type="text" id="period" placeholder="예: 1개월 이내">
+      </div>
+    </div>
+  </div>
+
+  <div class="cta-wrap">
+    <button class="btn-next" onclick="goNext()">다음 단계로 이동하기</button>
+    <div class="cta-note">입력하신 정보는 상담 목적으로만 안전하게 보관됩니다.</div>
+  </div>
+</div>
+
+<footer>
+  <span>© 2024 makeyourplace. All rights reserved.</span>
+  <span><a href="#">이용약관</a> &nbsp; <a href="#">개인정보처리방침</a></span>
+</footer>
+
+<button class="gear-btn" onclick="openModal()">⚙</button>
+
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal">
+    <h3>API 키 설정</h3>
+    <p>Claude API 키를 입력하면 AI 기능이 활성화됩니다.</p>
+    <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-...">
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="document.getElementById('modalOverlay').classList.remove('open')">취소</button>
+      <button class="modal-save" onclick="saveApiKey()">저장</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Load saved data
+window.addEventListener('load', () => {
+  const saved = JSON.parse(localStorage.getItem('step1Data') || '{}');
+  if(saved.area) document.getElementById('area').value = saved.area;
+  if(saved.spaceType) document.getElementById('spaceType').value = saved.spaceType;
+  if(saved.mood) document.getElementById('mood').value = saved.mood;
+  if(saved.products) document.getElementById('products').value = saved.products;
+  if(saved.budget) document.getElementById('budget').value = saved.budget;
+  if(saved.period) document.getElementById('period').value = saved.period;
+});
+
+function goNext() {
+  const data = {
+    area: document.getElementById('area').value.trim(),
+    spaceType: document.getElementById('spaceType').value,
+    mood: document.getElementById('mood').value.trim(),
+    products: document.getElementById('products').value.trim(),
+    budget: document.getElementById('budget').value.trim(),
+    period: document.getElementById('period').value.trim(),
+  };
+  if (!data.area) { alert('공간 면적을 입력해주세요.'); return; }
+  if (!data.mood) { alert('브랜드 무드를 입력해주세요.'); return; }
+  localStorage.setItem('step1Data', JSON.stringify(data));
+  window.location.href = 'step2-loading.html';
+}
+
+function openModal(){
+  document.getElementById('apiKeyInput').value = localStorage.getItem('apiKey')||'';
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function closeModal(e){
+  if(e.target===document.getElementById('modalOverlay'))
+    document.getElementById('modalOverlay').classList.remove('open');
+}
+function saveApiKey(){
+  const k=document.getElementById('apiKeyInput').value.trim();
+  if(k) localStorage.setItem('apiKey',k);
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+</script>
+</body>
+</html>

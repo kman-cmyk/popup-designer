@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>신청 완료 — makeyourplace</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Pretendard',sans-serif;background:#fff;color:#111;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px}
+
+    /* CHECK */
+    .check-icon{width:64px;height:64px;background:#EFF6FF;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:28px}
+    .check-icon svg{width:32px;height:32px}
+
+    /* TITLE */
+    h1{font-size:26px;font-weight:800;text-align:center;margin-bottom:8px;letter-spacing:-0.01em}
+    .subtitle{font-size:15px;color:#888;text-align:center;margin-bottom:32px}
+
+    /* CARD */
+    .card{width:100%;max-width:420px;border:1px solid #F0F0F0;border-radius:16px;overflow:hidden;margin-bottom:24px}
+
+    /* PREVIEW */
+    .preview-label{font-size:12px;font-weight:600;color:#AAA;padding:14px 20px 0;letter-spacing:0.04em}
+    .preview-img{width:100%;height:200px;background:linear-gradient(135deg,#F5F0E8,#E8D5C0);display:flex;align-items:center;justify-content:center;font-size:64px;margin:0}
+    .preview-title{padding:16px 20px 8px}
+    .preview-title h3{font-size:16px;font-weight:700;margin-bottom:4px}
+    .preview-title p{font-size:13px;color:#888}
+
+    /* SUMMARY */
+    .summary{border-top:1px solid #F0F0F0;padding:20px}
+    .summary h4{font-size:14px;font-weight:700;margin-bottom:16px;color:#111}
+    .summary-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;font-size:14px}
+    .summary-row .label{color:#888}
+    .summary-row .value{font-weight:600;color:#111}
+
+    /* BTNS */
+    .btns{width:100%;max-width:420px;display:flex;flex-direction:column;gap:10px}
+    .btn-primary{background:#3B82F6;color:#fff;border:none;padding:16px;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;text-align:center;text-decoration:none;display:block;transition:background 0.15s}
+    .btn-primary:hover{background:#2563EB}
+    .btn-outline{background:#fff;color:#333;border:2px solid #E5E7EB;padding:15px;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;text-align:center;text-decoration:none;display:block;transition:all 0.15s}
+    .btn-outline:hover{border-color:#3B82F6;color:#3B82F6}
+
+    /* NOTE */
+    .note{font-size:11px;color:#CCC;text-align:center;margin-top:20px;line-height:1.6}
+    .note a{color:#CCC;text-decoration:none}
+    .note a:hover{color:#999}
+
+    /* CONFETTI */
+    .confetti-wrap{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0}
+    .confetti-piece{position:absolute;width:8px;height:8px;top:-20px;animation:confetti-fall linear forwards}
+    @keyframes confetti-fall{
+      0%{transform:translateY(0) rotate(0deg);opacity:1}
+      100%{transform:translateY(110vh) rotate(720deg);opacity:0}
+    }
+
+    /* GEAR */
+    .gear-btn{position:fixed;bottom:24px;right:24px;width:44px;height:44px;background:#fff;border:1px solid #E5E7EB;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,0.1);z-index:200;transition:transform 0.2s}
+    .gear-btn:hover{transform:rotate(45deg)}
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:300;align-items:center;justify-content:center}
+    .modal-overlay.open{display:flex}
+    .modal{background:#fff;border-radius:16px;padding:32px;width:400px;max-width:90vw}
+    .modal h3{font-size:18px;font-weight:700;margin-bottom:8px}
+    .modal p{font-size:13px;color:#666;margin-bottom:20px}
+    .modal input{width:100%;border:1px solid #E5E7EB;border-radius:8px;padding:12px 14px;font-size:14px;font-family:inherit;outline:none;margin-bottom:16px}
+    .modal input:focus{border-color:#3B82F6}
+    .modal-btns{display:flex;gap:8px}
+    .modal-save{flex:1;background:#3B82F6;color:#fff;border:none;padding:12px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit}
+    .modal-cancel{flex:1;background:#F5F5F5;color:#444;border:none;padding:12px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
+  </style>
+</head>
+<body>
+
+<div class="confetti-wrap" id="confetti"></div>
+
+<div class="check-icon">
+  <svg viewBox="0 0 32 32" fill="none" stroke="#3B82F6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M6 16l8 8 12-14"/>
+  </svg>
+</div>
+
+<h1>결제가 성공적으로 완료되었습니다!</h1>
+<p class="subtitle">makeyourplace와 함께해주셔서 감사합니다.</p>
+
+<div class="card">
+  <div class="preview-label">최종 시안 미리보기</div>
+  <div class="preview-img">👠</div>
+  <div class="preview-title">
+    <h3>내 공간 스타일링 시안</h3>
+    <p>신청하신 스타일에 맞춰 제작된 맞춤형 도면입니다.</p>
+  </div>
+
+  <div class="summary">
+    <h4>계약 내용 요약</h4>
+    <div class="summary-row">
+      <span class="label">서비스명</span>
+      <span class="value">프리미엄 공간 컨설팅</span>
+    </div>
+    <div class="summary-row">
+      <span class="label">결제 금액</span>
+      <span class="value" id="summaryPrice">—</span>
+    </div>
+    <div class="summary-row">
+      <span class="label">결제 수단</span>
+      <span class="value">신용카드 (****-****-****-1234)</span>
+    </div>
+    <div class="summary-row">
+      <span class="label">신청 일시</span>
+      <span class="value" id="summaryTime">—</span>
+    </div>
+  </div>
+</div>
+
+<div class="btns">
+  <a href="#" class="btn-primary">내 신청 내역 확인하기</a>
+  <a href="index.html" class="btn-outline">홈으로 돌아가기</a>
+</div>
+
+<div class="note">
+  상세한 계약서 및 영수증은 기입하신 이메일로 발송되지않습니다.<br>
+  문의사항: <a href="#">support@makeyourplace.com</a>
+</div>
+
+<button class="gear-btn" onclick="openModal()">⚙</button>
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal">
+    <h3>API 키 설정</h3>
+    <p>Claude API 키를 입력하면 AI 기능이 활성화됩니다.</p>
+    <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-...">
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="document.getElementById('modalOverlay').classList.remove('open')">취소</button>
+      <button class="modal-save" onclick="saveApiKey()">저장</button>
+    </div>
+  </div>
+</div>
+
+<script>
+window.addEventListener('load', () => {
+  const quote = JSON.parse(localStorage.getItem('quoteData') || '{}');
+  const style = JSON.parse(localStorage.getItem('selectedStyle') || '{}');
+
+  if (quote.total) {
+    document.getElementById('summaryPrice').textContent = '₩' + Number(quote.total).toLocaleString() + '원';
+  }
+  if (quote.timestamp) {
+    document.getElementById('summaryTime').textContent = quote.timestamp;
+  } else {
+    document.getElementById('summaryTime').textContent = new Date().toLocaleString('ko-KR');
+  }
+
+  // Confetti
+  spawnConfetti();
+});
+
+function spawnConfetti() {
+  const container = document.getElementById('confetti');
+  const colors = ['#3B82F6','#EF4444','#22C55E','#F59E0B','#A855F7','#EC4899'];
+  for (let i = 0; i < 60; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.cssText = `
+      left:${Math.random() * 100}%;
+      background:${color};
+      border-radius:${Math.random() > 0.5 ? '50%' : '2px'};
+      width:${6 + Math.random() * 8}px;
+      height:${6 + Math.random() * 8}px;
+      animation-duration:${2 + Math.random() * 3}s;
+      animation-delay:${Math.random() * 2}s;
+      opacity:${0.6 + Math.random() * 0.4};
+    `;
+    container.appendChild(piece);
+  }
+}
+
+function openModal(){
+  document.getElementById('apiKeyInput').value = localStorage.getItem('apiKey')||'';
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function closeModal(e){
+  if(e.target===document.getElementById('modalOverlay'))
+    document.getElementById('modalOverlay').classList.remove('open');
+}
+function saveApiKey(){
+  const k=document.getElementById('apiKeyInput').value.trim();
+  if(k) localStorage.setItem('apiKey',k);
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+</script>
+</body>
+</html>

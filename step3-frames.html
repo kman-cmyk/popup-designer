@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STEP 3. 레이아웃 설계 — makeyourplace</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%;font-family:'Pretendard',sans-serif;background:#fff;color:#111;overflow:hidden}
+
+    /* LOADING OVERLAY */
+    #loadingOverlay{position:fixed;inset:0;background:rgba(255,255,255,0.97);z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:24px}
+    .loading-spinner{width:48px;height:48px;border:4px solid #E5E7EB;border-top-color:#3B82F6;border-radius:50%;animation:spin 0.8s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .loading-text{font-size:16px;font-weight:600;color:#444}
+    .loading-sub{font-size:13px;color:#AAA}
+
+    /* TOP BAR */
+    .topbar{display:flex;align-items:center;height:52px;border-bottom:1px solid #E5E7EB;background:#fff;padding:0 20px;gap:16px;flex-shrink:0;z-index:10;position:relative}
+    .topbar-logo{font-size:15px;font-weight:800;color:#111;text-decoration:none}
+    .topbar-sep{color:#E5E7EB;font-size:18px;margin:0 4px}
+    .topbar-title{font-size:14px;font-weight:600;color:#555}
+    .topbar-spacer{flex:1}
+    .topbar-btn{padding:8px 16px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:all 0.15s}
+    .topbar-btn-outline{background:#fff;color:#111;border:1px solid #E5E7EB}
+    .topbar-btn-outline:hover{border-color:#3B82F6;color:#3B82F6}
+    .topbar-btn-primary{background:#3B82F6;color:#fff;border:none}
+    .topbar-btn-primary:hover{background:#2563EB}
+
+    /* LAYOUT */
+    .workspace{display:flex;height:calc(100vh - 52px)}
+
+    /* LEFT PANEL */
+    .left-panel{width:200px;border-right:1px solid #E5E7EB;display:flex;flex-direction:column;overflow:hidden;flex-shrink:0;background:#fff}
+    .panel-header{padding:12px 16px;font-size:12px;font-weight:700;color:#111;border-bottom:1px solid #F0F0F0;flex-shrink:0}
+    .panel-sub{font-size:11px;color:#AAA;font-weight:400;margin-top:2px}
+    .frame-list{flex:1;overflow-y:auto;padding:8px}
+    .frame-list::-webkit-scrollbar{width:4px}
+    .frame-list::-webkit-scrollbar-thumb{background:#E5E7EB;border-radius:2px}
+    .frame-item{border:1px solid #E5E7EB;border-radius:10px;padding:10px;margin-bottom:8px;cursor:pointer;transition:all 0.15s;position:relative}
+    .frame-item:hover{border-color:#3B82F6}
+    .frame-item.active{border-color:#3B82F6;background:#EFF6FF}
+    .frame-item-name{font-size:12px;font-weight:700;color:#111;margin-bottom:6px;padding-right:20px}
+    .frame-item-size{font-size:10px;font-weight:600;color:#fff;background:#555;border-radius:4px;padding:2px 6px;display:inline-block}
+    .frame-item.active .frame-item-size{background:#3B82F6}
+    .frame-thumb{width:100%;height:64px;background:#F9FAFB;border-radius:6px;margin-top:8px;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+    .frame-item-del{position:absolute;top:8px;right:8px;width:20px;height:20px;border-radius:50%;background:#FEE2E2;color:#EF4444;border:none;cursor:pointer;font-size:11px;display:none;align-items:center;justify-content:center;line-height:1}
+    .frame-item:hover .frame-item-del{display:flex}
+    .ai-badge{display:inline-block;font-size:9px;font-weight:700;color:#7C3AED;background:#EDE9FE;border-radius:4px;padding:1px 5px;margin-left:4px;vertical-align:middle}
+    .panel-buttons{padding:8px;display:flex;flex-direction:column;gap:6px;flex-shrink:0;border-top:1px solid #F0F0F0}
+    .add-frame-btn{width:100%;background:#F0F7FF;color:#3B82F6;border:1px dashed #93C5FD;border-radius:10px;padding:9px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s}
+    .add-frame-btn:hover{background:#DBEAFE}
+    .regen-btn{width:100%;background:#F5F3FF;color:#7C3AED;border:1px dashed #C4B5FD;border-radius:10px;padding:9px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s;display:flex;align-items:center;justify-content:center;gap:4px}
+    .regen-btn:hover{background:#EDE9FE}
+    .regen-btn.loading{opacity:0.6;pointer-events:none}
+    .status-bar{padding:0 12px;height:26px;border-top:1px solid #F0F0F0;font-size:10px;color:#AAA;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+    .status-live{color:#22C55E;font-weight:700}
+
+    /* CENTER */
+    .center-panel{flex:1;background:#F4F5F7;display:flex;flex-direction:column;overflow:hidden}
+    .canvas-toolbar{display:flex;align-items:center;justify-content:center;gap:8px;padding:8px 16px;background:#fff;border-bottom:1px solid #E5E7EB;flex-shrink:0}
+    .tool-btn{height:30px;padding:0 10px;border:1px solid #E5E7EB;background:#fff;border-radius:7px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;transition:all 0.15s;gap:4px;color:#555;font-family:inherit;font-weight:500}
+    .tool-btn:hover{border-color:#3B82F6;color:#3B82F6}
+    .tool-btn.danger:hover{border-color:#EF4444;color:#EF4444}
+    .canvas-area{flex:1;overflow:auto;position:relative}
+    .canvas-area::-webkit-scrollbar{width:6px;height:6px}
+    .canvas-area::-webkit-scrollbar-thumb{background:#D1D5DB;border-radius:3px}
+    .canvas-inner{position:relative;min-width:100%;min-height:100%;width:1200px;height:800px}
+    .canvas-grid{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;background-image:linear-gradient(rgba(0,0,0,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(0,0,0,0.05) 1px,transparent 1px);background-size:40px 40px}
+    .canvas-grid.hidden{background-image:none}
+
+    /* FRAME ON CANVAS */
+    .canvas-frame-wrap{position:absolute;cursor:grab;user-select:none}
+    .canvas-frame-wrap:active{cursor:grabbing}
+    .canvas-frame-label{font-size:10px;font-weight:700;color:#666;text-align:center;margin-bottom:4px;pointer-events:none;white-space:nowrap}
+    .canvas-frame-box{width:60px;height:180px;border:2px solid #D1D5DB;border-radius:4px;overflow:hidden;display:flex;flex-direction:column;transition:border-color 0.15s;position:relative}
+    .canvas-frame-box.active{border-color:#3B82F6;box-shadow:0 0 0 3px rgba(59,130,246,0.2)}
+    .canvas-module-block{width:100%;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:600;color:#555;overflow:hidden;border-bottom:1px solid rgba(0,0,0,0.06);flex-shrink:0}
+    .canvas-module-block:last-child{border-bottom:none}
+    .canvas-frame-badge{position:absolute;top:3px;right:3px;font-size:8px;font-weight:700;color:#7C3AED;background:#EDE9FE;border-radius:3px;padding:1px 4px;pointer-events:none}
+
+    /* RIGHT PANEL */
+    .right-panel{width:240px;border-left:1px solid #E5E7EB;display:flex;flex-direction:column;overflow:hidden;flex-shrink:0;background:#fff}
+    .right-panel-header{padding:12px 16px;font-size:12px;font-weight:700;color:#111;border-bottom:1px solid #F0F0F0;flex-shrink:0}
+    .props-body{flex:1;overflow-y:auto;padding:12px 14px}
+    .props-body::-webkit-scrollbar{width:4px}
+    .props-body::-webkit-scrollbar-thumb{background:#E5E7EB;border-radius:2px}
+    .concept-box{background:#F5F3FF;border:1px solid #DDD6FE;border-radius:8px;padding:10px 12px;font-size:11px;color:#5B21B6;line-height:1.6;margin-bottom:14px}
+    .concept-box-label{font-size:10px;font-weight:700;color:#7C3AED;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.06em}
+    .prop-group{margin-bottom:14px}
+    .prop-label{font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:5px}
+    .prop-input{width:100%;border:1px solid #E5E7EB;border-radius:6px;padding:7px 10px;font-size:13px;font-family:inherit;outline:none}
+    .prop-input:focus{border-color:#3B82F6}
+
+    /* MODULE LIST */
+    .module-list{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+    .module-row{display:flex;align-items:center;gap:6px;background:#F9FAFB;border:1px solid #F0F0F0;border-radius:7px;padding:6px 8px}
+    .mod-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+    .mod-select{flex:1;border:1px solid #E5E7EB;border-radius:5px;padding:4px 6px;font-size:11px;font-family:inherit;outline:none;background:#fff;color:#111;cursor:pointer}
+    .mod-select:focus{border-color:#3B82F6}
+    .mod-height{width:44px;border:1px solid #E5E7EB;border-radius:5px;padding:4px 6px;font-size:11px;font-family:inherit;outline:none;text-align:center;color:#111}
+    .mod-height:focus{border-color:#3B82F6}
+    .mod-arrows{display:flex;flex-direction:column;gap:1px}
+    .mod-arrow{width:16px;height:12px;border:1px solid #E5E7EB;background:#fff;border-radius:3px;cursor:pointer;font-size:9px;display:flex;align-items:center;justify-content:center;color:#666;line-height:1}
+    .mod-arrow:hover{border-color:#3B82F6;color:#3B82F6}
+    .mod-del{width:18px;height:18px;border-radius:4px;background:#FEE2E2;color:#EF4444;border:none;cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1}
+    .mod-del:hover{background:#FCA5A5}
+    .add-module-btn{width:100%;background:#F0FDF4;color:#16A34A;border:1px dashed #86EFAC;border-radius:7px;padding:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s}
+    .add-module-btn:hover{background:#DCFCE7}
+    .height-warning{font-size:10px;color:#EF4444;margin-top:4px}
+    .no-selection{padding:20px;text-align:center;font-size:12px;color:#CCC;line-height:1.8}
+
+    /* GEAR / MODAL */
+    .gear-btn{position:fixed;bottom:24px;right:24px;width:38px;height:38px;background:#fff;border:1px solid #E5E7EB;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,0.1);z-index:200;transition:transform 0.2s}
+    .gear-btn:hover{transform:rotate(45deg)}
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:300;align-items:center;justify-content:center}
+    .modal-overlay.open{display:flex}
+    .modal{background:#fff;border-radius:16px;padding:32px;width:400px;max-width:90vw}
+    .modal h3{font-size:18px;font-weight:700;margin-bottom:8px}
+    .modal p{font-size:13px;color:#666;margin-bottom:20px}
+    .modal input{width:100%;border:1px solid #E5E7EB;border-radius:8px;padding:12px 14px;font-size:14px;font-family:inherit;outline:none;margin-bottom:16px}
+    .modal input:focus{border-color:#3B82F6}
+    .modal-btns{display:flex;gap:8px}
+    .modal-save{flex:1;background:#3B82F6;color:#fff;border:none;padding:12px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit}
+    .modal-cancel{flex:1;background:#F5F5F5;color:#444;border:none;padding:12px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
+  </style>
+</head>
+<body>
+
+<!-- LOADING OVERLAY -->
+<div id="loadingOverlay">
+  <div class="loading-spinner"></div>
+  <div class="loading-text">AI가 최적의 팝업 레이아웃을 설계하고 있습니다...</div>
+  <div class="loading-sub">잠시만 기다려주세요</div>
+</div>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <a href="index.html" class="topbar-logo">makeyourplace</a>
+  <span class="topbar-sep">|</span>
+  <span class="topbar-title">STEP 3. 레이아웃 설계</span>
+  <div class="topbar-spacer"></div>
+  <button class="topbar-btn topbar-btn-outline" onclick="window.location.href='step2.html'">이전 단계</button>
+  <button class="topbar-btn topbar-btn-primary" onclick="saveAndNext()">저장 후 다음</button>
+</div>
+
+<div class="workspace">
+
+  <!-- LEFT PANEL -->
+  <div class="left-panel">
+    <div class="panel-header">
+      프레임 목록
+      <div class="panel-sub">클릭하여 선택·편집</div>
+    </div>
+    <div class="frame-list" id="frameList"></div>
+    <div class="panel-buttons">
+      <button class="add-frame-btn" onclick="addFrame()">+ 프레임 추가</button>
+      <button class="regen-btn" id="regenBtn" onclick="regenerate()">✦ AI 재생성</button>
+    </div>
+    <div class="status-bar">
+      <span id="canvasInfo">프레임 0개</span>
+      <span class="status-live" id="saveStatus">● 저장됨</span>
+    </div>
+  </div>
+
+  <!-- CENTER CANVAS -->
+  <div class="center-panel">
+    <div class="canvas-toolbar">
+      <div class="tool-btn" onclick="zoom(1.25)">＋ 확대</div>
+      <div class="tool-btn" onclick="zoom(0.8)">－ 축소</div>
+      <div class="tool-btn" onclick="fitView()">⊡ 맞춤</div>
+      <div class="tool-btn" onclick="toggleGrid()">⊞ 그리드</div>
+      <div class="tool-btn danger" onclick="deleteActiveFrame()">🗑 삭제</div>
+    </div>
+    <div class="canvas-area" id="canvasArea">
+      <div class="canvas-inner" id="canvasInner">
+        <div class="canvas-grid" id="canvasGrid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right-panel">
+    <div class="right-panel-header">속성 편집</div>
+    <div class="props-body" id="propsBody">
+      <div class="no-selection">프레임을 선택하면<br>여기서 편집할 수 있습니다.</div>
+    </div>
+  </div>
+
+</div>
+
+<button class="gear-btn" onclick="openModal()">⚙</button>
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalOverlay(event)">
+  <div class="modal">
+    <h3>API 키 설정</h3>
+    <p>Claude API 키를 입력하면 AI 레이아웃 자동생성 기능이 활성화됩니다.</p>
+    <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-...">
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="document.getElementById('modalOverlay').classList.remove('open')">취소</button>
+      <button class="modal-save" onclick="saveApiKey()">저장</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Constants ──
+const MODULE_TYPES = ['선반', '행거', '디스플레이박스', '카운터'];
+const MODULE_COLORS = {
+  '선반': '#DBEAFE',
+  '행거': '#EDE9FE',
+  '디스플레이박스': '#DCFCE7',
+  '카운터': '#FEF3C7',
+};
+const SNAP = 40;
+const SCALE = 10; // 1:10 → 600px real = 60px canvas, 1800px real = 180px canvas
+const FRAME_PX_W = 60;
+const FRAME_PX_H = 180;
+
+// ── State ──
+let frames = [];
+let activeIdx = -1;
+let aiConcept = '';
+let gridVisible = true;
+let canvasZoom = 1;
+
+// ── Init ──
+window.addEventListener('load', async () => {
+  const saved = JSON.parse(localStorage.getItem('layoutData') || 'null');
+  if (saved && saved.length && saved[0].modules && saved[0].modules.length) {
+    frames = saved;
+    aiConcept = localStorage.getItem('aiConcept') || '';
+    hideLoading();
+    activeIdx = 0;
+    renderAll();
+  } else {
+    await generateAILayout();
+  }
+});
+
+function hideLoading() {
+  document.getElementById('loadingOverlay').style.display = 'none';
+}
+
+// ── AI Generation ──
+async function generateAILayout() {
+  document.getElementById('loadingOverlay').style.display = 'flex';
+  const btn = document.getElementById('regenBtn');
+  btn.classList.add('loading');
+
+  const step1 = JSON.parse(localStorage.getItem('step1Data') || '{}');
+  const style = JSON.parse(localStorage.getItem('selectedStyle') || '{}');
+  const apiKey = localStorage.getItem('apiKey');
+
+  let success = false;
+
+  if (apiKey) {
+    try {
+      const infoText = [
+        step1.spaceSize    ? `공간 크기: ${step1.spaceSize}` : null,
+        step1.brandMood    ? `브랜드 무드: ${step1.brandMood}` : null,
+        step1.products     ? `취급 상품: ${step1.products}` : null,
+        step1.budget       ? `예산: ${step1.budget}` : null,
+        style.name         ? `선택 스타일: ${style.name}` : null,
+        style.description  ? `스타일 설명: ${style.description}` : null,
+      ].filter(Boolean).join(', ');
+
+      const prompt = `You are a popup store designer. Based on this info: ${infoText || 'No specific info provided, use defaults'}, generate an optimal 2D layout. Return ONLY valid JSON in this format:
+{
+  "frames": [
+    {
+      "id": "frame-1",
+      "name": "MAIN FRAME A",
+      "x": 200, "y": 80,
+      "modules": [
+        {"type": "선반", "height": 360},
+        {"type": "행거", "height": 540},
+        {"type": "디스플레이박스", "height": 360},
+        {"type": "카운터", "height": 540}
+      ]
+    }
+  ],
+  "concept": "brief description in Korean of why this layout"
+}
+Rules: Frame width is always 600, height is always 1800. Module heights must sum to exactly 1800. Use 3-6 modules per frame. Generate 2-4 frames based on space size. Only use these module types: 선반, 행거, 디스플레이박스, 카운터.`;
+
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true',
+        },
+        body: JSON.stringify({
+          model: 'claude-opus-4-6',
+          max_tokens: 1500,
+          messages: [{ role: 'user', content: prompt }],
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        const text = data.content && data.content[0] && data.content[0].text || '';
+        const match = text.match(/\{[\s\S]*\}/);
+        if (match) {
+          const parsed = JSON.parse(match[0]);
+          if (parsed.frames && parsed.frames.length) {
+            frames = parsed.frames.map((f, i) => ({
+              id: f.id || `frame-${Date.now()}-${i}`,
+              name: f.name || `FRAME ${String.fromCharCode(65+i)}`,
+              x: typeof f.x === 'number' ? f.x : 80 + i * 120,
+              y: typeof f.y === 'number' ? f.y : 80,
+              aiGenerated: true,
+              modules: (f.modules || []).map(m => ({
+                type: MODULE_TYPES.includes(m.type) ? m.type : '선반',
+                height: parseInt(m.height) || 360,
+              })),
+            }));
+            aiConcept = parsed.concept || '';
+            localStorage.setItem('aiConcept', aiConcept);
+            success = true;
+          }
+        }
+      }
+    } catch (err) {
+      console.warn('AI API error:', err);
+    }
+  }
+
+  if (!success) {
+    useMockData(JSON.parse(localStorage.getItem('step1Data') || '{}'), JSON.parse(localStorage.getItem('selectedStyle') || '{}'));
+  }
+
+  hideLoading();
+  btn.classList.remove('loading');
+  activeIdx = 0;
+  renderAll();
+  autoSave();
+}
+
+function useMockData(step1, style) {
+  const size = (step1.spaceSize || '').toString();
+  const count = (size.includes('대') || parseInt(size) >= 20) ? 4
+              : (size.includes('소') || parseInt(size) <= 8) ? 2 : 3;
+
+  const letters = 'ABCDEFGH';
+  const presets = [
+    [{ type:'선반',height:360 },{ type:'행거',height:540 },{ type:'선반',height:360 },{ type:'카운터',height:540 }],
+    [{ type:'행거',height:600 },{ type:'디스플레이박스',height:600 },{ type:'카운터',height:600 }],
+    [{ type:'선반',height:450 },{ type:'선반',height:450 },{ type:'행거',height:450 },{ type:'카운터',height:450 }],
+    [{ type:'디스플레이박스',height:600 },{ type:'행거',height:720 },{ type:'카운터',height:480 }],
+  ];
+
+  frames = Array.from({ length: count }, (_, i) => ({
+    id: `frame-${i+1}`,
+    name: `MAIN FRAME ${letters[i]}`,
+    x: 80 + i * 120,
+    y: 80,
+    aiGenerated: true,
+    modules: presets[i % presets.length].map(m => ({ ...m })),
+  }));
+
+  aiConcept = `${style.name || '기본'} 스타일 기반으로 동선과 진열 효율을 고려한 레이아웃을 자동 생성했습니다.`;
+  localStorage.setItem('aiConcept', aiConcept);
+}
+
+async function regenerate() {
+  await generateAILayout();
+}
+
+// ── Render ──
+function renderAll() {
+  renderFrameList();
+  renderCanvas();
+  renderRightPanel();
+  document.getElementById('canvasInfo').textContent = `프레임 ${frames.length}개`;
+}
+
+function renderFrameList() {
+  const list = document.getElementById('frameList');
+  list.innerHTML = '';
+  frames.forEach((f, i) => {
+    const el = document.createElement('div');
+    el.className = 'frame-item' + (i === activeIdx ? ' active' : '');
+    el.onclick = () => { activeIdx = i; renderAll(); };
+
+    const thumbCanvas = buildThumbSVG(f);
+
+    el.innerHTML = `
+      <button class="frame-item-del" onclick="deleteFrame(${i},event)">✕</button>
+      <div class="frame-item-name">${f.name}${f.aiGenerated ? '<span class="ai-badge">AI</span>' : ''}</div>
+      <span class="frame-item-size">600 × 1800</span>
+      <div class="frame-thumb">${thumbCanvas}</div>`;
+    list.appendChild(el);
+  });
+}
+
+function buildThumbSVG(f) {
+  const totalH = f.modules.reduce((s, m) => s + m.height, 0) || 1800;
+  const svgH = 56;
+  const svgW = 24;
+  let y = 0;
+  const rects = f.modules.map(m => {
+    const h = (m.height / totalH) * svgH;
+    const r = `<rect x="0" y="${y.toFixed(1)}" width="${svgW}" height="${h.toFixed(1)}" fill="${MODULE_COLORS[m.type] || '#F3F4F6'}" />`;
+    y += h;
+    return r;
+  }).join('');
+  return `<svg width="${svgW}" height="${svgH}" style="border-radius:3px;overflow:hidden">${rects}</svg>`;
+}
+
+function renderCanvas() {
+  const inner = document.getElementById('canvasInner');
+  inner.querySelectorAll('.canvas-frame-wrap').forEach(el => el.remove());
+
+  frames.forEach((f, fi) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'canvas-frame-wrap';
+    wrap.style.left = f.x + 'px';
+    wrap.style.top = f.y + 'px';
+
+    const label = document.createElement('div');
+    label.className = 'canvas-frame-label';
+    label.textContent = f.name;
+
+    const box = document.createElement('div');
+    box.className = 'canvas-frame-box' + (fi === activeIdx ? ' active' : '');
+
+    const totalH = f.modules.reduce((s, m) => s + m.height, 0) || 1800;
+    f.modules.forEach(m => {
+      const block = document.createElement('div');
+      block.className = 'canvas-module-block';
+      const h = (m.height / totalH) * FRAME_PX_H;
+      block.style.height = h + 'px';
+      block.style.background = MODULE_COLORS[m.type] || '#F3F4F6';
+      block.textContent = m.type;
+      box.appendChild(block);
+    });
+
+    if (f.aiGenerated) {
+      const badge = document.createElement('div');
+      badge.className = 'canvas-frame-badge';
+      badge.textContent = 'AI 추천';
+      box.appendChild(badge);
+    }
+
+    wrap.appendChild(label);
+    wrap.appendChild(box);
+    inner.appendChild(wrap);
+
+    wrap.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      activeIdx = fi;
+      renderAll();
+      startDrag(e, fi, wrap);
+    });
+  });
+}
+
+function startDrag(e, fi, wrap) {
+  const startX = e.clientX - frames[fi].x;
+  const startY = e.clientY - frames[fi].y;
+
+  function onMove(ev) {
+    let nx = ev.clientX - startX;
+    let ny = ev.clientY - startY;
+    nx = Math.round(nx / SNAP) * SNAP;
+    ny = Math.round(ny / SNAP) * SNAP;
+    nx = Math.max(0, nx);
+    ny = Math.max(0, ny);
+    frames[fi].x = nx;
+    frames[fi].y = ny;
+    wrap.style.left = nx + 'px';
+    wrap.style.top = ny + 'px';
+    autoSave();
+  }
+
+  function onUp() {
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('mouseup', onUp);
+    renderAll();
+    autoSave();
+  }
+
+  document.addEventListener('mousemove', onMove);
+  document.addEventListener('mouseup', onUp);
+}
+
+function renderRightPanel() {
+  const body = document.getElementById('propsBody');
+  if (activeIdx < 0 || !frames[activeIdx]) {
+    body.innerHTML = '<div class="no-selection">프레임을 선택하면<br>여기서 편집할 수 있습니다.</div>';
+    return;
+  }
+
+  const f = frames[activeIdx];
+  const totalH = f.modules.reduce((s, m) => s + m.height, 0);
+  const isOk = totalH === 1800;
+
+  let modulesHTML = f.modules.map((m, mi) => `
+    <div class="module-row">
+      <div class="mod-dot" style="background:${MODULE_COLORS[m.type] || '#DDD'}"></div>
+      <select class="mod-select" onchange="updateModuleType(${mi},this.value)">
+        ${MODULE_TYPES.map(t => `<option value="${t}"${t===m.type?' selected':''}>${t}</option>`).join('')}
+      </select>
+      <input class="mod-height" type="number" value="${m.height}" min="60" max="1800" step="60"
+        onchange="updateModuleHeight(${mi},this.value)">
+      <div class="mod-arrows">
+        <button class="mod-arrow" onclick="moveModule(${mi},-1)" title="위로">▲</button>
+        <button class="mod-arrow" onclick="moveModule(${mi},1)" title="아래로">▼</button>
+      </div>
+      <button class="mod-del" onclick="deleteModule(${mi})">✕</button>
+    </div>`).join('');
+
+  body.innerHTML = `
+    ${aiConcept ? `<div class="concept-box"><div class="concept-box-label">AI 설계 개념</div>${aiConcept}</div>` : ''}
+    <div class="prop-group">
+      <div class="prop-label">프레임 이름</div>
+      <input class="prop-input" value="${f.name}" oninput="updateFrameName(this.value)">
+    </div>
+    <div class="prop-group">
+      <div class="prop-label">모듈 구성 <span style="font-weight:400;color:${isOk?'#22C55E':'#EF4444'}">(합계 ${totalH}mm / 1800mm)</span></div>
+      <div class="module-list">${modulesHTML}</div>
+      ${!isOk ? `<div class="height-warning">⚠ 모듈 높이 합이 1800mm이어야 합니다 (현재 ${totalH}mm)</div>` : ''}
+      <button class="add-module-btn" onclick="addModule()">+ 모듈 추가</button>
+    </div>`;
+}
+
+// ── Frame & Module Editing ──
+function updateFrameName(val) {
+  if (frames[activeIdx]) {
+    frames[activeIdx].name = val;
+    renderFrameList();
+    renderCanvas();
+    autoSave();
+  }
+}
+
+function updateModuleType(mi, val) {
+  if (frames[activeIdx]) {
+    frames[activeIdx].modules[mi].type = val;
+    renderAll();
+    autoSave();
+  }
+}
+
+function updateModuleHeight(mi, val) {
+  if (frames[activeIdx]) {
+    frames[activeIdx].modules[mi].height = Math.max(60, parseInt(val) || 60);
+    renderRightPanel();
+    renderCanvas();
+    renderFrameList();
+    autoSave();
+  }
+}
+
+function moveModule(mi, dir) {
+  const mods = frames[activeIdx] && frames[activeIdx].modules;
+  if (!mods) return;
+  const ni = mi + dir;
+  if (ni < 0 || ni >= mods.length) return;
+  [mods[mi], mods[ni]] = [mods[ni], mods[mi]];
+  renderAll();
+  autoSave();
+}
+
+function deleteModule(mi) {
+  const mods = frames[activeIdx] && frames[activeIdx].modules;
+  if (!mods || mods.length <= 1) return;
+  mods.splice(mi, 1);
+  renderAll();
+  autoSave();
+}
+
+function addModule() {
+  if (!frames[activeIdx]) return;
+  const mods = frames[activeIdx].modules;
+  const used = mods.reduce((s, m) => s + m.height, 0);
+  const remaining = 1800 - used;
+  mods.push({ type: '선반', height: remaining > 60 ? remaining : 180 });
+  renderAll();
+  autoSave();
+}
+
+function addFrame() {
+  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const letter = letters[frames.length % letters.length];
+  frames.push({
+    id: `frame-${Date.now()}`,
+    name: `FRAME ${letter}`,
+    x: 80 + (frames.length % 6) * 120,
+    y: 80 + Math.floor(frames.length / 6) * 240,
+    aiGenerated: false,
+    modules: [
+      { type: '선반', height: 450 },
+      { type: '행거', height: 900 },
+      { type: '카운터', height: 450 },
+    ],
+  });
+  activeIdx = frames.length - 1;
+  renderAll();
+  autoSave();
+}
+
+function deleteFrame(idx, e) {
+  e.stopPropagation();
+  if (frames.length <= 1) { alert('최소 1개의 프레임이 필요합니다.'); return; }
+  frames.splice(idx, 1);
+  if (activeIdx >= frames.length) activeIdx = frames.length - 1;
+  renderAll();
+  autoSave();
+}
+
+function deleteActiveFrame() {
+  if (activeIdx < 0) return;
+  deleteFrame(activeIdx, { stopPropagation: () => {} });
+}
+
+// ── Canvas Controls ──
+function zoom(factor) {
+  canvasZoom = Math.min(3, Math.max(0.3, canvasZoom * factor));
+  document.getElementById('canvasInner').style.transform = `scale(${canvasZoom})`;
+  document.getElementById('canvasInner').style.transformOrigin = 'top left';
+}
+
+function fitView() {
+  canvasZoom = 1;
+  document.getElementById('canvasInner').style.transform = '';
+}
+
+function toggleGrid() {
+  gridVisible = !gridVisible;
+  document.getElementById('canvasGrid').classList.toggle('hidden', !gridVisible);
+}
+
+// ── Persistence ──
+function autoSave() {
+  localStorage.setItem('layoutData', JSON.stringify(frames));
+  const t = new Date().toTimeString().slice(0, 8);
+  document.getElementById('saveStatus').textContent = `● ${t}`;
+}
+
+function saveAndNext() {
+  autoSave();
+  window.location.href = 'step5.html';
+}
+
+// ── API Key Modal ──
+function openModal() {
+  document.getElementById('apiKeyInput').value = localStorage.getItem('apiKey') || '';
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function closeModalOverlay(e) {
+  if (e.target === document.getElementById('modalOverlay'))
+    document.getElementById('modalOverlay').classList.remove('open');
+}
+function saveApiKey() {
+  const k = document.getElementById('apiKeyInput').value.trim();
+  if (k) localStorage.setItem('apiKey', k);
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+</script>
+</body>
+</html>

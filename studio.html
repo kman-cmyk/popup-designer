@@ -1,0 +1,1277 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MYP Studio — AI 웹 개발 스튜디오</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --left-bg: #0f172a;
+      --left-border: #1e293b;
+      --left-hover: #1e293b;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --accent-light: #1d4ed8;
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --input-bg: #1e293b;
+      --input-border: #334155;
+      --right-bg: #ffffff;
+      --toolbar-bg: #ffffff;
+      --toolbar-border: #e2e8f0;
+      --radius: 8px;
+      --radius-sm: 6px;
+      --radius-xs: 4px;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 14px;
+      overflow: hidden;
+    }
+
+    body {
+      display: flex;
+      background: var(--left-bg);
+      color: var(--text-primary);
+    }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--input-border); border-radius: 99px; }
+    ::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+    /* ═══════════════════════════════════════════════════════
+       LEFT PANEL
+    ═══════════════════════════════════════════════════════ */
+    #left {
+      width: 420px;
+      flex-shrink: 0;
+      background: var(--left-bg);
+      border-right: 1px solid var(--left-border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      height: 100vh;
+    }
+
+    /* Header */
+    #left-header {
+      flex-shrink: 0;
+      padding: 16px 20px 14px;
+      border-bottom: 1px solid var(--left-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .logo-area { display: flex; flex-direction: column; gap: 2px; }
+    .logo-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.01em;
+    }
+    .logo-title span { color: var(--accent); }
+    .logo-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+    .gear-btn {
+      width: 32px; height: 32px;
+      border-radius: var(--radius-xs);
+      border: 1px solid var(--input-border);
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px;
+      transition: all .15s;
+    }
+    .gear-btn:hover { background: var(--left-hover); color: var(--text-primary); }
+
+    /* System prompt collapsible */
+    #sysprompt-section {
+      flex-shrink: 0;
+      border-bottom: 1px solid var(--left-border);
+    }
+    #sysprompt-toggle {
+      width: 100%;
+      padding: 10px 20px;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: color .15s;
+    }
+    #sysprompt-toggle:hover { color: var(--text-secondary); }
+    #sysprompt-toggle .chevron { font-size: 10px; transition: transform .2s; }
+    #sysprompt-toggle.open .chevron { transform: rotate(180deg); }
+    #sysprompt-body {
+      display: none;
+      padding: 0 16px 12px;
+    }
+    #sysprompt-body.open { display: block; }
+    #sysprompt-body textarea {
+      width: 100%;
+      height: 90px;
+      background: var(--input-bg);
+      border: 1px solid var(--input-border);
+      border-radius: var(--radius-xs);
+      color: var(--text-secondary);
+      font-family: inherit;
+      font-size: 12px;
+      padding: 8px 10px;
+      resize: none;
+      outline: none;
+      line-height: 1.6;
+    }
+    #sysprompt-body textarea:focus { border-color: var(--accent); color: var(--text-primary); }
+    #sysprompt-body textarea::placeholder { color: var(--text-muted); }
+
+    /* Chat history */
+    #chat-history {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .chat-turn { display: flex; flex-direction: column; gap: 4px; }
+
+    /* User bubble */
+    .msg-user {
+      align-self: flex-end;
+      max-width: 88%;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 14px 14px 3px 14px;
+      padding: 9px 13px;
+      font-size: 13px;
+      line-height: 1.55;
+      word-break: break-word;
+    }
+
+    /* Assistant bubble */
+    .msg-assistant-wrap {
+      align-self: flex-start;
+      max-width: 92%;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .msg-assistant {
+      background: var(--input-bg);
+      border: 1px solid var(--input-border);
+      color: var(--text-secondary);
+      border-radius: 3px 14px 14px 14px;
+      padding: 9px 13px;
+      font-size: 13px;
+      line-height: 1.55;
+      cursor: pointer;
+      transition: border-color .15s, background .15s;
+      word-break: break-word;
+    }
+    .msg-assistant:hover { border-color: var(--accent); background: #1a2540; color: var(--text-primary); }
+    .msg-assistant.active { border-color: var(--accent); background: #172036; }
+    .code-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #0f3460;
+      border: 1px solid #1d4ed8;
+      color: #93c5fd;
+      border-radius: 99px;
+      padding: 2px 8px;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: .04em;
+      align-self: flex-start;
+    }
+    .msg-time {
+      font-size: 10px;
+      color: var(--text-muted);
+      padding: 0 4px;
+    }
+
+    /* Input area */
+    #input-area {
+      flex-shrink: 0;
+      padding: 14px 16px 16px;
+      border-top: 1px solid var(--left-border);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    #prompt-textarea {
+      width: 100%;
+      min-height: 80px;
+      max-height: 200px;
+      background: var(--input-bg);
+      border: 1px solid var(--input-border);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 13px;
+      padding: 10px 12px;
+      resize: none;
+      outline: none;
+      line-height: 1.6;
+      transition: border-color .15s;
+    }
+    #prompt-textarea:focus { border-color: var(--accent); }
+    #prompt-textarea::placeholder { color: var(--text-muted); font-size: 12.5px; }
+
+    #generate-btn {
+      width: 100%;
+      padding: 11px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .15s, opacity .15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    #generate-btn:hover:not(:disabled) { background: var(--accent-hover); }
+    #generate-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+    .input-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .context-toggle {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 12px;
+      color: var(--text-muted);
+      cursor: pointer;
+      user-select: none;
+    }
+    .toggle-switch {
+      width: 32px; height: 18px;
+      background: var(--input-border);
+      border-radius: 99px;
+      position: relative;
+      transition: background .2s;
+      flex-shrink: 0;
+    }
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      background: #fff;
+      top: 3px; left: 3px;
+      transition: transform .2s;
+    }
+    .toggle-switch.on { background: var(--accent); }
+    .toggle-switch.on::after { transform: translateX(14px); }
+    .shortcut-hint {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       SETTINGS MODAL
+    ═══════════════════════════════════════════════════════ */
+    #settings-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.6);
+      backdrop-filter: blur(4px);
+      z-index: 300;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    #settings-overlay.open { display: flex; }
+    .settings-modal {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      width: 400px;
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      box-shadow: 0 24px 64px rgba(0,0,0,.5);
+    }
+    .settings-modal h2 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+    .field input[type="password"],
+    .field input[type="text"],
+    .field select {
+      width: 100%;
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: var(--radius-xs);
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 13px;
+      padding: 9px 11px;
+      outline: none;
+      transition: border-color .15s;
+    }
+    .field input:focus, .field select:focus { border-color: var(--accent); }
+    .field input::placeholder { color: var(--text-muted); }
+    .field select option { background: #1e293b; }
+
+    .range-row { display: flex; align-items: center; gap: 10px; }
+    .range-row input[type="range"] {
+      flex: 1;
+      accent-color: var(--accent);
+      height: 4px;
+      cursor: pointer;
+    }
+    .range-val {
+      font-size: 12px;
+      color: var(--text-secondary);
+      min-width: 28px;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .settings-actions { display: flex; gap: 8px; justify-content: flex-end; }
+    .btn-modal {
+      padding: 8px 18px;
+      border-radius: var(--radius-xs);
+      border: none;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .btn-cancel { background: #334155; color: var(--text-secondary); }
+    .btn-cancel:hover { background: #475569; color: var(--text-primary); }
+    .btn-save { background: var(--accent); color: #fff; }
+    .btn-save:hover { background: var(--accent-hover); }
+
+    /* ═══════════════════════════════════════════════════════
+       RIGHT PANEL
+    ═══════════════════════════════════════════════════════ */
+    #right {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: var(--right-bg);
+      overflow: hidden;
+      height: 100vh;
+    }
+
+    /* Toolbar */
+    #right-toolbar {
+      flex-shrink: 0;
+      height: 48px;
+      background: var(--toolbar-bg);
+      border-bottom: 1px solid var(--toolbar-border);
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      gap: 8px;
+    }
+
+    /* Tab switcher */
+    .tab-switcher {
+      display: flex;
+      background: #f1f5f9;
+      border-radius: var(--radius-xs);
+      padding: 2px;
+      gap: 1px;
+    }
+    .tab-btn {
+      padding: 5px 14px;
+      border-radius: 3px;
+      border: none;
+      background: transparent;
+      color: #64748b;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .tab-btn.active {
+      background: #fff;
+      color: #1e293b;
+      box-shadow: 0 1px 3px rgba(0,0,0,.1);
+    }
+
+    .toolbar-spacer { flex: 1; }
+
+    .tool-btn {
+      width: 34px; height: 34px;
+      border-radius: var(--radius-xs);
+      border: 1px solid var(--toolbar-border);
+      background: #fff;
+      color: #475569;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px;
+      transition: all .15s;
+      text-decoration: none;
+    }
+    .tool-btn:hover { background: #f8fafc; color: #1e293b; }
+
+    /* Content area */
+    #right-content {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Preview pane */
+    #preview-pane {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    #preview-iframe {
+      flex: 1;
+      border: none;
+      width: 100%;
+      background: #fff;
+    }
+
+    /* Code pane */
+    #code-pane {
+      position: absolute;
+      inset: 0;
+      display: none;
+      flex-direction: column;
+    }
+    #code-pane.active { display: flex; }
+    #code-display {
+      flex: 1;
+      overflow: auto;
+      background: #0d1117;
+      padding: 20px 24px;
+    }
+    #code-pre {
+      margin: 0;
+      font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', Consolas, monospace;
+      font-size: 12.5px;
+      line-height: 1.7;
+      color: #e6edf3;
+      white-space: pre;
+      counter-reset: line;
+    }
+    .code-line {
+      display: block;
+      padding-left: 3.5em;
+      position: relative;
+    }
+    .code-line::before {
+      content: counter(line);
+      counter-increment: line;
+      position: absolute;
+      left: 0;
+      width: 2.5em;
+      text-align: right;
+      color: #484f58;
+      user-select: none;
+    }
+
+    /* Empty state */
+    #empty-state {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      background: #f8fafc;
+      z-index: 2;
+    }
+    .empty-icon {
+      font-size: 56px;
+      opacity: .25;
+    }
+    .empty-title {
+      font-size: 16px;
+      color: #94a3b8;
+      font-weight: 500;
+      text-align: center;
+      line-height: 1.6;
+    }
+    .example-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      max-width: 480px;
+    }
+    .example-chip {
+      padding: 7px 14px;
+      border-radius: 99px;
+      border: 1px solid #e2e8f0;
+      background: #fff;
+      font-size: 13px;
+      color: #475569;
+      cursor: pointer;
+      transition: all .15s;
+      box-shadow: 0 1px 2px rgba(0,0,0,.05);
+    }
+    .example-chip:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      box-shadow: 0 0 0 3px #dbeafe;
+    }
+
+    /* Loading overlay */
+    #loading-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(248,250,252,.92);
+      backdrop-filter: blur(3px);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      z-index: 10;
+    }
+    #loading-overlay.active { display: flex; }
+
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid #e2e8f0;
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .loading-label {
+      font-size: 14px;
+      color: #64748b;
+      font-weight: 500;
+      animation: pulse 1.6s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+    /* Streaming indicator */
+    #streaming-bar {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent) 0%, #8b5cf6 50%, var(--accent) 100%);
+      background-size: 200% 100%;
+      animation: stream 1.5s linear infinite;
+      display: none;
+      z-index: 5;
+    }
+    #streaming-bar.active { display: block; }
+    @keyframes stream { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+    /* ═══════════════════════════════════════════════════════
+       MOBILE
+    ═══════════════════════════════════════════════════════ */
+    #mobile-toggle {
+      display: none;
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 52px; height: 52px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(59,130,246,.4);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+
+    @media (max-width: 768px) {
+      body { overflow: hidden; }
+      #left {
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        z-index: 50;
+        transform: translateX(-100%);
+        transition: transform .3s ease;
+      }
+      #left.mobile-open { transform: translateX(0); }
+      #right { width: 100%; }
+      #mobile-toggle { display: flex; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════
+     LEFT PANEL
+═══════════════════════════════════════════════════════ -->
+<div id="left">
+
+  <!-- Header -->
+  <div id="left-header">
+    <div class="logo-area">
+      <div class="logo-title"><span>MYP</span> Studio</div>
+      <div class="logo-sub">AI 웹 개발 스튜디오</div>
+    </div>
+    <button class="gear-btn" onclick="openSettings()" title="설정">⚙</button>
+  </div>
+
+  <!-- System prompt -->
+  <div id="sysprompt-section">
+    <button id="sysprompt-toggle" onclick="toggleSysPrompt()">
+      <span>시스템 프롬프트</span>
+      <span class="chevron">▼</span>
+    </button>
+    <div id="sysprompt-body">
+      <textarea id="sysprompt-text" placeholder="AI에게 추가 지시사항을 입력하세요 (선택사항)"></textarea>
+    </div>
+  </div>
+
+  <!-- Chat history -->
+  <div id="chat-history">
+    <!-- Populated by JS -->
+  </div>
+
+  <!-- Input area -->
+  <div id="input-area">
+    <textarea
+      id="prompt-textarea"
+      placeholder="무엇을 만들까요? 또는 수정사항을 입력하세요... (Ctrl+Enter)"
+    ></textarea>
+    <button id="generate-btn" onclick="handleGenerate()">
+      <span id="generate-btn-icon">▶</span>
+      <span id="generate-btn-text">생성</span>
+    </button>
+    <div class="input-footer">
+      <label class="context-toggle" onclick="toggleContext()">
+        <div class="toggle-switch" id="context-switch"></div>
+        <span>컨텍스트 유지</span>
+      </label>
+      <span class="shortcut-hint">Ctrl+Enter</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     RIGHT PANEL
+═══════════════════════════════════════════════════════ -->
+<div id="right">
+
+  <!-- Toolbar -->
+  <div id="right-toolbar">
+    <div class="tab-switcher">
+      <button class="tab-btn active" id="tab-preview" onclick="switchTab('preview')">미리보기</button>
+      <button class="tab-btn" id="tab-code" onclick="switchTab('code')">코드</button>
+    </div>
+    <div class="toolbar-spacer"></div>
+    <button class="tool-btn" onclick="copyCode()" title="코드 복사">⎘</button>
+    <button class="tool-btn" onclick="downloadHTML()" title="HTML 다운로드">↓</button>
+    <button class="tool-btn" onclick="openInNewTab()" title="새 탭에서 열기">⎋</button>
+    <button class="tool-btn" onclick="refreshPreview()" title="새로고침">↺</button>
+  </div>
+
+  <!-- Content -->
+  <div id="right-content">
+
+    <!-- Streaming bar -->
+    <div id="streaming-bar"></div>
+
+    <!-- Empty state -->
+    <div id="empty-state">
+      <div class="empty-icon">✦</div>
+      <div class="empty-title">왼쪽에서 프롬프트를 입력해<br/>웹 UI를 생성해보세요</div>
+      <div class="example-chips">
+        <div class="example-chip" onclick="useExample(this)">팝업스토어 랜딩 페이지 만들어줘</div>
+        <div class="example-chip" onclick="useExample(this)">3단 카드 레이아웃</div>
+        <div class="example-chip" onclick="useExample(this)">모달 다이얼로그 컴포넌트</div>
+        <div class="example-chip" onclick="useExample(this)">대시보드 UI</div>
+      </div>
+    </div>
+
+    <!-- Loading overlay -->
+    <div id="loading-overlay">
+      <div class="spinner"></div>
+      <div class="loading-label">생성 중...</div>
+    </div>
+
+    <!-- Preview pane -->
+    <div id="preview-pane">
+      <iframe id="preview-iframe" sandbox="allow-scripts allow-same-origin"></iframe>
+    </div>
+
+    <!-- Code pane -->
+    <div id="code-pane">
+      <div id="code-display">
+        <pre id="code-pre"></pre>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     SETTINGS MODAL
+═══════════════════════════════════════════════════════ -->
+<div id="settings-overlay" onclick="handleSettingsOverlayClick(event)">
+  <div class="settings-modal">
+    <h2>⚙ 설정</h2>
+
+    <div class="field">
+      <label>Anthropic API Key</label>
+      <input type="password" id="settings-api-key" placeholder="sk-ant-..." autocomplete="off" />
+    </div>
+
+    <div class="field">
+      <label>모델</label>
+      <select id="settings-model">
+        <option value="claude-sonnet-4-5">claude-sonnet-4-5</option>
+        <option value="claude-opus-4-6">claude-opus-4-6</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Temperature</label>
+      <div class="range-row">
+        <input type="range" id="settings-temp" min="0" max="1" step="0.05" value="0.7"
+          oninput="document.getElementById('temp-val').textContent = this.value" />
+        <span class="range-val" id="temp-val">0.7</span>
+      </div>
+    </div>
+
+    <div class="settings-actions">
+      <button class="btn-modal btn-cancel" onclick="closeSettings()">취소</button>
+      <button class="btn-modal btn-save" onclick="saveSettings()">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- Mobile toggle -->
+<button id="mobile-toggle" onclick="toggleMobilePanel()">☰</button>
+
+<script>
+/* ═════════════════════════════════════════════════════════════
+   STATE
+═════════════════════════════════════════════════════════════ */
+let chatHistory = [];       // [{role, content, code, time, id}]
+let currentCode = '';       // latest generated HTML
+let activeMessageId = null; // which assistant msg is shown in preview
+let contextEnabled = false;
+let syspromptOpen = false;
+let currentTab = 'preview';
+let isGenerating = false;
+
+/* ═════════════════════════════════════════════════════════════
+   INIT
+═════════════════════════════════════════════════════════════ */
+window.addEventListener('DOMContentLoaded', () => {
+  // Load settings
+  const apiKey = localStorage.getItem('myp_studio_api_key') || '';
+  const model  = localStorage.getItem('myp_studio_model') || 'claude-sonnet-4-5';
+  const temp   = localStorage.getItem('myp_studio_temp') || '0.7';
+
+  document.getElementById('settings-api-key').value = apiKey;
+  document.getElementById('settings-model').value = model;
+  document.getElementById('settings-temp').value = temp;
+  document.getElementById('temp-val').textContent = temp;
+
+  // Load chat history
+  const saved = localStorage.getItem('myp_studio_chat');
+  if (saved) {
+    try {
+      chatHistory = JSON.parse(saved);
+      renderChat();
+      // Restore last code
+      const lastCode = chatHistory.slice().reverse().find(m => m.code);
+      if (lastCode) {
+        currentCode = lastCode.code;
+        renderCode(currentCode);
+        renderPreview(currentCode);
+        hideEmptyState();
+        activeMessageId = lastCode.id;
+        highlightActiveMsg(activeMessageId);
+      }
+    } catch(e) { chatHistory = []; }
+  }
+
+  // Ctrl+Enter
+  document.getElementById('prompt-textarea').addEventListener('keydown', e => {
+    if (e.ctrlKey && e.key === 'Enter') {
+      e.preventDefault();
+      handleGenerate();
+    }
+  });
+});
+
+/* ═════════════════════════════════════════════════════════════
+   SETTINGS
+═════════════════════════════════════════════════════════════ */
+function openSettings() {
+  document.getElementById('settings-overlay').classList.add('open');
+}
+function closeSettings() {
+  document.getElementById('settings-overlay').classList.remove('open');
+}
+function handleSettingsOverlayClick(e) {
+  if (e.target === document.getElementById('settings-overlay')) closeSettings();
+}
+function saveSettings() {
+  const key  = document.getElementById('settings-api-key').value.trim();
+  const model = document.getElementById('settings-model').value;
+  const temp  = document.getElementById('settings-temp').value;
+  if (key) localStorage.setItem('myp_studio_api_key', key);
+  localStorage.setItem('myp_studio_model', model);
+  localStorage.setItem('myp_studio_temp', temp);
+  closeSettings();
+  showToast('설정이 저장되었습니다');
+}
+
+function getApiKey()  { return localStorage.getItem('myp_studio_api_key') || ''; }
+function getModel()   { return localStorage.getItem('myp_studio_model') || 'claude-sonnet-4-5'; }
+function getTemp()    { return parseFloat(localStorage.getItem('myp_studio_temp') || '0.7'); }
+
+/* ═════════════════════════════════════════════════════════════
+   SYSTEM PROMPT
+═════════════════════════════════════════════════════════════ */
+function toggleSysPrompt() {
+  syspromptOpen = !syspromptOpen;
+  const toggle = document.getElementById('sysprompt-toggle');
+  const body   = document.getElementById('sysprompt-body');
+  toggle.classList.toggle('open', syspromptOpen);
+  body.classList.toggle('open', syspromptOpen);
+}
+
+/* ═════════════════════════════════════════════════════════════
+   CONTEXT TOGGLE
+═════════════════════════════════════════════════════════════ */
+function toggleContext() {
+  contextEnabled = !contextEnabled;
+  document.getElementById('context-switch').classList.toggle('on', contextEnabled);
+}
+
+/* ═════════════════════════════════════════════════════════════
+   TABS
+═════════════════════════════════════════════════════════════ */
+function switchTab(tab) {
+  currentTab = tab;
+  document.getElementById('tab-preview').classList.toggle('active', tab === 'preview');
+  document.getElementById('tab-code').classList.toggle('active', tab === 'code');
+  document.getElementById('preview-pane').style.display = tab === 'preview' ? 'flex' : 'none';
+  document.getElementById('code-pane').classList.toggle('active', tab === 'code');
+}
+
+/* ═════════════════════════════════════════════════════════════
+   GENERATE
+═════════════════════════════════════════════════════════════ */
+async function handleGenerate() {
+  if (isGenerating) return;
+  const prompt = document.getElementById('prompt-textarea').value.trim();
+  if (!prompt) {
+    document.getElementById('prompt-textarea').focus();
+    return;
+  }
+
+  const apiKey = getApiKey();
+  if (!apiKey) {
+    showToast('⚙ 설정에서 Anthropic API 키를 먼저 입력해주세요', true);
+    openSettings();
+    return;
+  }
+
+  isGenerating = true;
+  setGeneratingUI(true);
+
+  // Add user message
+  const userMsgId = Date.now();
+  addChatMessage({ role: 'user', content: prompt, id: userMsgId, time: nowTime() });
+
+  // Clear textarea
+  document.getElementById('prompt-textarea').value = '';
+
+  // Build messages for API
+  const messages = buildMessages(prompt);
+
+  try {
+    const html = await callAnthropic(apiKey, messages);
+    currentCode = html;
+
+    const assistantId = Date.now() + 1;
+    addChatMessage({ role: 'assistant', content: '코드가 생성되었습니다.', code: html, id: assistantId, time: nowTime() });
+    activeMessageId = assistantId;
+    highlightActiveMsg(assistantId);
+
+    renderCode(html);
+    renderPreview(html);
+    hideEmptyState();
+    switchTab('preview');
+    persistChat();
+
+  } catch (err) {
+    console.error(err);
+    const errId = Date.now() + 1;
+    addChatMessage({ role: 'assistant', content: `오류: ${err.message}`, id: errId, time: nowTime() });
+    showToast('생성 실패: ' + err.message, true);
+  } finally {
+    isGenerating = false;
+    setGeneratingUI(false);
+  }
+}
+
+function setGeneratingUI(on) {
+  const btn  = document.getElementById('generate-btn');
+  const icon = document.getElementById('generate-btn-icon');
+  const text = document.getElementById('generate-btn-text');
+  btn.disabled = on;
+
+  if (on) {
+    icon.textContent = '⏳';
+    text.textContent = '생성 중...';
+    document.getElementById('loading-overlay').classList.add('active');
+    document.getElementById('streaming-bar').classList.add('active');
+  } else {
+    icon.textContent = '▶';
+    text.textContent = '생성';
+    document.getElementById('loading-overlay').classList.remove('active');
+    document.getElementById('streaming-bar').classList.remove('active');
+  }
+}
+
+/* ═════════════════════════════════════════════════════════════
+   BUILD MESSAGES
+═════════════════════════════════════════════════════════════ */
+function buildMessages(newPrompt) {
+  if (!contextEnabled || chatHistory.length === 0) {
+    return [{ role: 'user', content: newPrompt }];
+  }
+
+  const msgs = [];
+  // Include previous turns (compress if long)
+  const prevTurns = chatHistory.slice(-10); // last 10 messages
+  for (const m of prevTurns) {
+    if (m.role === 'user') {
+      msgs.push({ role: 'user', content: m.content });
+    } else if (m.role === 'assistant') {
+      // Include code as context if exists
+      if (m.code) {
+        msgs.push({ role: 'assistant', content: m.code });
+      } else {
+        msgs.push({ role: 'assistant', content: m.content });
+      }
+    }
+  }
+
+  // If context on and we have existing code, inject it
+  if (contextEnabled && currentCode) {
+    const ctxPrompt = `현재 생성된 코드:\n\`\`\`html\n${currentCode}\n\`\`\`\n\n수정 요청: ${newPrompt}`;
+    msgs.push({ role: 'user', content: ctxPrompt });
+  } else {
+    msgs.push({ role: 'user', content: newPrompt });
+  }
+
+  return msgs;
+}
+
+/* ═════════════════════════════════════════════════════════════
+   API CALL
+═════════════════════════════════════════════════════════════ */
+async function callAnthropic(apiKey, messages) {
+  const userSysPrompt = document.getElementById('sysprompt-text').value.trim();
+
+  const systemParts = [
+    'You are an expert web developer. Generate complete, self-contained HTML with inline CSS and JS. Return ONLY the raw HTML code starting with <!DOCTYPE html>. No explanations, no markdown fences, no extra text.',
+  ];
+  if (userSysPrompt) systemParts.unshift(userSysPrompt);
+  const systemPrompt = systemParts.join('\n\n');
+
+  const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true',
+    },
+    body: JSON.stringify({
+      model: getModel(),
+      max_tokens: 4096,
+      temperature: getTemp(),
+      system: systemPrompt,
+      messages,
+    }),
+  });
+
+  if (!resp.ok) {
+    let errMsg = `HTTP ${resp.status}`;
+    try { const e = await resp.json(); errMsg = e.error?.message || errMsg; } catch(_) {}
+    throw new Error(errMsg);
+  }
+
+  const data = await resp.json();
+  const raw = data.content?.[0]?.text || '';
+  return extractHTML(raw);
+}
+
+function extractHTML(raw) {
+  let s = raw.trim();
+  // Strip markdown fences if present
+  s = s.replace(/^```(?:html)?\s*/i, '').replace(/\s*```$/i, '').trim();
+  // Find DOCTYPE start
+  const idx = s.toLowerCase().indexOf('<!doctype');
+  if (idx > 0) s = s.slice(idx);
+  return s;
+}
+
+/* ═════════════════════════════════════════════════════════════
+   CHAT
+═════════════════════════════════════════════════════════════ */
+function addChatMessage(msg) {
+  chatHistory.push(msg);
+  renderChat();
+  scrollChatToBottom();
+}
+
+function renderChat() {
+  const container = document.getElementById('chat-history');
+  container.innerHTML = '';
+
+  for (const msg of chatHistory) {
+    const turn = document.createElement('div');
+    turn.className = 'chat-turn';
+
+    if (msg.role === 'user') {
+      const bubble = document.createElement('div');
+      bubble.className = 'msg-user';
+      bubble.textContent = msg.content;
+      turn.appendChild(bubble);
+
+    } else if (msg.role === 'assistant') {
+      const wrap = document.createElement('div');
+      wrap.className = 'msg-assistant-wrap';
+
+      if (msg.code) {
+        const badge = document.createElement('div');
+        badge.className = 'code-badge';
+        badge.innerHTML = '✦ 코드 생성됨';
+        wrap.appendChild(badge);
+      }
+
+      const bubble = document.createElement('div');
+      bubble.className = 'msg-assistant' + (msg.id === activeMessageId ? ' active' : '');
+      bubble.dataset.msgId = msg.id;
+      bubble.textContent = msg.content;
+      if (msg.code) {
+        bubble.title = '클릭하면 이 버전을 미리보기에 표시합니다';
+        bubble.addEventListener('click', () => restoreVersion(msg.id));
+      }
+      wrap.appendChild(bubble);
+
+      const timeEl = document.createElement('div');
+      timeEl.className = 'msg-time';
+      timeEl.textContent = msg.time || '';
+      wrap.appendChild(timeEl);
+
+      turn.appendChild(wrap);
+    }
+
+    container.appendChild(turn);
+  }
+}
+
+function scrollChatToBottom() {
+  const h = document.getElementById('chat-history');
+  setTimeout(() => { h.scrollTop = h.scrollHeight; }, 50);
+}
+
+function highlightActiveMsg(id) {
+  document.querySelectorAll('.msg-assistant').forEach(el => {
+    el.classList.toggle('active', el.dataset.msgId == id);
+  });
+}
+
+function restoreVersion(id) {
+  const msg = chatHistory.find(m => m.id === id);
+  if (!msg || !msg.code) return;
+  currentCode = msg.code;
+  activeMessageId = id;
+  highlightActiveMsg(id);
+  renderCode(currentCode);
+  renderPreview(currentCode);
+  hideEmptyState();
+  switchTab('preview');
+}
+
+function persistChat() {
+  // Keep last 30 messages (trim code for older entries to save space)
+  const toSave = chatHistory.slice(-30).map((m, i, arr) => {
+    if (m.code && i < arr.length - 5) {
+      return { ...m, code: null, content: '[코드 저장됨]' };
+    }
+    return m;
+  });
+  try { localStorage.setItem('myp_studio_chat', JSON.stringify(toSave)); } catch(_) {}
+}
+
+/* ═════════════════════════════════════════════════════════════
+   PREVIEW & CODE
+═════════════════════════════════════════════════════════════ */
+function renderPreview(html) {
+  const iframe = document.getElementById('preview-iframe');
+  iframe.srcdoc = html;
+}
+
+function refreshPreview() {
+  if (currentCode) renderPreview(currentCode);
+}
+
+function renderCode(html) {
+  const pre = document.getElementById('code-pre');
+  pre.innerHTML = '';
+  const lines = escapeHtml(html).split('\n');
+  lines.forEach(line => {
+    const span = document.createElement('span');
+    span.className = 'code-line';
+    span.innerHTML = colorizeHTML(line) || '&#8203;';
+    pre.appendChild(span);
+  });
+}
+
+function colorizeHTML(line) {
+  // Very basic syntax highlighting
+  return line
+    .replace(/(&lt;\/?[\w!][^&gt;]*&gt;)/g, '<span style="color:#7ee787">$1</span>')
+    .replace(/("([^"]*)")/g, '<span style="color:#a5d6ff">$1</span>')
+    .replace(/(\/\*[\s\S]*?\*\/)/g, '<span style="color:#8b949e">$1</span>')
+    .replace(/(\/\/.*)/g, '<span style="color:#8b949e">$1</span>');
+}
+
+function hideEmptyState() {
+  document.getElementById('empty-state').style.display = 'none';
+}
+
+/* ═════════════════════════════════════════════════════════════
+   TOOLBAR ACTIONS
+═════════════════════════════════════════════════════════════ */
+function copyCode() {
+  if (!currentCode) { showToast('생성된 코드가 없습니다', true); return; }
+  navigator.clipboard.writeText(currentCode).then(() => showToast('코드가 복사되었습니다 ✓'));
+}
+
+function downloadHTML() {
+  if (!currentCode) { showToast('생성된 코드가 없습니다', true); return; }
+  const blob = new Blob([currentCode], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'generated-' + Date.now() + '.html';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('HTML 파일이 다운로드되었습니다 ✓');
+}
+
+function openInNewTab() {
+  if (!currentCode) { showToast('생성된 코드가 없습니다', true); return; }
+  const blob = new Blob([currentCode], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  window.open(url, '_blank');
+}
+
+/* ═════════════════════════════════════════════════════════════
+   EXAMPLE CHIPS
+═════════════════════════════════════════════════════════════ */
+function useExample(el) {
+  document.getElementById('prompt-textarea').value = el.textContent;
+  document.getElementById('prompt-textarea').focus();
+}
+
+/* ═════════════════════════════════════════════════════════════
+   MOBILE
+═════════════════════════════════════════════════════════════ */
+function toggleMobilePanel() {
+  document.getElementById('left').classList.toggle('mobile-open');
+}
+
+/* ═════════════════════════════════════════════════════════════
+   TOAST
+═════════════════════════════════════════════════════════════ */
+let toastTimer;
+function showToast(msg, isError = false) {
+  let toast = document.getElementById('toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'toast';
+    toast.style.cssText = `
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      background: #1e293b; color: #f1f5f9; border: 1px solid #334155;
+      border-radius: 8px; padding: 10px 18px; font-size: 13px; font-weight: 500;
+      z-index: 999; white-space: nowrap; box-shadow: 0 8px 24px rgba(0,0,0,.3);
+      transition: opacity .25s;
+    `;
+    document.body.appendChild(toast);
+  }
+  if (isError) toast.style.borderColor = '#dc2626';
+  else toast.style.borderColor = '#334155';
+  toast.textContent = msg;
+  toast.style.opacity = '1';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { toast.style.opacity = '0'; }, 2800);
+}
+
+/* ═════════════════════════════════════════════════════════════
+   UTILS
+═════════════════════════════════════════════════════════════ */
+function nowTime() {
+  return new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+}
+
+function escapeHtml(str) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+</script>
+
+</body>
+</html>
