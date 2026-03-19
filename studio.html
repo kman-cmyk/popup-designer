@@ -746,6 +746,107 @@
     .tool-btn-save:hover { background: #dbeafe; border-color: #93c5fd; }
     .tool-btn-save:disabled { opacity: .4; cursor: not-allowed; }
 
+    /* Deploy button */
+    .tool-btn-deploy {
+      padding: 0 12px;
+      height: 34px;
+      border-radius: var(--radius-xs);
+      border: 1px solid #6ee7b7;
+      background: #ecfdf5;
+      color: #065f46;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: inherit;
+      gap: 4px;
+      transition: all .15s;
+      white-space: nowrap;
+    }
+    .tool-btn-deploy:hover { background: #d1fae5; border-color: #34d399; }
+    .tool-btn-deploy:disabled { opacity: .4; cursor: not-allowed; }
+
+    /* Undeploy badge */
+    #undeploy-badge {
+      display: none;
+      align-items: center;
+      gap: 3px;
+      background: #431a00;
+      border: 1px solid #f97316;
+      color: #fb923c;
+      border-radius: 99px;
+      padding: 2px 9px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    #undeploy-badge.visible { display: inline-flex; }
+
+    /* Deploy modal */
+    #deploy-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.6);
+      backdrop-filter: blur(4px);
+      z-index: 300;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    #deploy-overlay.open { display: flex; }
+    .deploy-modal {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      width: 420px;
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      box-shadow: 0 24px 64px rgba(0,0,0,.5);
+    }
+    .deploy-modal h2 { font-size: 16px; font-weight: 700; color: var(--text-primary); }
+    .deploy-modal p { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+    .deploy-file-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .deploy-file-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: var(--radius-xs);
+      padding: 8px 12px;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+    .deploy-file-item .fi-name { font-weight: 500; color: var(--text-primary); }
+    #deploy-progress {
+      font-size: 13px;
+      color: var(--text-secondary);
+      text-align: center;
+      min-height: 20px;
+    }
+    .deploy-actions { display: flex; gap: 8px; justify-content: flex-end; }
+    .btn-deploy-confirm {
+      padding: 8px 18px;
+      border-radius: var(--radius-xs);
+      border: none;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      background: #10B981;
+      color: #fff;
+      transition: all .15s;
+    }
+    .btn-deploy-confirm:hover { background: #059669; }
+    .btn-deploy-confirm:disabled { opacity: .5; cursor: not-allowed; }
+
     /* ═══════════════════════════════════════════════════════
        LOCK SCREEN
     ═══════════════════════════════════════════════════════ */
@@ -824,6 +925,163 @@
       80%      { transform: translateX(6px); }
     }
     .shake { animation: shake .4s ease; }
+
+    /* ═══════════════════════════════════════════════════════
+       ANNOTATION OVERLAY
+    ═══════════════════════════════════════════════════════ */
+    .tool-btn-markup {
+      padding: 0 12px;
+      height: 34px;
+      border-radius: var(--radius-xs);
+      border: 1px solid #fecaca;
+      background: #fef2f2;
+      color: #dc2626;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: inherit;
+      gap: 4px;
+      transition: all .15s;
+      white-space: nowrap;
+    }
+    .tool-btn-markup:hover { background: #fee2e2; border-color: #fca5a5; }
+    .tool-btn-markup.active { background: #EF4444; color: #fff; border-color: #dc2626; }
+
+    #annotation-canvas {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 5;
+      cursor: crosshair;
+    }
+
+    #annotation-toolbar {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 6px 10px;
+      display: none;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 4px 20px rgba(0,0,0,.35);
+      user-select: none;
+    }
+
+    .ann-tool-group { display: flex; align-items: center; gap: 3px; }
+
+    .ann-divider { width: 1px; height: 22px; background: #334155; flex-shrink: 0; }
+
+    .ann-tool-btn {
+      width: 30px; height: 30px;
+      border-radius: 6px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: #94a3b8;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 600;
+      transition: all .12s;
+    }
+    .ann-tool-btn:hover { background: #334155; color: #f1f5f9; }
+    .ann-tool-btn.active { background: #3b82f6; color: #fff; border-color: #2563eb; }
+
+    .ann-color-swatch {
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: transform .12s, box-shadow .12s;
+      flex-shrink: 0;
+    }
+    .ann-color-swatch:hover { transform: scale(1.2); }
+    .ann-color-swatch.active { border-color: #fff; box-shadow: 0 0 0 2px #3b82f6; }
+
+    .ann-width-btn {
+      width: 30px; height: 30px;
+      border-radius: 6px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: #94a3b8;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+      transition: all .12s;
+      line-height: 1;
+    }
+    .ann-width-btn:hover { background: #334155; color: #f1f5f9; }
+    .ann-width-btn.active { background: #334155; color: #f1f5f9; border-color: #475569; }
+
+    .ann-action-btn {
+      width: 30px; height: 30px;
+      border-radius: 6px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: #94a3b8;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px;
+      transition: all .12s;
+    }
+    .ann-action-btn:hover { background: #334155; color: #f1f5f9; }
+    .ann-close-btn:hover { background: #7f1d1d; color: #fca5a5; }
+
+    #annotation-tooltip {
+      position: absolute;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      background: rgba(30,41,59,.9);
+      color: #94a3b8;
+      font-size: 12px;
+      padding: 6px 14px;
+      border-radius: 99px;
+      border: 1px solid #334155;
+      white-space: nowrap;
+      pointer-events: none;
+      display: none;
+    }
+
+    #markup-clear-dialog {
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 500;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 16px 20px;
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: 0 8px 32px rgba(0,0,0,.45);
+      min-width: 220px;
+      align-items: center;
+    }
+    #markup-clear-dialog p { font-size: 14px; color: #f1f5f9; font-weight: 500; text-align: center; }
+    .markup-clear-actions { display: flex; gap: 8px; }
+    .markup-clear-actions button {
+      padding: 7px 18px;
+      border-radius: var(--radius-xs);
+      border: none;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .markup-clear-actions .btn-keep { background: #334155; color: #94a3b8; }
+    .markup-clear-actions .btn-keep:hover { background: #475569; color: #f1f5f9; }
+    .markup-clear-actions .btn-erase { background: #EF4444; color: #fff; }
+    .markup-clear-actions .btn-erase:hover { background: #dc2626; }
   </style>
 </head>
 <body>
@@ -895,6 +1153,7 @@
     <div id="file-status-row">
       <div class="file-badge">✦ 편집 중: <span id="file-badge-name"></span></div>
       <div id="changed-badge">변경됨 ●</div>
+      <div id="undeploy-badge">● 미배포</div>
     </div>
   </div>
 
@@ -935,8 +1194,10 @@
       <button class="tab-btn active" id="tab-preview" onclick="switchTab('preview')">미리보기</button>
       <button class="tab-btn" id="tab-code" onclick="switchTab('code')">코드</button>
     </div>
+    <button class="tool-btn-markup" id="markup-toggle-btn" onclick="toggleAnnotationMode()" title="마크업 모드">✏️ 마크업</button>
     <div class="toolbar-spacer"></div>
-    <button class="tool-btn-save" id="save-file-btn" onclick="saveCurrentFile()" title="파일 저장" disabled>💾 저장</button>
+    <button class="tool-btn-save" id="save-file-btn" onclick="saveCurrentFile()" title="로컬에 임시 저장" disabled>💾 저장</button>
+    <button class="tool-btn-deploy" id="deploy-btn" onclick="deployAllDrafts()" title="GitHub에 배포">🚀 배포</button>
     <button class="tool-btn" onclick="copyCode()" title="코드 복사">⎘</button>
     <button class="tool-btn" onclick="downloadHTML()" title="HTML 다운로드">↓</button>
     <button class="tool-btn" onclick="openInNewTab()" title="새 탭에서 열기">⎋</button>
@@ -970,6 +1231,38 @@
     <!-- Preview pane -->
     <div id="preview-pane">
       <iframe id="preview-iframe" sandbox="allow-scripts allow-same-origin"></iframe>
+
+      <!-- Annotation overlay -->
+      <canvas id="annotation-canvas"></canvas>
+
+      <div id="annotation-toolbar">
+        <div class="ann-tool-group">
+          <button class="ann-tool-btn active" id="ann-tool-pen" onclick="setAnnotationTool('pen')" title="펜 (자유 드로잉)">✏</button>
+          <button class="ann-tool-btn" id="ann-tool-arrow" onclick="setAnnotationTool('arrow')" title="화살표">↗</button>
+          <button class="ann-tool-btn" id="ann-tool-rect" onclick="setAnnotationTool('rect')" title="사각형">▭</button>
+          <button class="ann-tool-btn" id="ann-tool-text" onclick="setAnnotationTool('text')" title="텍스트">T</button>
+          <button class="ann-tool-btn" id="ann-tool-eraser" onclick="setAnnotationTool('eraser')" title="지우개">⌫</button>
+        </div>
+        <div class="ann-divider"></div>
+        <div class="ann-tool-group">
+          <button class="ann-color-swatch active" data-color="#EF4444" onclick="setAnnotationColor('#EF4444')" style="background:#EF4444" title="빨강"></button>
+          <button class="ann-color-swatch" data-color="#3B82F6" onclick="setAnnotationColor('#3B82F6')" style="background:#3B82F6" title="파랑"></button>
+          <button class="ann-color-swatch" data-color="#22C55E" onclick="setAnnotationColor('#22C55E')" style="background:#22C55E" title="초록"></button>
+          <button class="ann-color-swatch" data-color="#EAB308" onclick="setAnnotationColor('#EAB308')" style="background:#EAB308" title="노랑"></button>
+          <button class="ann-color-swatch" data-color="#000000" onclick="setAnnotationColor('#000000')" style="background:#000000" title="검정"></button>
+        </div>
+        <div class="ann-divider"></div>
+        <div class="ann-tool-group">
+          <button class="ann-width-btn active" data-width="2" onclick="setAnnotationWidth(2)" title="얇게">─</button>
+          <button class="ann-width-btn" data-width="4" onclick="setAnnotationWidth(4)" title="보통">━</button>
+          <button class="ann-width-btn" data-width="7" onclick="setAnnotationWidth(7)" title="굵게">▬</button>
+        </div>
+        <div class="ann-divider"></div>
+        <button class="ann-action-btn" onclick="clearAnnotation()" title="전체 지우기">🗑</button>
+        <button class="ann-action-btn ann-close-btn" onclick="deactivateAnnotation()" title="마크업 닫기">✕</button>
+      </div>
+
+      <div id="annotation-tooltip">마크업 후 프롬프트를 입력하고 생성하세요</div>
     </div>
 
     <!-- Code pane -->
@@ -1025,6 +1318,33 @@
 
 <!-- Mobile toggle -->
 <button id="mobile-toggle" onclick="toggleMobilePanel()">☰</button>
+
+<!-- Markup clear dialog -->
+<div id="markup-clear-dialog">
+  <p>마크업을 지울까요?</p>
+  <div class="markup-clear-actions">
+    <button class="btn-keep" onclick="confirmClearMarkup(false)">유지</button>
+    <button class="btn-erase" onclick="confirmClearMarkup(true)">지우기</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     DEPLOY MODAL
+═══════════════════════════════════════════════════════ -->
+<div id="deploy-overlay" onclick="handleDeployOverlayClick(event)">
+  <div class="deploy-modal">
+    <h2>🚀 배포</h2>
+    <p>아래 파일들을 GitHub에 푸시하고 Pages에 배포합니다.</p>
+    <div class="deploy-file-list" id="deploy-file-list">
+      <!-- Populated by JS -->
+    </div>
+    <div id="deploy-progress"></div>
+    <div class="deploy-actions">
+      <button class="btn-modal btn-cancel" id="deploy-cancel-btn" onclick="closeDeployModal()">취소</button>
+      <button class="btn-deploy-confirm" id="deploy-confirm-btn" onclick="confirmDeploy()">배포하기</button>
+    </div>
+  </div>
+</div>
 
 <script>
 /* ═════════════════════════════════════════════════════════════
@@ -1083,6 +1403,9 @@ window.addEventListener('DOMContentLoaded', () => {
       }
     } catch(e) { chatHistory = []; }
   }
+
+  // Init annotation canvas
+  initAnnotationCanvas();
 
   // Ctrl+Enter
   document.getElementById('prompt-textarea').addEventListener('keydown', e => {
@@ -1181,8 +1504,15 @@ async function handleGenerate() {
   // Clear textarea
   document.getElementById('prompt-textarea').value = '';
 
+  // Capture annotation if present
+  let annotationImage = null;
+  if (hasAnnotation()) {
+    const annCanvas = document.getElementById('annotation-canvas');
+    annotationImage = annCanvas.toDataURL('image/png').split(',')[1];
+  }
+
   // Build messages for API
-  const messages = buildMessages(prompt);
+  const messages = buildMessages(prompt, annotationImage);
 
   try {
     const html = await callAnthropic(apiKey, messages);
@@ -1205,6 +1535,9 @@ async function handleGenerate() {
       document.getElementById('changed-badge').classList.add('visible');
       document.getElementById('save-file-btn').disabled = false;
     }
+
+    // Ask to clear markup if annotation was included
+    if (annotationImage) showMarkupClearDialog();
 
   } catch (err) {
     console.error(err);
@@ -1239,39 +1572,46 @@ function setGeneratingUI(on) {
 /* ═════════════════════════════════════════════════════════════
    BUILD MESSAGES
 ═════════════════════════════════════════════════════════════ */
-function buildMessages(newPrompt) {
-  // When a file is loaded, always inject full code as context regardless of toggle
+function buildMessages(newPrompt, annotationImage = null) {
+  // Append annotation instruction to prompt if image present
+  const finalPrompt = annotationImage
+    ? newPrompt + '\n\n[첨부된 마크업 이미지를 참고해서 표시된 부분을 수정해주세요]'
+    : newPrompt;
+
+  // Helper: wrap text (+ optional image) into message content
+  function makeContent(text, img) {
+    if (!img) return text;
+    return [
+      { type: 'image', source: { type: 'base64', media_type: 'image/png', data: img } },
+      { type: 'text', text }
+    ];
+  }
+
+  // When a file is loaded, always inject full code as context
   if (loadedFileName && currentCode) {
-    const ctxPrompt = `현재 편집 중인 파일 (${loadedFileName})의 전체 코드:\n\`\`\`html\n${currentCode}\n\`\`\`\n\n수정 요청: ${newPrompt}`;
-    return [{ role: 'user', content: ctxPrompt }];
+    const ctxPrompt = `현재 편집 중인 파일 (${loadedFileName})의 전체 코드:\n\`\`\`html\n${currentCode}\n\`\`\`\n\n수정 요청: ${finalPrompt}`;
+    return [{ role: 'user', content: makeContent(ctxPrompt, annotationImage) }];
   }
 
   if (!contextEnabled || chatHistory.length === 0) {
-    return [{ role: 'user', content: newPrompt }];
+    return [{ role: 'user', content: makeContent(finalPrompt, annotationImage) }];
   }
 
   const msgs = [];
-  // Include previous turns (compress if long)
-  const prevTurns = chatHistory.slice(-10); // last 10 messages
+  const prevTurns = chatHistory.slice(-10);
   for (const m of prevTurns) {
     if (m.role === 'user') {
       msgs.push({ role: 'user', content: m.content });
     } else if (m.role === 'assistant') {
-      // Include code as context if exists
-      if (m.code) {
-        msgs.push({ role: 'assistant', content: m.code });
-      } else {
-        msgs.push({ role: 'assistant', content: m.content });
-      }
+      msgs.push({ role: 'assistant', content: m.code || m.content });
     }
   }
 
-  // If context on and we have existing code, inject it
   if (contextEnabled && currentCode) {
-    const ctxPrompt = `현재 생성된 코드:\n\`\`\`html\n${currentCode}\n\`\`\`\n\n수정 요청: ${newPrompt}`;
-    msgs.push({ role: 'user', content: ctxPrompt });
+    const ctxPrompt = `현재 생성된 코드:\n\`\`\`html\n${currentCode}\n\`\`\`\n\n수정 요청: ${finalPrompt}`;
+    msgs.push({ role: 'user', content: makeContent(ctxPrompt, annotationImage) });
   } else {
-    msgs.push({ role: 'user', content: newPrompt });
+    msgs.push({ role: 'user', content: makeContent(finalPrompt, annotationImage) });
   }
 
   return msgs;
@@ -1502,9 +1842,21 @@ async function loadSelectedFile() {
   btn.textContent = '불러오는 중...';
 
   try {
-    const resp = await fetch(filename + '?_=' + Date.now());
-    if (!resp.ok) throw new Error(`파일을 찾을 수 없습니다: ${filename}`);
-    const html = await resp.text();
+    // Check localStorage for draft first
+    const draftKey = 'draft_' + filename;
+    const draftHtml = localStorage.getItem(draftKey);
+
+    let html;
+    let fromDraft = false;
+
+    if (draftHtml) {
+      html = draftHtml;
+      fromDraft = true;
+    } else {
+      const resp = await fetch(filename + '?_=' + Date.now());
+      if (!resp.ok) throw new Error(`파일을 찾을 수 없습니다: ${filename}`);
+      html = await resp.text();
+    }
 
     // Set state
     loadedFileName = filename;
@@ -1526,11 +1878,18 @@ async function loadSelectedFile() {
     document.getElementById('changed-badge').classList.remove('visible');
     document.getElementById('save-file-btn').disabled = true;
 
+    // Show undeploy badge if draft exists in localStorage
+    updateUndeployBadge();
+
     // Update placeholder
     document.getElementById('prompt-textarea').placeholder =
       `${filename} 수정사항을 입력하세요... (Ctrl+Enter)`;
 
-    showToast(`✓ ${filename} 불러오기 완료`);
+    if (fromDraft) {
+      showToast(`📋 ${filename} 임시저장본 불러옴`, false, '#d97706');
+    } else {
+      showToast(`✓ ${filename} 불러오기 완료`);
+    }
     switchTab('preview');
 
   } catch (err) {
@@ -1541,90 +1900,180 @@ async function loadSelectedFile() {
   }
 }
 
-async function saveCurrentFile() {
+function saveCurrentFile() {
   if (!currentCode) { showToast('저장할 코드가 없습니다', true); return; }
-  const filename = loadedFileName || ('generated-' + Date.now() + '.html');
-  const ghToken = localStorage.getItem('myp_studio_github_token') || '';
+  if (!loadedFileName) { showToast('파일을 먼저 불러와주세요', true); return; }
 
-  if (!ghToken) {
-    // Fallback: download
-    showToast('GitHub 토큰이 없어 다운로드로 저장됩니다', false);
-    const blob = new Blob([currentCode], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    a.click();
-    URL.revokeObjectURL(url);
-    hasUnsavedChanges = false;
-    document.getElementById('changed-badge').classList.remove('visible');
-    document.getElementById('save-file-btn').disabled = true;
+  // Save to localStorage (draft)
+  const draftKey = 'draft_' + loadedFileName;
+  try {
+    localStorage.setItem(draftKey, currentCode);
+  } catch(e) {
+    showToast('저장 실패: 로컬 스토리지 용량 초과', true);
     return;
   }
 
-  const btn = document.getElementById('save-file-btn');
-  btn.disabled = true;
-  btn.textContent = '저장 중...';
+  // Clear "변경됨" badge, show "미배포" badge
+  hasUnsavedChanges = false;
+  document.getElementById('changed-badge').classList.remove('visible');
+  document.getElementById('save-file-btn').disabled = true;
+  updateUndeployBadge();
 
-  try {
-    const owner = 'kman-cmyk';
-    const repo  = 'popup-designer';
-    const apiBase = 'https://api.github.com/repos/' + owner + '/' + repo + '/contents/' + filename;
-    const headers = {
-      'Authorization': 'token ' + ghToken,
-      'Accept': 'application/vnd.github.v3+json',
-      'Content-Type': 'application/json',
-    };
+  showToast('💾 임시 저장됨');
+}
 
-    // 1. GET current SHA
-    let sha = null;
-    const getResp = await fetch(apiBase, { headers });
-    if (getResp.ok) {
-      const data = await getResp.json();
-      sha = data.sha;
-    } else if (getResp.status !== 404) {
-      const err = await getResp.json();
-      throw new Error(err.message || `GET failed: ${getResp.status}`);
-    }
-
-    // 2. PUT new content
-    const encoded = btoa(unescape(encodeURIComponent(currentCode)));
-    const body = {
-      message: `Update ${filename} via MYP Studio`,
-      content: encoded,
-    };
-    if (sha) body.sha = sha;
-
-    const putResp = await fetch(apiBase, {
-      method: 'PUT',
-      headers,
-      body: JSON.stringify(body),
-    });
-
-    if (!putResp.ok) {
-      const err = await putResp.json();
-      throw new Error(err.message || `PUT failed: ${putResp.status}`);
-    }
-
-    // Clear changed indicator
-    hasUnsavedChanges = false;
-    document.getElementById('changed-badge').classList.remove('visible');
-
-    showToast('✓ 저장됨', false);
-    setTimeout(() => showToast('배포 중... 약 1분 후 반영됩니다', false), 1500);
-
-  } catch (err) {
-    showToast('저장 실패: ' + err.message, true);
-    btn.disabled = false;
-  } finally {
-    btn.textContent = '💾 저장';
-    if (!hasUnsavedChanges) btn.disabled = true;
-    else btn.disabled = false;
-  }
+function updateUndeployBadge() {
+  if (!loadedFileName) return;
+  const hasDraft = localStorage.getItem('draft_' + loadedFileName) !== null;
+  document.getElementById('undeploy-badge').classList.toggle('visible', hasDraft);
 }
 
 function getGithubToken() {
   return localStorage.getItem('myp_studio_github_token') || '';
+}
+
+/* ═════════════════════════════════════════════════════════════
+   DEPLOY
+═════════════════════════════════════════════════════════════ */
+function deployAllDrafts() {
+  // Find all draft files in localStorage
+  const drafts = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && key.startsWith('draft_')) {
+      drafts.push({ key, filename: key.slice(6) }); // remove "draft_" prefix
+    }
+  }
+
+  if (drafts.length === 0) {
+    showToast('배포할 변경사항이 없습니다');
+    return;
+  }
+
+  // Populate modal file list
+  const list = document.getElementById('deploy-file-list');
+  list.innerHTML = '';
+  for (const d of drafts) {
+    const item = document.createElement('div');
+    item.className = 'deploy-file-item';
+    item.innerHTML = `<span>📄</span><span class="fi-name">${d.filename}</span>`;
+    list.appendChild(item);
+  }
+
+  document.getElementById('deploy-progress').textContent = '';
+  document.getElementById('deploy-confirm-btn').disabled = false;
+  document.getElementById('deploy-cancel-btn').disabled = false;
+  document.getElementById('deploy-overlay').classList.add('open');
+}
+
+function closeDeployModal() {
+  document.getElementById('deploy-overlay').classList.remove('open');
+}
+
+function handleDeployOverlayClick(e) {
+  if (e.target === document.getElementById('deploy-overlay')) closeDeployModal();
+}
+
+async function confirmDeploy() {
+  const ghToken = localStorage.getItem('myp_studio_github_token') || '';
+  if (!ghToken) {
+    showToast('설정에서 GitHub 토큰을 먼저 입력해주세요', true);
+    closeDeployModal();
+    openSettings();
+    return;
+  }
+
+  // Collect drafts again
+  const drafts = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && key.startsWith('draft_')) {
+      drafts.push({ key, filename: key.slice(6), content: localStorage.getItem(key) });
+    }
+  }
+
+  const confirmBtn = document.getElementById('deploy-confirm-btn');
+  const cancelBtn  = document.getElementById('deploy-cancel-btn');
+  const progress   = document.getElementById('deploy-progress');
+  confirmBtn.disabled = true;
+  cancelBtn.disabled  = true;
+
+  const owner    = 'kman-cmyk';
+  const repo     = 'popup-designer';
+  const headers  = {
+    'Authorization': 'token ' + ghToken,
+    'Accept': 'application/vnd.github.v3+json',
+    'Content-Type': 'application/json',
+  };
+
+  let successCount = 0;
+  const failed = [];
+
+  for (let idx = 0; idx < drafts.length; idx++) {
+    const { key, filename, content } = drafts[idx];
+    progress.textContent = `배포 중... (${idx + 1}/${drafts.length}) ${filename}`;
+
+    try {
+      const apiBase = `https://api.github.com/repos/${owner}/${repo}/contents/${filename}`;
+
+      // 1. GET current SHA
+      let sha = null;
+      const getResp = await fetch(apiBase, { headers });
+      if (getResp.ok) {
+        const data = await getResp.json();
+        sha = data.sha;
+      } else if (getResp.status !== 404) {
+        const err = await getResp.json();
+        throw new Error(err.message || `GET failed: ${getResp.status}`);
+      }
+
+      // 2. PUT new content
+      const encoded = btoa(unescape(encodeURIComponent(content)));
+      const body = { message: `Update ${filename} via MYP Studio`, content: encoded };
+      if (sha) body.sha = sha;
+
+      const putResp = await fetch(apiBase, {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify(body),
+      });
+
+      if (!putResp.ok) {
+        const err = await putResp.json();
+        throw new Error(err.message || `PUT failed: ${putResp.status}`);
+      }
+
+      // Clear this draft from localStorage
+      localStorage.removeItem(key);
+      successCount++;
+
+    } catch (err) {
+      failed.push(filename + ': ' + err.message);
+    }
+  }
+
+  confirmBtn.disabled = false;
+  cancelBtn.disabled  = false;
+
+  if (failed.length === 0) {
+    // All success
+    progress.textContent = '';
+    closeDeployModal();
+
+    // Clear undeploy badge if current file was among deployed
+    if (loadedFileName) updateUndeployBadge();
+
+    showToast('🚀 배포 완료! 약 1분 후 사이트에 반영됩니다');
+  } else {
+    // Partial failure
+    progress.textContent = '';
+    closeDeployModal();
+    if (loadedFileName) updateUndeployBadge();
+    if (successCount > 0) showToast(`${successCount}개 배포 완료`);
+    for (const f of failed) {
+      setTimeout(() => showToast('배포 실패: ' + f, true), 300);
+    }
+  }
 }
 
 /* ═════════════════════════════════════════════════════════════
@@ -1646,7 +2095,7 @@ function toggleMobilePanel() {
    TOAST
 ═════════════════════════════════════════════════════════════ */
 let toastTimer;
-function showToast(msg, isError = false) {
+function showToast(msg, isError = false, accentColor = null) {
   let toast = document.getElementById('toast');
   if (!toast) {
     toast = document.createElement('div');
@@ -1661,6 +2110,7 @@ function showToast(msg, isError = false) {
     document.body.appendChild(toast);
   }
   if (isError) toast.style.borderColor = '#dc2626';
+  else if (accentColor) toast.style.borderColor = accentColor;
   else toast.style.borderColor = '#334155';
   toast.textContent = msg;
   toast.style.opacity = '1';
@@ -1686,6 +2136,194 @@ function escapeHtml(str) {
 /* ═════════════════════════════════════════════════════════════
    LOCK SCREEN
 ═════════════════════════════════════════════════════════════ */
+/* ═════════════════════════════════════════════════════════════
+   ANNOTATION / MARKUP TOOL
+═════════════════════════════════════════════════════════════ */
+let annotationActive = false;
+let annotationTool = 'pen';
+let annotationColor = '#EF4444';
+let annotationWidth = 2;
+let annotationDrawing = false;
+let annotationStartX = 0, annotationStartY = 0;
+let annotationSnapshot = null;
+
+function toggleAnnotationMode() {
+  annotationActive = !annotationActive;
+  applyAnnotationState();
+}
+
+function applyAnnotationState() {
+  const btn    = document.getElementById('markup-toggle-btn');
+  const canvas = document.getElementById('annotation-canvas');
+  const tb     = document.getElementById('annotation-toolbar');
+  const tip    = document.getElementById('annotation-tooltip');
+  const iframe = document.getElementById('preview-iframe');
+  btn.classList.toggle('active', annotationActive);
+  canvas.style.pointerEvents = annotationActive ? 'all' : 'none';
+  tb.style.display  = annotationActive ? 'flex' : 'none';
+  tip.style.display = annotationActive ? 'block' : 'none';
+  iframe.style.outline = annotationActive ? '2px dashed #EF4444' : 'none';
+  if (annotationActive) syncCanvasSize();
+}
+
+function deactivateAnnotation() {
+  annotationActive = false;
+  applyAnnotationState();
+}
+
+function syncCanvasSize() {
+  const canvas = document.getElementById('annotation-canvas');
+  const pane   = document.getElementById('preview-pane');
+  // Preserve existing drawings during resize
+  const tmp = document.createElement('canvas');
+  tmp.width = canvas.width; tmp.height = canvas.height;
+  tmp.getContext('2d').drawImage(canvas, 0, 0);
+  canvas.width  = pane.offsetWidth;
+  canvas.height = pane.offsetHeight;
+  canvas.getContext('2d').drawImage(tmp, 0, 0);
+}
+
+function setAnnotationTool(tool) {
+  annotationTool = tool;
+  document.querySelectorAll('.ann-tool-btn').forEach(b => b.classList.remove('active'));
+  const b = document.getElementById('ann-tool-' + tool);
+  if (b) b.classList.add('active');
+}
+
+function setAnnotationColor(color) {
+  annotationColor = color;
+  document.querySelectorAll('.ann-color-swatch').forEach(b => {
+    b.classList.toggle('active', b.dataset.color === color);
+  });
+}
+
+function setAnnotationWidth(w) {
+  annotationWidth = w;
+  document.querySelectorAll('.ann-width-btn').forEach(b => {
+    b.classList.toggle('active', parseInt(b.dataset.width) === w);
+  });
+}
+
+function clearAnnotation() {
+  const canvas = document.getElementById('annotation-canvas');
+  canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+}
+
+function hasAnnotation() {
+  const canvas = document.getElementById('annotation-canvas');
+  if (!canvas.width || !canvas.height) return false;
+  const data = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height).data;
+  for (let i = 3; i < data.length; i += 4) { if (data[i] > 0) return true; }
+  return false;
+}
+
+function showMarkupClearDialog() {
+  document.getElementById('markup-clear-dialog').style.display = 'flex';
+}
+function confirmClearMarkup(yes) {
+  document.getElementById('markup-clear-dialog').style.display = 'none';
+  if (yes) clearAnnotation();
+}
+
+function canvasPos(e) {
+  const r = document.getElementById('annotation-canvas').getBoundingClientRect();
+  return { x: e.clientX - r.left, y: e.clientY - r.top };
+}
+
+function drawArrow(ctx, x1, y1, x2, y2) {
+  const len   = Math.max(10, Math.hypot(x2 - x1, y2 - y1) * 0.22);
+  const angle = Math.atan2(y2 - y1, x2 - x1);
+  ctx.beginPath();
+  ctx.moveTo(x1, y1);
+  ctx.lineTo(x2, y2);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(x2, y2);
+  ctx.lineTo(x2 - len * Math.cos(angle - Math.PI / 6), y2 - len * Math.sin(angle - Math.PI / 6));
+  ctx.moveTo(x2, y2);
+  ctx.lineTo(x2 - len * Math.cos(angle + Math.PI / 6), y2 - len * Math.sin(angle + Math.PI / 6));
+  ctx.stroke();
+}
+
+function initAnnotationCanvas() {
+  const canvas = document.getElementById('annotation-canvas');
+
+  canvas.addEventListener('mousedown', e => {
+    if (!annotationActive) return;
+    e.preventDefault();
+    annotationDrawing = true;
+    const { x, y } = canvasPos(e);
+    annotationStartX = x; annotationStartY = y;
+    const ctx = canvas.getContext('2d');
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+
+    if (annotationTool === 'text') {
+      const txt = prompt('텍스트 입력:');
+      if (txt) {
+        ctx.font = `bold ${annotationWidth * 5 + 10}px Pretendard, sans-serif`;
+        ctx.fillStyle = annotationColor;
+        ctx.fillText(txt, x, y);
+      }
+      annotationDrawing = false;
+      return;
+    }
+    if (annotationTool === 'pen' || annotationTool === 'eraser') {
+      ctx.beginPath(); ctx.moveTo(x, y);
+    } else {
+      annotationSnapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    }
+  });
+
+  canvas.addEventListener('mousemove', e => {
+    if (!annotationDrawing || !annotationActive) return;
+    const { x, y } = canvasPos(e);
+    const ctx = canvas.getContext('2d');
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+
+    if (annotationTool === 'pen') {
+      ctx.strokeStyle = annotationColor;
+      ctx.lineWidth = annotationWidth;
+      ctx.lineTo(x, y); ctx.stroke();
+    } else if (annotationTool === 'eraser') {
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.strokeStyle = 'rgba(0,0,0,1)';
+      ctx.lineWidth = annotationWidth * 5;
+      ctx.lineTo(x, y); ctx.stroke();
+      ctx.globalCompositeOperation = 'source-over';
+    } else if (annotationTool === 'arrow') {
+      ctx.putImageData(annotationSnapshot, 0, 0);
+      ctx.strokeStyle = annotationColor; ctx.lineWidth = annotationWidth;
+      drawArrow(ctx, annotationStartX, annotationStartY, x, y);
+    } else if (annotationTool === 'rect') {
+      ctx.putImageData(annotationSnapshot, 0, 0);
+      ctx.strokeStyle = annotationColor; ctx.lineWidth = annotationWidth;
+      ctx.strokeRect(annotationStartX, annotationStartY, x - annotationStartX, y - annotationStartY);
+    }
+  });
+
+  const endDraw = () => {
+    if (!annotationDrawing) return;
+    annotationDrawing = false;
+    annotationSnapshot = null;
+    const ctx = canvas.getContext('2d');
+    ctx.beginPath();
+    ctx.globalCompositeOperation = 'source-over';
+  };
+  canvas.addEventListener('mouseup', endDraw);
+  canvas.addEventListener('mouseleave', endDraw);
+
+  // Touch support
+  const toMouse = (type, touch) =>
+    new MouseEvent(type, { clientX: touch.clientX, clientY: touch.clientY, bubbles: true });
+  canvas.addEventListener('touchstart', e => { e.preventDefault(); canvas.dispatchEvent(toMouse('mousedown', e.touches[0])); }, { passive: false });
+  canvas.addEventListener('touchmove',  e => { e.preventDefault(); canvas.dispatchEvent(toMouse('mousemove', e.touches[0])); }, { passive: false });
+  canvas.addEventListener('touchend',   e => { e.preventDefault(); canvas.dispatchEvent(new MouseEvent('mouseup', { bubbles: true })); }, { passive: false });
+
+  // Resize sync
+  new ResizeObserver(() => { if (annotationActive) syncCanvasSize(); })
+    .observe(document.getElementById('preview-pane'));
+}
+
 function submitAccessCode() {
   const input = document.getElementById('lock-code-input');
   const error = document.getElementById('lock-error');
