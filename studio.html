@@ -878,15 +878,17 @@
     <div class="file-loader-row">
       <select id="file-selector">
         <option value="">— 파일 선택 —</option>
-        <option value="index.html">index.html (랜딩)</option>
-        <option value="step1.html">step1.html (정보 입력)</option>
-        <option value="step2-loading.html">step2-loading.html (AI 로딩)</option>
-        <option value="step2.html">step2.html (스타일 선택)</option>
-        <option value="step3-frames.html">step3-frames.html (프레임 배치)</option>
-        <option value="step3.html">step3.html (레이아웃 커스텀)</option>
-        <option value="step4.html">step4.html (모듈 설정)</option>
-        <option value="step5.html">step5.html (견적 확인)</option>
-        <option value="complete.html">complete.html (완료)</option>
+        <optgroup label="🗂 메이크유어플레이스 솔루션">
+          <option value="index.html">index.html (랜딩)</option>
+          <option value="step1.html">step1.html (정보 입력)</option>
+          <option value="step2-loading.html">step2-loading.html (AI 로딩)</option>
+          <option value="step2.html">step2.html (스타일 선택)</option>
+          <option value="step3-frames.html">step3-frames.html (프레임 배치)</option>
+          <option value="step3.html">step3.html (레이아웃 커스텀)</option>
+          <option value="step4.html">step4.html (모듈 설정)</option>
+          <option value="step5.html">step5.html (견적 확인)</option>
+          <option value="complete.html">complete.html (완료)</option>
+        </optgroup>
       </select>
       <button id="load-file-btn" onclick="loadSelectedFile()">불러오기</button>
     </div>
@@ -1519,7 +1521,7 @@ async function loadSelectedFile() {
     hideEmptyState();
 
     // Update file status badge
-    document.getElementById('file-badge-name').textContent = filename;
+    document.getElementById('file-badge-name').textContent = '메이크유어플레이스 솔루션 › ' + filename;
     document.getElementById('file-status-row').classList.add('visible');
     document.getElementById('changed-badge').classList.remove('visible');
     document.getElementById('save-file-btn').disabled = true;
