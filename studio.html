@@ -314,6 +314,7 @@ html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Sego
       </div>
       <div class="right-actions">
         <button class="save-btn" onclick="saveToGitHub()">💾 저장</button>
+        <button class="save-btn" style="background:#1f6feb;color:#fff;border-color:#1f6feb" onclick="deployAndShowLink()">🚀 배포</button>
       </div>
     </div>
     <div id="preview-pane">
@@ -558,6 +559,15 @@ promptBox.addEventListener('drop', e => {
 promptBox.addEventListener('keydown', e => {
   if (e.key === 'Enter' && e.ctrlKey) { e.preventDefault(); sendMessage(); }
 });
+promptBox.addEventListener('paste', e => {
+  const items = Array.from(e.clipboardData?.items || []);
+  const imgItems = items.filter(i => i.type.startsWith('image/'));
+  if (imgItems.length === 0) return;
+  e.preventDefault();
+  const files = imgItems.map(i => i.getAsFile()).filter(Boolean);
+  if (files.length) addImages(files);
+  showToast(`🖼 이미지 ${files.length}장 첨부됨`);
+});
 
 // ── SEND ──
 async function sendMessage() {
@@ -690,6 +700,17 @@ async function saveToGitHub() {
 
   const filename = document.getElementById('file-select').value;
   await commitToGitHub(filename, ghToken);
+}
+
+async function deployAndShowLink() {
+  const { ghToken } = getSettings();
+  if (!ghToken) { openSettings(); showToast('GitHub 토큰을 먼저 설정해주세요'); return; }
+  if (!currentCode) { showToast('저장할 코드가 없습니다'); return; }
+
+  const filename = document.getElementById('file-select').value;
+  showToast('🚀 배포 중...');
+  await commitToGitHub(filename, ghToken, true);
+  showDeployPopup(filename);
 }
 
 async function autoSave() {
