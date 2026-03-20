@@ -245,7 +245,7 @@ animateProgress();
 callClaude();
 
 function openModal(){
-  document.getElementById('apiKeyInput').value = localStorage.getItem('apiKey')||'';
+  document.getElementById('apiKeyInput').value = localStorage.getItem('myp_solution_api_key') || localStorage.getItem('apiKey')||'';
   document.getElementById('modalOverlay').classList.add('open');
 }
 function closeModal(e){

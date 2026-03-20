@@ -438,7 +438,7 @@ function autoSave() {
 }
 
 async function aiSuggestLayout() {
-  const apiKey = localStorage.getItem('apiKey');
+  const apiKey = localStorage.getItem('myp_solution_api_key') || localStorage.getItem('apiKey');
   const step1 = JSON.parse(localStorage.getItem('step1Data') || '{}');
   const style = JSON.parse(localStorage.getItem('selectedStyle') || '{}');
 
