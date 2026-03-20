@@ -1,1096 +1,264 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>MYP Studio</title>
-<style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>makeyourplace — 팝업스토어 AI 설계</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Pretendard',sans-serif;background:#fff;color:#111;line-height:1.6}
 
-:root {
-  --bg: #0d1117;
-  --panel: #161b22;
-  --border: #30363d;
-  --hover: #1f2937;
-  --accent: #2563eb;
-  --accent-hover: #1d4ed8;
-  --text: #e6edf3;
-  --text-2: #8b949e;
-  --text-3: #484f58;
-  --input-bg: #0d1117;
-  --user-msg: #1d3557;
-  --ai-msg: #161b22;
-  --r: 8px;
-  --r-sm: 6px;
-}
+    /* NAV */
+    nav{display:flex;align-items:center;justify-content:space-between;padding:0 48px;height:64px;border-bottom:1px solid #f0f0f0;position:sticky;top:0;background:#fff;z-index:100}
+    .nav-logo{font-size:18px;font-weight:800;color:#111;text-decoration:none}
+    .nav-links{display:flex;gap:32px;list-style:none}
+    .nav-links a{font-size:14px;color:#555;text-decoration:none;font-weight:500}
+    .nav-links a:hover{color:#111}
+    .nav-cta{background:#020202;color:#fff;border:none;padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;text-decoration:none}
+    .nav-cta:hover{background:#1a1a1a}
 
-html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; overflow: hidden; background: var(--bg); color: var(--text); }
+    /* HERO */
+    .hero{text-align:center;padding:100px 24px 80px;max-width:800px;margin:0 auto}
+    .hero h1{font-size:48px;font-weight:800;line-height:1.2;letter-spacing:-0.02em;margin-bottom:12px}
+    .hero h1 span{color:#3B82F6}
+    .hero p{font-size:16px;color:#666;margin-bottom:40px;line-height:1.7}
+    .hero-btns{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+    .btn-primary{background:#020202;color:#fff;border:none;padding:14px 28px;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;text-decoration:none;display:inline-block}
+    .btn-primary:hover{background:#1a1a1a}
+    .btn-outline{background:#fff;color:#111;border:2px solid #E5E7EB;padding:14px 28px;border-radius:10px;font-size:16px;font-weight:600;cursor:pointer;font-family:inherit;text-decoration:none;display:inline-block}
+    .btn-outline:hover{border-color:#020202;color:#020202}
 
-::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+    /* SERVICES */
+    .section{padding:80px 48px;max-width:1200px;margin:0 auto}
+    .section-title{font-size:14px;font-weight:600;color:#999;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px}
+    .section h2{font-size:32px;font-weight:800;margin-bottom:48px;letter-spacing:-0.01em}
+    .services-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:32px}
+    .service-card{padding:32px;border:1px solid #F0F0F0;border-radius:16px}
+    .service-icon{width:44px;height:44px;background:#EFF6FF;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:20px;font-size:22px}
+    .service-card h3{font-size:18px;font-weight:700;margin-bottom:10px}
+    .service-card p{font-size:14px;color:#666;line-height:1.7}
 
-/* ── LOGIN ── */
-#login-screen {
-  position: fixed; inset: 0; background: var(--bg);
-  display: flex; align-items: center; justify-content: center; z-index: 1000;
-}
-.login-box {
-  background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
-  padding: 40px 48px; width: 340px; text-align: center;
-}
-.login-logo { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
-.login-logo span { color: var(--accent); }
-.login-sub { color: var(--text-2); font-size: 13px; margin-bottom: 28px; }
-.login-input {
-  width: 100%; padding: 10px 14px; border-radius: var(--r-sm);
-  background: var(--input-bg); border: 1px solid var(--border);
-  color: var(--text); font-size: 15px; text-align: center;
-  letter-spacing: 4px; outline: none; margin-bottom: 12px;
-}
-.login-input:focus { border-color: var(--accent); }
-.login-btn {
-  width: 100%; padding: 10px; border-radius: var(--r-sm);
-  background: var(--accent); border: none; color: #fff;
-  font-size: 14px; font-weight: 600; cursor: pointer;
-}
-.login-btn:hover { background: var(--accent-hover); }
-.login-err { color: #f85149; font-size: 12px; margin-top: 8px; min-height: 16px; }
+    /* PORTFOLIO */
+    .portfolio-section{padding:80px 48px;background:#FAFAFA}
+    .portfolio-inner{max-width:1200px;margin:0 auto}
+    .portfolio-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px}
+    .portfolio-header h2{font-size:28px;font-weight:800}
+    .more-link{font-size:14px;color:#3B82F6;text-decoration:none;font-weight:600}
+    .portfolio-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+    .portfolio-card{border-radius:16px;overflow:hidden;position:relative;aspect-ratio:16/10;cursor:pointer}
+    .portfolio-card-bg{width:100%;height:100%;background:linear-gradient(135deg,#2D4A3E 0%,#1A2E25 100%);display:flex;align-items:flex-end;padding:24px}
+    .portfolio-card:nth-child(2) .portfolio-card-bg{background:linear-gradient(135deg,#3D2E1E 0%,#2A1F15 100%)}
+    .portfolio-card-badge{font-size:11px;color:rgba(255,255,255,0.6);font-weight:600;text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:4px}
+    .portfolio-card-name{font-size:20px;color:#fff;font-weight:700}
+    .portfolio-card-num{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:120px;font-weight:900;color:rgba(255,255,255,0.08);pointer-events:none;user-select:none;line-height:1}
 
-/* ── MAIN LAYOUT ── */
-#app { display: none; height: 100vh; }
-#app.visible { display: flex; }
+    /* CONTACT */
+    .contact-section{padding:80px 48px;max-width:1200px;margin:0 auto;text-align:center}
+    .contact-section h2{font-size:28px;font-weight:800;margin-bottom:8px}
+    .contact-section p{font-size:15px;color:#666;margin-bottom:48px}
+    .contact-form{max-width:560px;margin:0 auto;text-align:left}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+    .form-group{display:flex;flex-direction:column;gap:6px}
+    .form-group label{font-size:13px;font-weight:600;color:#444}
+    .form-group input,.form-group textarea{border:1px solid #E5E7EB;border-radius:8px;padding:12px 14px;font-size:14px;font-family:inherit;outline:none;transition:border-color 0.15s}
+    .form-group input:focus,.form-group textarea:focus{border-color:#020202}
+    .form-group textarea{min-height:120px;resize:vertical}
+    .contact-submit{width:100%;background:#020202;color:#fff;border:none;padding:16px;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:8px}
+    .contact-submit:hover{background:#1a1a1a}
 
-/* ── LEFT PANEL ── */
-#left {
-  width: 360px; flex-shrink: 0;
-  background: var(--panel); border-right: 1px solid var(--border);
-  display: flex; flex-direction: column; height: 100vh; overflow: hidden;
-}
+    /* FOOTER */
+    footer{background:#111;color:#888;padding:48px;margin-top:0}
+    .footer-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:32px;align-items:start}
+    .footer-logo{font-size:18px;font-weight:800;color:#fff;margin-bottom:8px}
+    .footer-copy{font-size:12px;color:#555}
+    .footer-col h4{font-size:13px;font-weight:700;color:#fff;margin-bottom:12px}
+    .footer-col p,.footer-col a{font-size:13px;color:#888;text-decoration:none;display:block;line-height:1.8}
 
-#left-header {
-  flex-shrink: 0; padding: 14px 16px 12px;
-  border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: space-between;
-}
-.logo { font-size: 15px; font-weight: 700; }
-.logo span { color: var(--accent); }
-.header-actions { display: flex; gap: 6px; }
-.icon-btn {
-  width: 30px; height: 30px; border-radius: var(--r-sm);
-  border: 1px solid var(--border); background: transparent;
-  color: var(--text-2); cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 14px; transition: all .15s;
-}
-.icon-btn:hover { background: var(--hover); color: var(--text); }
+    /* GEAR */
+    .gear-btn{position:fixed;bottom:24px;right:24px;width:44px;height:44px;background:#fff;border:1px solid #E5E7EB;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,0.1);z-index:200;transition:transform 0.2s}
+    .gear-btn:hover{transform:rotate(45deg)}
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:300;align-items:center;justify-content:center}
+    .modal-overlay.open{display:flex}
+    .modal{background:#fff;border-radius:16px;padding:32px;width:400px;max-width:90vw}
+    .modal h3{font-size:18px;font-weight:700;margin-bottom:8px}
+    .modal p{font-size:13px;color:#666;margin-bottom:20px}
+    .modal input{width:100%;border:1px solid #E5E7EB;border-radius:8px;padding:12px 14px;font-size:14px;font-family:inherit;outline:none;margin-bottom:16px}
+    .modal input:focus{border-color:#020202}
+    .modal-btns{display:flex;gap:8px}
+    .modal-save{flex:1;background:#020202;color:#fff;border:none;padding:12px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit}
+    .modal-cancel{flex:1;background:#F5F5F5;color:#444;border:none;padding:12px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
 
-/* File selector */
-#file-row {
-  flex-shrink: 0; padding: 10px 12px 6px;
-  border-bottom: none;
-  display: flex; align-items: center; gap: 8px;
-}
-#file-select {
-  flex: 1; padding: 7px 10px; border-radius: var(--r-sm);
-  background: var(--input-bg); border: 1px solid var(--border);
-  color: var(--text); font-size: 13px; outline: none; cursor: pointer;
-}
-#file-select:focus { border-color: var(--accent); }
-#load-btn {
-  padding: 7px 12px; border-radius: var(--r-sm);
-  background: var(--hover); border: 1px solid var(--border);
-  color: var(--text-2); font-size: 12px; cursor: pointer; white-space: nowrap;
-  transition: all .15s;
-}
-#load-btn:hover:not(:disabled) { color: var(--text); }
-#load-btn:disabled { opacity: .4; cursor: not-allowed; }
-
-/* Project actions row */
-#project-actions {
-  flex-shrink: 0; padding: 4px 12px 8px;
-  border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: space-between;
-}
-#add-project-btn {
-  padding: 4px 9px; border-radius: var(--r-sm);
-  background: transparent; border: 1px solid var(--border);
-  color: var(--text-2); font-size: 11px; cursor: pointer;
-  transition: all .15s;
-}
-#add-project-btn:hover { color: var(--text); background: var(--hover); }
-#delete-project-link {
-  font-size: 11px; color: var(--text-3); text-decoration: none;
-  cursor: pointer; background: none; border: none; padding: 0;
-}
-#delete-project-link:hover { color: #f85149; }
-
-/* Chat history */
-#chat {
-  flex: 1; overflow-y: auto; padding: 12px;
-  display: flex; flex-direction: column; gap: 10px;
-}
-
-.msg { display: flex; flex-direction: column; max-width: 100%; }
-.msg.user { align-items: flex-end; }
-.msg.ai { align-items: flex-start; }
-.msg-bubble {
-  padding: 10px 13px; border-radius: var(--r);
-  font-size: 13px; line-height: 1.6; max-width: 90%; word-break: break-word;
-}
-.msg.user .msg-bubble { background: var(--user-msg); color: var(--text); border-radius: var(--r) var(--r-sm) var(--r) var(--r); }
-.msg.ai .msg-bubble { background: var(--ai-msg); border: 1px solid var(--border); color: var(--text); border-radius: var(--r-sm) var(--r) var(--r) var(--r); }
-.msg-thumb-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 6px; }
-.msg-thumb { width: 52px; height: 52px; object-fit: cover; border-radius: var(--r-sm); border: 1px solid var(--border); }
-.msg-status { font-size: 11px; color: var(--text-3); margin-top: 4px; padding: 0 2px; }
-
-/* Thinking indicator */
-.thinking { display: flex; gap: 5px; padding: 10px 13px; background: var(--ai-msg); border: 1px solid var(--border); border-radius: var(--r-sm) var(--r) var(--r) var(--r); }
-.thinking span { width: 6px; height: 6px; border-radius: 50%; background: var(--text-3); animation: pulse 1.2s infinite; }
-.thinking span:nth-child(2) { animation-delay: .2s; }
-.thinking span:nth-child(3) { animation-delay: .4s; }
-@keyframes pulse { 0%,60%,100% { opacity: .3; transform: scale(.8); } 30% { opacity: 1; transform: scale(1); } }
-
-/* Input area */
-#input-area {
-  flex-shrink: 0; padding: 10px 12px 12px;
-  border-top: 1px solid var(--border);
-}
-#image-previews { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
-.img-prev-wrap { position: relative; }
-.img-prev { width: 52px; height: 52px; object-fit: cover; border-radius: var(--r-sm); border: 1px solid var(--border); display: block; }
-.img-prev-rm {
-  position: absolute; top: -5px; right: -5px; width: 16px; height: 16px;
-  border-radius: 50%; background: #f85149; border: none; color: #fff;
-  font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center;
-  line-height: 1;
-}
-#prompt-box {
-  width: 100%; min-height: 72px; max-height: 160px; resize: vertical;
-  padding: 10px 12px; border-radius: var(--r-sm);
-  background: var(--input-bg); border: 1px solid var(--border);
-  color: var(--text); font-size: 13px; line-height: 1.6;
-  outline: none; font-family: inherit; margin-bottom: 8px;
-}
-#prompt-box:focus { border-color: var(--accent); }
-#prompt-box::placeholder { color: var(--text-3); }
-#input-actions { display: flex; align-items: center; justify-content: space-between; }
-#input-left { display: flex; gap: 6px; align-items: center; }
-.attach-btn {
-  padding: 6px 10px; border-radius: var(--r-sm);
-  background: transparent; border: 1px solid var(--border);
-  color: var(--text-2); font-size: 13px; cursor: pointer;
-}
-.attach-btn:hover { color: var(--text); background: var(--hover); }
-#img-count { font-size: 11px; color: var(--text-3); }
-#send-btn {
-  padding: 7px 16px; border-radius: var(--r-sm);
-  background: var(--accent); border: none; color: #fff;
-  font-size: 13px; font-weight: 600; cursor: pointer;
-}
-#send-btn:hover:not(:disabled) { background: var(--accent-hover); }
-#send-btn:disabled { opacity: .5; cursor: not-allowed; }
-
-/* ── RIGHT PANEL ── */
-#right { flex: 1; display: flex; flex-direction: column; background: var(--bg); overflow: hidden; }
-
-#right-header {
-  flex-shrink: 0; padding: 0 16px;
-  border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: space-between;
-  height: 45px; background: var(--panel);
-}
-.tab-group { display: flex; gap: 0; }
-.tab-btn {
-  padding: 0 16px; height: 45px; border: none; background: transparent;
-  color: var(--text-2); font-size: 13px; cursor: pointer;
-  border-bottom: 2px solid transparent; margin-bottom: -1px;
-}
-.tab-btn.active { color: var(--text); border-bottom-color: var(--accent); }
-.tab-btn:hover:not(.active) { color: var(--text); }
-.right-actions { display: flex; gap: 6px; }
-.save-btn {
-  padding: 5px 12px; border-radius: var(--r-sm);
-  background: transparent; border: 1px solid var(--border);
-  color: var(--text-2); font-size: 12px; cursor: pointer;
-}
-.save-btn:hover { color: var(--text); background: var(--hover); }
-
-#preview-pane { flex: 1; display: flex; overflow: hidden; }
-#preview-pane iframe { flex: 1; border: none; background: #fff; }
-#code-pane {
-  flex: 1; display: none; overflow: auto; padding: 20px;
-}
-#code-pane pre {
-  margin: 0; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12px;
-  line-height: 1.7; color: var(--text); white-space: pre-wrap; word-break: break-all;
-}
-
-/* ── SETTINGS MODAL ── */
-#modal-backdrop {
-  display: none; position: fixed; inset: 0; background: rgba(0,0,0,.7);
-  z-index: 500; align-items: center; justify-content: center;
-}
-#modal-backdrop.open { display: flex; }
-.modal {
-  background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
-  padding: 28px 32px; width: 420px;
-}
-.modal-title { font-size: 16px; font-weight: 700; margin-bottom: 20px; }
-.field { margin-bottom: 16px; }
-.field label { display: block; font-size: 12px; color: var(--text-2); margin-bottom: 6px; }
-.field input, .field select {
-  width: 100%; padding: 9px 12px; border-radius: var(--r-sm);
-  background: var(--input-bg); border: 1px solid var(--border);
-  color: var(--text); font-size: 13px; outline: none;
-}
-.field input:focus, .field select:focus { border-color: var(--accent); }
-.modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 8px; }
-.btn-cancel {
-  padding: 8px 16px; border-radius: var(--r-sm);
-  background: transparent; border: 1px solid var(--border);
-  color: var(--text-2); font-size: 13px; cursor: pointer;
-}
-.btn-save {
-  padding: 8px 16px; border-radius: var(--r-sm);
-  background: var(--accent); border: none; color: #fff;
-  font-size: 13px; font-weight: 600; cursor: pointer;
-}
-.btn-save:hover { background: var(--accent-hover); }
-
-/* ── PROJECT MODAL ── */
-#project-modal-backdrop {
-  display: none; position: fixed; inset: 0; background: rgba(0,0,0,.7);
-  z-index: 500; align-items: center; justify-content: center;
-}
-#project-modal-backdrop.open { display: flex; }
-
-/* Toast */
-#toast {
-  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-  background: #1f2937; border: 1px solid var(--border); color: var(--text);
-  padding: 10px 20px; border-radius: var(--r); font-size: 13px;
-  z-index: 9999; opacity: 0; transition: opacity .25s; pointer-events: none;
-}
-#toast.show { opacity: 1; }
-</style>
+    @media(max-width:768px){
+      nav{padding:0 20px}
+      .nav-links{display:none}
+      .hero h1{font-size:32px}
+      .section{padding:48px 20px}
+      .services-grid{grid-template-columns:1fr}
+      .portfolio-grid{grid-template-columns:1fr}
+      .portfolio-section{padding:48px 20px}
+      .contact-section{padding:48px 20px}
+      .form-row{grid-template-columns:1fr}
+      footer{padding:32px 20px}
+      .footer-inner{grid-template-columns:1fr 1fr}
+    }
+  </style>
 </head>
 <body>
 
-<!-- LOGIN -->
-<div id="login-screen">
-  <div class="login-box">
-    <div class="login-logo">MYP <span>Studio</span></div>
-    <div class="login-sub">접근 코드를 입력하세요</div>
-    <input type="password" id="code-input" class="login-input" placeholder="••••••••" maxlength="16" />
-    <button class="login-btn" onclick="tryLogin()">입력</button>
-    <div class="login-err" id="login-err"></div>
+<nav>
+  <a href="index.html" class="nav-logo">makeyourplace</a>
+  <ul class="nav-links">
+    <li><a href="#">서비스 소개</a></li>
+    <li><a href="#">포트폴리오</a></li>
+    <li><a href="#">전문 상담</a></li>
+    <li><a href="#">고객지원</a></li>
+  </ul>
+  <a href="step1.html" class="nav-cta">팝업 설계 시작하기</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <h1>생각만 하던 팝업스토어,<br><span>가장 완벽하게</span> 현실이 됩니다.</h1>
+  <p>브랜드 아이덴티티를 살은 공간 기획부터 가구 선별, 현장 시공까지,<br>makeyourplace가 당신의 공간 경험을 디자인합니다.</p>
+  <div class="hero-btns">
+    <a href="step1.html" class="btn-primary">팝업 설계 시작하기</a>
+    <a href="#contact" class="btn-outline">상담 신청하기</a>
   </div>
 </div>
 
-<!-- APP -->
-<div id="app">
-  <!-- LEFT -->
-  <div id="left">
-    <div id="left-header">
-      <div class="logo">MYP <span>Studio</span></div>
-      <div class="header-actions">
-        <button class="icon-btn" onclick="openSettings()" title="설정">⚙️</button>
-      </div>
+<!-- SERVICES -->
+<div class="section">
+  <div class="section-title">서비스 범위</div>
+  <div class="services-grid">
+    <div class="service-card">
+      <div class="service-icon">🏗</div>
+      <h3>공간 기획 및 설계</h3>
+      <p>브랜드의 메시지를 가장 효과적으로 전달할 수 있는 동선과 공간 구성을 제안합니다.</p>
     </div>
-
-    <div id="file-row">
-      <select id="file-select" onchange="onFileSelectChange()">
-        <!-- dynamically rendered by renderProjectDropdown() -->
-      </select>
-      <button id="load-btn" onclick="loadFile()">불러오기</button>
+    <div class="service-card">
+      <div class="service-icon">🔧</div>
+      <h3>모듈러 렌탈 서비스</h3>
+      <p>반복된 공장에서 제작하여 고품질의 고품질 모듈 가구와 비품을 부담없는 가격으로 제공합니다.</p>
     </div>
-
-    <div id="project-actions">
-      <button id="add-project-btn" onclick="openAddProject()">＋ 프로젝트 추가</button>
-      <button id="delete-project-link" onclick="deleteCurrentProject()">✕ 현재 프로젝트 삭제</button>
+    <div class="service-card">
+      <div class="service-icon">✨</div>
+      <h3>원스톱 실행</h3>
+      <p>디자인부터 설치, 철거까지 모든 과정을 makeyourplace 팀이 직접 관리합니다.</p>
     </div>
+  </div>
+</div>
 
-    <div id="chat"></div>
-
-    <div id="input-area">
-      <div id="image-previews"></div>
-      <textarea id="prompt-box" placeholder="수정 지시사항을 입력하세요... (Ctrl+Enter 전송)"></textarea>
-      <div id="input-actions">
-        <div id="input-left">
-          <button class="attach-btn" onclick="document.getElementById('img-input').click()">📎 이미지</button>
-          <span id="img-count"></span>
-          <input type="file" id="img-input" accept="image/*" multiple style="display:none" onchange="addImages(this.files)" />
+<!-- PORTFOLIO -->
+<div class="portfolio-section">
+  <div class="portfolio-inner">
+    <div class="portfolio-header">
+      <h2>Portfolio<br><small style="font-size:14px;font-weight:500;color:#999">우리가 만들어 온 공간들</small></h2>
+      <a href="#" class="more-link">전체 보기 →</a>
+    </div>
+    <div class="portfolio-grid">
+      <div class="portfolio-card">
+        <div class="portfolio-card-bg">
+          <div>
+            <span class="portfolio-card-badge">라이프스타일 팝업</span>
+            <div class="portfolio-card-name">라이프스타일 브랜드 A</div>
+          </div>
         </div>
-        <button id="send-btn" onclick="sendMessage()">▶ 생성</button>
       </div>
-    </div>
-  </div>
-
-  <!-- RIGHT -->
-  <div id="right">
-    <div id="right-header">
-      <div class="tab-group">
-        <button class="tab-btn active" id="tab-preview" onclick="switchTab('preview')">미리보기</button>
-        <button class="tab-btn" id="tab-code" onclick="switchTab('code')">코드</button>
+      <div class="portfolio-card">
+        <div class="portfolio-card-bg">
+          <div class="portfolio-card-num">2</div>
+          <div>
+            <span class="portfolio-card-badge">코스메틱 팝업</span>
+            <div class="portfolio-card-name">코스메틱 브랜드 B</div>
+          </div>
+        </div>
       </div>
-      <div class="right-actions">
-        <button class="save-btn" onclick="saveToGitHub()">💾 저장</button>
-        <button class="save-btn" style="background:#1f6feb;color:#fff;border-color:#1f6feb" onclick="deployAndShowLink()">🚀 배포</button>
-      </div>
-    </div>
-    <div id="preview-pane">
-      <iframe id="preview-iframe" sandbox="allow-scripts allow-same-origin"></iframe>
-    </div>
-    <div id="code-pane">
-      <pre id="code-display"></pre>
     </div>
   </div>
 </div>
 
-<!-- SETTINGS MODAL -->
-<div id="modal-backdrop">
+<!-- CONTACT -->
+<div class="contact-section" id="contact">
+  <h2>무료 견적 상담</h2>
+  <p>프로젝트의 기본적인 정보를 알려주시면 담당자가 24시간 이내 연락 드립니다.</p>
+  <div class="contact-form">
+    <div class="form-row">
+      <div class="form-group">
+        <label>기업/브랜드명</label>
+        <input type="text" placeholder="예: 메이크유어플레이스">
+      </div>
+      <div class="form-group">
+        <label>담당자 성함</label>
+        <input type="text" placeholder="이름을 입력해주세요">
+      </div>
+    </div>
+    <div class="form-group" style="margin-bottom:16px">
+      <label>연락처</label>
+      <input type="text" placeholder="010-0000-0000">
+    </div>
+    <div class="form-group" style="margin-bottom:16px">
+      <label>프로젝트 상세 내용</label>
+      <textarea placeholder="팝업 시기, 기간, 진행하시려는 현장 등을 최대한 자세하게 작성해주세요."></textarea>
+    </div>
+    <button class="contact-submit">상담 신청 완료하기</button>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div>
+      <div class="footer-logo">makeyourplace</div>
+      <div class="footer-copy">© 2025 makeyourplace. All rights reserved.</div>
+    </div>
+    <div class="footer-col">
+      <h4>Address</h4>
+      <p>서울특별시 성동구 성수이로 7길 70, 110</p>
+    </div>
+    <div class="footer-col">
+      <h4>Contact</h4>
+      <p>02 123 4567 | info@makeyourplace.kr</p>
+    </div>
+    <div class="footer-col">
+      <h4>Social</h4>
+      <a href="#">Instagram</a>
+      <a href="#">LinkedIn</a>
+    </div>
+  </div>
+</footer>
+
+<!-- GEAR -->
+<button class="gear-btn" onclick="openModal()">⚙</button>
+
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
   <div class="modal">
-    <div class="modal-title">⚙️ 설정</div>
-    <div class="field">
-      <label>Anthropic API 키</label>
-      <input type="password" id="s-apikey" placeholder="sk-ant-..." />
-    </div>
-    <div class="field">
-      <label>GitHub 토큰</label>
-      <input type="password" id="s-ghtoken" placeholder="ghp_..." />
-    </div>
-    <div class="field">
-      <label>모델</label>
-      <select id="s-model">
-        <option value="claude-opus-4-5">claude-opus-4-5</option>
-        <option value="claude-sonnet-4-5" selected>claude-sonnet-4-5</option>
-        <option value="claude-haiku-4-5">claude-haiku-4-5</option>
-      </select>
-    </div>
-    <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeSettings()">취소</button>
-      <button class="btn-save" onclick="saveSettings()">저장</button>
+    <h3>API 키 설정</h3>
+    <p>Claude API 키를 입력하면 AI 기능이 활성화됩니다. 키는 브라우저에만 저장됩니다.</p>
+    <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-..." value="">
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="document.getElementById('modalOverlay').classList.remove('open')">취소</button>
+      <button class="modal-save" onclick="saveApiKey()">저장</button>
     </div>
   </div>
 </div>
-
-<!-- PROJECT MODAL -->
-<div id="project-modal-backdrop">
-  <div class="modal">
-    <div class="modal-title">＋ 프로젝트 추가</div>
-    <div class="field">
-      <label>프로젝트 이름</label>
-      <input type="text" id="pm-name" placeholder="팝업 디자이너 v2" />
-    </div>
-    <div class="field">
-      <label>GitHub 레포 (owner/repo)</label>
-      <input type="text" id="pm-repo" placeholder="kman-cmyk/new-repo" />
-    </div>
-    <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeAddProject()">취소</button>
-      <button class="btn-save" onclick="confirmAddProject()">추가</button>
-    </div>
-  </div>
-</div>
-
-<!-- TOAST -->
-<div id="toast"></div>
 
 <script>
-// ── CONFIG ──
-const ACCESS_CODE = 'MYP1101';
-const GITHUB_API = 'https://api.github.com';
-const ANTHROPIC_API = 'https://api.anthropic.com/v1/messages';
-
-const DEFAULT_PROJECT = {
-  name: '메이크유어플레이스 솔루션',
-  repo: 'kman-cmyk/popup-designer',
-  files: ['index.html','step1.html','step2-loading.html','step2.html','step3-frames.html','step3.html','step4.html','step5.html','complete.html','studio.html'],
-  builtin: true,
-};
-
-// ── STATE ──
-let currentCode = '';
-let attachedImages = []; // [{base64, mediaType, name}]
-let isGenerating = false;
-let currentFileSHA = null;
-let currentProjectIdx = 0; // tracks last-used project for __all__ batch
-
-// ── PROJECTS ──
-function getProjects() {
-  try {
-    const stored = JSON.parse(localStorage.getItem('myp_projects') || 'null');
-    if (Array.isArray(stored) && stored.length > 0) return stored;
-  } catch (e) {}
-  return [DEFAULT_PROJECT];
+function openModal(){
+  document.getElementById('apiKeyInput').value = localStorage.getItem('apiKey')||'';
+  document.getElementById('modalOverlay').classList.add('open');
 }
-
-function saveProjects(projects) {
-  localStorage.setItem('myp_projects', JSON.stringify(projects));
+function closeModal(e){
+  if(e.target===document.getElementById('modalOverlay'))
+    document.getElementById('modalOverlay').classList.remove('open');
 }
-
-function renderProjectDropdown() {
-  const sel = document.getElementById('file-select');
-  const currentVal = sel.value;
-
-  sel.innerHTML = '<option value="__all__">🗂 전체 솔루션 (일괄 적용)</option>';
-
-  const projects = getProjects();
-  projects.forEach((proj, pIdx) => {
-    const og = document.createElement('optgroup');
-    og.label = `🗂 ${proj.name}`;
-
-    if (proj.files.length === 0) {
-      const opt = document.createElement('option');
-      opt.value = `__load_${pIdx}`;
-      opt.textContent = '파일 목록 불러오기...';
-      opt.dataset.projectIdx = pIdx;
-      og.appendChild(opt);
-    } else {
-      proj.files.forEach(f => {
-        const opt = document.createElement('option');
-        opt.value = f;
-        opt.textContent = f;
-        opt.dataset.projectIdx = pIdx;
-        og.appendChild(opt);
-      });
-    }
-    sel.appendChild(og);
-  });
-
-  // Restore previous selection if still available
-  const match = sel.querySelector(`option[value="${CSS.escape(currentVal)}"]`);
-  if (match) sel.value = currentVal;
-
-  updateLoadBtn();
+function saveApiKey(){
+  const k=document.getElementById('apiKeyInput').value.trim();
+  if(k) localStorage.setItem('apiKey',k);
+  document.getElementById('modalOverlay').classList.remove('open');
+  alert('API 키가 저장되었습니다.');
 }
-
-function onFileSelectChange() {
-  const sel = document.getElementById('file-select');
-  const selectedOpt = sel.options[sel.selectedIndex];
-  if (selectedOpt && selectedOpt.dataset.projectIdx !== undefined) {
-    currentProjectIdx = parseInt(selectedOpt.dataset.projectIdx) || 0;
-  }
-  updateLoadBtn();
-}
-
-function updateLoadBtn() {
-  const val = document.getElementById('file-select').value;
-  const btn = document.getElementById('load-btn');
-  const isSpecial = val === '__all__';
-  btn.disabled = isSpecial;
-}
-
-function getCurrentProject() {
-  const projects = getProjects();
-  return projects[currentProjectIdx] || projects[0];
-}
-
-function getCurrentRepo() {
-  const proj = getCurrentProject();
-  return proj ? proj.repo : DEFAULT_PROJECT.repo;
-}
-
-// ── SETTINGS ──
-function getSettings() {
-  return {
-    apiKey: localStorage.getItem('myp_apikey') || '',
-    ghToken: localStorage.getItem('myp_ghtoken') || '',
-    model: localStorage.getItem('myp_model') || 'claude-sonnet-4-5',
-  };
-}
-function openSettings() {
-  const s = getSettings();
-  document.getElementById('s-apikey').value = s.apiKey;
-  document.getElementById('s-ghtoken').value = s.ghToken;
-  document.getElementById('s-model').value = s.model;
-  document.getElementById('modal-backdrop').classList.add('open');
-}
-function closeSettings() { document.getElementById('modal-backdrop').classList.remove('open'); }
-function saveSettings() {
-  localStorage.setItem('myp_apikey', document.getElementById('s-apikey').value.trim());
-  localStorage.setItem('myp_ghtoken', document.getElementById('s-ghtoken').value.trim());
-  localStorage.setItem('myp_model', document.getElementById('s-model').value);
-  closeSettings();
-  showToast('설정이 저장됐습니다');
-}
-
-// ── ADD / DELETE PROJECT ──
-function openAddProject() {
-  document.getElementById('pm-name').value = '';
-  document.getElementById('pm-repo').value = '';
-  document.getElementById('project-modal-backdrop').classList.add('open');
-  setTimeout(() => document.getElementById('pm-name').focus(), 50);
-}
-function closeAddProject() { document.getElementById('project-modal-backdrop').classList.remove('open'); }
-function confirmAddProject() {
-  const name = document.getElementById('pm-name').value.trim();
-  const repo = document.getElementById('pm-repo').value.trim();
-  if (!name || !repo) { showToast('이름과 레포를 입력해주세요'); return; }
-  if (!/^[^/]+\/[^/]+$/.test(repo)) { showToast('레포 형식: owner/repo-name'); return; }
-
-  const projects = getProjects();
-  projects.push({ name, repo, files: [] });
-  saveProjects(projects);
-  renderProjectDropdown();
-  closeAddProject();
-  showToast(`✅ "${name}" 프로젝트 추가됨`);
-}
-
-function deleteCurrentProject() {
-  const sel = document.getElementById('file-select');
-  const selectedOpt = sel.options[sel.selectedIndex];
-  if (!selectedOpt || selectedOpt.value === '__all__') {
-    showToast('삭제할 프로젝트의 파일을 먼저 선택해주세요');
-    return;
-  }
-  const pIdx = parseInt(selectedOpt.dataset.projectIdx);
-  const projects = getProjects();
-  if (isNaN(pIdx) || !projects[pIdx]) { showToast('프로젝트를 찾을 수 없습니다'); return; }
-
-  const proj = projects[pIdx];
-  if (proj.builtin) { showToast('기본 프로젝트는 삭제할 수 없습니다'); return; }
-  if (!confirm(`"${proj.name}" 프로젝트를 삭제하시겠습니까?`)) return;
-
-  projects.splice(pIdx, 1);
-  saveProjects(projects);
-  currentProjectIdx = 0;
-  renderProjectDropdown();
-  showToast(`"${proj.name}" 삭제됨`);
-}
-
-// ── PROJECT MODAL CLOSE ON BACKDROP ──
-document.getElementById('project-modal-backdrop').addEventListener('click', e => {
-  if (e.target === document.getElementById('project-modal-backdrop')) closeAddProject();
-});
-document.getElementById('pm-repo').addEventListener('keydown', e => {
-  if (e.key === 'Enter') confirmAddProject();
-});
-
-// ── LOGIN ──
-function tryLogin() {
-  const val = document.getElementById('code-input').value;
-  if (val === ACCESS_CODE) {
-    sessionStorage.setItem('myp_auth', '1');
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('app').classList.add('visible');
-    renderProjectDropdown();
-    addSystemMsg('안녕하세요! 파일을 선택하고 수정 지시사항을 입력하세요.');
-  } else {
-    document.getElementById('login-err').textContent = '접근 코드가 올바르지 않습니다';
-  }
-}
-document.getElementById('code-input').addEventListener('keydown', e => { if (e.key === 'Enter') tryLogin(); });
-
-if (sessionStorage.getItem('myp_auth') === '1') {
-  document.getElementById('login-screen').style.display = 'none';
-  document.getElementById('app').classList.add('visible');
-  setTimeout(() => {
-    renderProjectDropdown();
-    addSystemMsg('안녕하세요! 파일을 선택하고 수정 지시사항을 입력하세요.');
-  }, 100);
-}
-
-// ── TABS ──
-function switchTab(tab) {
-  document.getElementById('tab-preview').classList.toggle('active', tab === 'preview');
-  document.getElementById('tab-code').classList.toggle('active', tab === 'code');
-  document.getElementById('preview-pane').style.display = tab === 'preview' ? 'flex' : 'none';
-  document.getElementById('code-pane').style.display = tab === 'code' ? 'block' : 'none';
-}
-
-// ── FILE LOADING ──
-async function loadFile() {
-  const sel = document.getElementById('file-select');
-  const filename = sel.value;
-  if (filename === '__all__') return;
-
-  // Handle loading project file list when files[] is empty
-  if (filename.startsWith('__load_')) {
-    const pIdx = parseInt(filename.replace('__load_', ''));
-    await loadProjectFiles(pIdx);
-    return;
-  }
-
-  const repo = getCurrentRepo();
-  const { ghToken } = getSettings();
-  const btn = document.getElementById('load-btn');
-  btn.textContent = '로딩...';
-  btn.disabled = true;
-  try {
-    const headers = { 'Accept': 'application/vnd.github.v3+json' };
-    if (ghToken) headers['Authorization'] = `token ${ghToken}`;
-    const res = await fetch(`${GITHUB_API}/repos/${repo}/contents/${filename}`, { headers });
-    if (!res.ok) throw new Error(`GitHub ${res.status}`);
-    const data = await res.json();
-    const raw = atob(data.content.replace(/\n/g, ''));
-    const content = new TextDecoder('utf-8').decode(Uint8Array.from(raw, c => c.charCodeAt(0)));
-    currentFileSHA = data.sha;
-    setCode(content);
-    addSystemMsg(`✅ ${filename} 불러왔습니다`);
-  } catch (e) {
-    showToast(`파일 로드 실패: ${e.message}`);
-  } finally {
-    btn.textContent = '불러오기';
-    btn.disabled = false;
-  }
-}
-
-async function loadProjectFiles(pIdx) {
-  const projects = getProjects();
-  const proj = projects[pIdx];
-  if (!proj) return;
-
-  const { ghToken } = getSettings();
-  const btn = document.getElementById('load-btn');
-  btn.textContent = '조회 중...';
-  btn.disabled = true;
-  try {
-    const headers = { 'Accept': 'application/vnd.github.v3+json' };
-    if (ghToken) headers['Authorization'] = `token ${ghToken}`;
-    const res = await fetch(`${GITHUB_API}/repos/${proj.repo}/contents/`, { headers });
-    if (!res.ok) throw new Error(`GitHub ${res.status}`);
-    const data = await res.json();
-    const htmlFiles = data
-      .filter(f => f.type === 'file' && f.name.endsWith('.html'))
-      .map(f => f.name);
-    if (htmlFiles.length === 0) { showToast('HTML 파일을 찾을 수 없습니다'); return; }
-    projects[pIdx].files = htmlFiles;
-    saveProjects(projects);
-    renderProjectDropdown();
-    showToast(`✅ ${proj.name}: ${htmlFiles.length}개 파일 로드됨`);
-  } catch (e) {
-    showToast(`파일 목록 조회 실패: ${e.message}`);
-  } finally {
-    btn.textContent = '불러오기';
-    btn.disabled = false;
-  }
-}
-
-function ensureCharset(html) {
-  if (/<meta\s[^>]*charset/i.test(html)) return html;
-  if (/<head[^>]*>/i.test(html)) {
-    return html.replace(/(<head[^>]*>)/i, '$1\n  <meta charset="utf-8">');
-  }
-  if (/<html[^>]*>/i.test(html)) {
-    return html.replace(/(<html[^>]*>)/i, '$1\n<head><meta charset="utf-8"></head>');
-  }
-  return '<meta charset="utf-8">\n' + html;
-}
-
-function setCode(html) {
-  const safeHtml = ensureCharset(html);
-  currentCode = html;
-  const iframe = document.getElementById('preview-iframe');
-  const blob = new Blob([safeHtml], { type: 'text/html; charset=utf-8' });
-  const blobUrl = URL.createObjectURL(blob);
-  if (iframe._blobUrl) URL.revokeObjectURL(iframe._blobUrl);
-  iframe._blobUrl = blobUrl;
-  iframe.src = blobUrl;
-  document.getElementById('code-display').textContent = html;
-}
-
-// ── CHAT ──
-function addSystemMsg(text) {
-  addMsg('ai', text);
-}
-
-function addMsg(role, text, images) {
-  const chat = document.getElementById('chat');
-  const div = document.createElement('div');
-  div.className = `msg ${role}`;
-
-  if (images && images.length > 0) {
-    const row = document.createElement('div');
-    row.className = 'msg-thumb-row';
-    images.forEach(img => {
-      const el = document.createElement('img');
-      el.className = 'msg-thumb';
-      el.src = `data:${img.mediaType};base64,${img.base64}`;
-      row.appendChild(el);
-    });
-    div.appendChild(row);
-  }
-
-  const bubble = document.createElement('div');
-  bubble.className = 'msg-bubble';
-  bubble.textContent = text;
-  div.appendChild(bubble);
-  chat.appendChild(div);
-  chat.scrollTop = chat.scrollHeight;
-  return div;
-}
-
-function addThinking() {
-  const chat = document.getElementById('chat');
-  const div = document.createElement('div');
-  div.className = 'msg ai';
-  div.innerHTML = '<div class="thinking"><span></span><span></span><span></span></div>';
-  chat.appendChild(div);
-  chat.scrollTop = chat.scrollHeight;
-  return div;
-}
-
-// ── IMAGE ATTACH ──
-function addImages(files) {
-  const remaining = 5 - attachedImages.length;
-  const toAdd = Array.from(files).slice(0, remaining);
-  toAdd.forEach(file => {
-    const reader = new FileReader();
-    reader.onload = e => {
-      const b64 = e.target.result.split(',')[1];
-      attachedImages.push({ base64: b64, mediaType: file.type, name: file.name });
-      renderImagePreviews();
-    };
-    reader.readAsDataURL(file);
-  });
-  document.getElementById('img-input').value = '';
-}
-
-function removeImage(idx) {
-  attachedImages.splice(idx, 1);
-  renderImagePreviews();
-}
-
-function renderImagePreviews() {
-  const container = document.getElementById('image-previews');
-  container.innerHTML = '';
-  attachedImages.forEach((img, i) => {
-    const wrap = document.createElement('div');
-    wrap.className = 'img-prev-wrap';
-    wrap.innerHTML = `
-      <img class="img-prev" src="data:${img.mediaType};base64,${img.base64}" />
-      <button class="img-prev-rm" onclick="removeImage(${i})">×</button>
-    `;
-    container.appendChild(wrap);
-  });
-  document.getElementById('img-count').textContent = attachedImages.length > 0 ? `${attachedImages.length}/5` : '';
-}
-
-// Drop on textarea
-const promptBox = document.getElementById('prompt-box');
-promptBox.addEventListener('dragover', e => e.preventDefault());
-promptBox.addEventListener('drop', e => {
-  e.preventDefault();
-  const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
-  if (files.length) addImages(files);
-});
-promptBox.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && e.ctrlKey) { e.preventDefault(); sendMessage(); }
-});
-promptBox.addEventListener('paste', e => {
-  const items = Array.from(e.clipboardData?.items || []);
-  const imgItems = items.filter(i => i.type.startsWith('image/'));
-  if (imgItems.length === 0) return;
-  e.preventDefault();
-  const files = imgItems.map(i => i.getAsFile()).filter(Boolean);
-  if (files.length) addImages(files);
-  showToast(`🖼 이미지 ${files.length}장 첨부됨`);
-});
-
-// ── SEND ──
-async function sendMessage() {
-  if (isGenerating) return;
-  const { apiKey, model } = getSettings();
-  if (!apiKey) { openSettings(); showToast('API 키를 먼저 설정해주세요'); return; }
-
-  const text = promptBox.value.trim();
-  if (!text && attachedImages.length === 0) return;
-
-  const filename = document.getElementById('file-select').value;
-  const userText = text || '(이미지 첨부)';
-  const sentImages = [...attachedImages];
-  addMsg('user', userText, sentImages);
-
-  promptBox.value = '';
-  attachedImages = [];
-  renderImagePreviews();
-
-  isGenerating = true;
-  document.getElementById('send-btn').disabled = true;
-
-  // ── 전체 솔루션 일괄 적용 ──
-  if (filename === '__all__') {
-    try {
-      await sendAllFiles(apiKey, model, text, sentImages);
-    } finally {
-      isGenerating = false;
-      document.getElementById('send-btn').disabled = false;
-    }
-    return;
-  }
-
-  const thinking = addThinking();
-  try {
-    const html = await callAI(apiKey, model, text, sentImages, filename);
-    thinking.remove();
-    if (html) {
-      setCode(html);
-      addMsg('ai', `✅ ${filename} 업데이트됐습니다. 코드가 적용됐어요.`);
-      autoSave();
-    } else {
-      addMsg('ai', '코드를 생성하지 못했습니다. 다시 시도해주세요.');
-    }
-  } catch (e) {
-    thinking.remove();
-    addMsg('ai', `오류: ${e.message}`);
-  } finally {
-    isGenerating = false;
-    document.getElementById('send-btn').disabled = false;
-  }
-}
-
-// ── BATCH: 전체 솔루션 일괄 적용 ──
-async function sendAllFiles(apiKey, model, text, images) {
-  const proj = getCurrentProject();
-  if (!proj) { addMsg('ai', '현재 프로젝트를 찾을 수 없습니다.'); return; }
-
-  const { ghToken } = getSettings();
-  const files = proj.files;
-
-  if (files.length === 0) {
-    addMsg('ai', '처리할 파일이 없습니다. 먼저 파일을 선택해 목록을 불러오세요.');
-    return;
-  }
-
-  const statusDiv = addMsg('ai', `⏳ 전체 솔루션 처리 시작... (0/${files.length})`);
-  const bubble = statusDiv.querySelector('.msg-bubble');
-
-  let successCount = 0;
-  for (let i = 0; i < files.length; i++) {
-    const fname = files[i];
-    bubble.textContent = `⏳ 처리 중 (${i + 1}/${files.length}): ${fname}...`;
-    document.getElementById('chat').scrollTop = document.getElementById('chat').scrollHeight;
-
-    try {
-      // 1. 파일 로드
-      const headers = { 'Accept': 'application/vnd.github.v3+json' };
-      if (ghToken) headers['Authorization'] = `token ${ghToken}`;
-      const res = await fetch(`${GITHUB_API}/repos/${proj.repo}/contents/${fname}`, { headers });
-      if (!res.ok) throw new Error(`GitHub ${res.status}`);
-      const data = await res.json();
-      const raw = atob(data.content.replace(/\n/g, ''));
-      const content = new TextDecoder('utf-8').decode(Uint8Array.from(raw, c => c.charCodeAt(0)));
-      currentFileSHA = data.sha;
-      currentCode = content;
-
-      // 2. AI 호출
-      const html = await callAI(apiKey, model, text, images, fname);
-      if (!html) throw new Error('AI가 코드를 반환하지 않았습니다');
-
-      // 3. GitHub 커밋
-      currentCode = html;
-      await commitToGitHub(fname, ghToken, true, proj.repo);
-      successCount++;
-    } catch (e) {
-      console.warn(`[batch] ${fname} 실패:`, e.message);
-    }
-  }
-
-  bubble.textContent = `✅ 전체 솔루션 ${successCount}/${files.length}개 파일 업데이트 완료`;
-  document.getElementById('chat').scrollTop = document.getElementById('chat').scrollHeight;
-}
-
-// ── AI CALL ──
-async function callAI(apiKey, model, text, images, filename) {
-  filename = filename || document.getElementById('file-select').value;
-  const systemPrompt = `You are a web developer editing "${filename}".
-Return ONLY complete HTML code, nothing else.
-No JSON. No markdown fences. No explanation. No comments outside HTML.
-Start your response directly with <!DOCTYPE html> or <html.
-The user may send images for reference.`;
-
-  const userContent = [];
-  if (images && images.length > 0) {
-    images.forEach(img => {
-      userContent.push({ type: 'image', source: { type: 'base64', media_type: img.mediaType, data: img.base64 } });
-    });
-  }
-
-  let userText = text || 'Update this file as shown in the image.';
-  if (currentCode) {
-    userText += `\n\nCurrent file content:\n\`\`\`html\n${currentCode}\n\`\`\``;
-  }
-  userContent.push({ type: 'text', text: userText });
-
-  const body = {
-    model,
-    max_tokens: 8192,
-    system: systemPrompt,
-    messages: [{ role: 'user', content: userContent }],
-  };
-
-  const res = await fetch(ANTHROPIC_API, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true',
-    },
-    body: JSON.stringify(body),
-  });
-
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.error?.message || `API ${res.status}`);
-  }
-
-  const data = await res.json();
-  const raw = data.content?.[0]?.text || '';
-  return extractHTML(raw);
-}
-
-// ── HTML EXTRACTION ──
-function extractHTML(raw) {
-  if (!raw) return null;
-
-  const fenceMatch = raw.match(/```(?:html)?\s*([\s\S]*?)```/i);
-  if (fenceMatch) {
-    const candidate = fenceMatch[1].trim();
-    if (looksLikeHTML(candidate)) return candidate;
-  }
-
-  const doctypeIdx = raw.search(/<!DOCTYPE\s+html/i);
-  if (doctypeIdx !== -1) return raw.slice(doctypeIdx).trim();
-
-  const htmlIdx = raw.search(/<html[\s>]/i);
-  if (htmlIdx !== -1) return raw.slice(htmlIdx).trim();
-
-  const trimmed = raw.trim();
-  if (trimmed.startsWith('<')) return trimmed;
-
-  return null;
-}
-
-function looksLikeHTML(str) {
-  return /<!DOCTYPE\s+html/i.test(str) || /<html[\s>]/i.test(str) || /<head[\s>]/i.test(str);
-}
-
-// ── GITHUB SAVE ──
-async function saveToGitHub() {
-  const filename = document.getElementById('file-select').value;
-  if (filename === '__all__' || filename.startsWith('__load_')) { showToast('파일을 먼저 선택해주세요'); return; }
-  const { ghToken } = getSettings();
-  if (!ghToken) { openSettings(); showToast('GitHub 토큰을 먼저 설정해주세요'); return; }
-  if (!currentCode) { showToast('저장할 코드가 없습니다'); return; }
-  await commitToGitHub(filename, ghToken);
-}
-
-async function deployAndShowLink() {
-  const filename = document.getElementById('file-select').value;
-  if (filename === '__all__' || filename.startsWith('__load_')) { showToast('파일을 먼저 선택해주세요'); return; }
-  const { ghToken } = getSettings();
-  if (!ghToken) { openSettings(); showToast('GitHub 토큰을 먼저 설정해주세요'); return; }
-  if (!currentCode) { showToast('저장할 코드가 없습니다'); return; }
-  showToast('🚀 배포 중...');
-  await commitToGitHub(filename, ghToken, true);
-  showDeployPopup(filename);
-}
-
-async function autoSave() {
-  const filename = document.getElementById('file-select').value;
-  if (filename === '__all__' || filename.startsWith('__load_')) return;
-  const { ghToken } = getSettings();
-  if (!ghToken || !currentCode) return;
-  await commitToGitHub(filename, ghToken, true);
-}
-
-async function commitToGitHub(filename, token, silent = false, repo = null) {
-  repo = repo || getCurrentRepo();
-  try {
-    const content = btoa(unescape(encodeURIComponent(currentCode)));
-    const body = {
-      message: `Update: ${filename} via MYP Studio`,
-      content,
-    };
-    if (currentFileSHA) body.sha = currentFileSHA;
-
-    const res = await fetch(`${GITHUB_API}/repos/${repo}/contents/${filename}`, {
-      method: 'PUT',
-      headers: {
-        'Authorization': `token ${token}`,
-        'Content-Type': 'application/json',
-        'Accept': 'application/vnd.github.v3+json',
-      },
-      body: JSON.stringify(body),
-    });
-
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.message || `GitHub ${res.status}`);
-    }
-
-    const data = await res.json();
-    currentFileSHA = data.content?.sha || currentFileSHA;
-    if (!silent) showDeployPopup(filename, repo);
-  } catch (e) {
-    if (!silent) showToast(`저장 실패: ${e.message}`);
-    else console.warn('Auto-save failed:', e.message);
-  }
-}
-
-function showDeployPopup(filename, repo) {
-  repo = repo || getCurrentRepo();
-  const [owner, repoName] = repo.split('/');
-  const url = `https://${owner}.github.io/${repoName}/${filename}`;
-  const existing = document.getElementById('deploy-popup');
-  if (existing) existing.remove();
-  const popup = document.createElement('div');
-  popup.id = 'deploy-popup';
-  popup.style.cssText = `
-    position:fixed; bottom:60px; right:20px; z-index:9999;
-    background:#161b22; border:1px solid #30363d; border-radius:12px;
-    padding:16px 20px; min-width:320px; box-shadow:0 8px 32px rgba(0,0,0,0.5);
-    font-family:sans-serif;
-  `;
-  popup.innerHTML = `
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-      <span style="color:#3fb950;font-weight:600;font-size:14px">✅ 저장 완료!</span>
-      <button onclick="this.closest('#deploy-popup').remove()" style="background:none;border:none;color:#8b949e;cursor:pointer;font-size:16px">✕</button>
-    </div>
-    <div style="background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:8px 12px;margin-bottom:10px;display:flex;align-items:center;gap:8px">
-      <span style="color:#8b949e;font-size:12px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${url}</span>
-    </div>
-    <div style="display:flex;gap:8px">
-      <button onclick="navigator.clipboard.writeText('${url}').then(()=>{this.textContent='✅ 복사됨!';setTimeout(()=>this.textContent='🔗 링크 복사',1500)})"
-        style="flex:1;padding:8px;background:#1f6feb;border:none;border-radius:6px;color:#fff;cursor:pointer;font-size:13px;font-weight:600">🔗 링크 복사</button>
-      <button onclick="window.open('${url}','_blank')"
-        style="padding:8px 14px;background:#21262d;border:1px solid #30363d;border-radius:6px;color:#cdd9e5;cursor:pointer;font-size:13px">열기</button>
-    </div>
-  `;
-  document.body.appendChild(popup);
-  setTimeout(() => popup.remove(), 10000);
-}
-
-// ── TOAST ──
-let toastTimer;
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
-}
-
-// ── MODAL CLOSE ON BACKDROP CLICK ──
-document.getElementById('modal-backdrop').addEventListener('click', e => {
-  if (e.target === document.getElementById('modal-backdrop')) closeSettings();
-});
-
-// ── 1분 자동저장 ──
-let lastAutoSaveCode = null;
-setInterval(async () => {
-  if (!currentCode || currentCode === lastAutoSaveCode) return;
-  const filename = document.getElementById('file-select').value;
-  if (filename === '__all__' || filename.startsWith('__load_')) return;
-  const { ghToken } = getSettings();
-  if (!ghToken) return;
-  lastAutoSaveCode = currentCode;
-  await commitToGitHub(filename, ghToken, true);
-  showToast('🔄 자동저장됨');
-}, 60000);
 </script>
 </body>
 </html>
