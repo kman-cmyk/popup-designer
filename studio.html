@@ -446,10 +446,23 @@ async function loadFile() {
   }
 }
 
+function ensureCharset(html) {
+  // Inject <meta charset="utf-8"> right after <head> if not already present
+  if (/<meta\s[^>]*charset/i.test(html)) return html;
+  if (/<head[^>]*>/i.test(html)) {
+    return html.replace(/(<head[^>]*>)/i, '$1\n  <meta charset="utf-8">');
+  }
+  if (/<html[^>]*>/i.test(html)) {
+    return html.replace(/(<html[^>]*>)/i, '$1\n<head><meta charset="utf-8"></head>');
+  }
+  return '<meta charset="utf-8">\n' + html;
+}
+
 function setCode(html) {
+  const safeHtml = ensureCharset(html);
   currentCode = html;
   const iframe = document.getElementById('preview-iframe');
-  const blob = new Blob([html], { type: 'text/html; charset=utf-8' });
+  const blob = new Blob([safeHtml], { type: 'text/html; charset=utf-8' });
   const blobUrl = URL.createObjectURL(blob);
   if (iframe._blobUrl) URL.revokeObjectURL(iframe._blobUrl);
   iframe._blobUrl = blobUrl;
