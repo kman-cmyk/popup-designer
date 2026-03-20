@@ -27,6 +27,24 @@
     .btn-back{background:#fff;color:#555;border:1px solid #E5E7EB}
     .btn-back:hover{border-color:#3B82F6;color:#3B82F6}
 
+    /* CATALOG MODAL */
+    .catalog-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:400;align-items:flex-end;justify-content:center}
+    .catalog-overlay.open{display:flex}
+    .catalog-sheet{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:560px;max-height:80vh;display:flex;flex-direction:column;overflow:hidden;padding-bottom:env(safe-area-inset-bottom)}
+    .catalog-header{padding:16px 20px 12px;border-bottom:1px solid #F0F0F0;flex-shrink:0;display:flex;align-items:center;justify-content:space-between}
+    .catalog-header h4{font-size:15px;font-weight:700;color:#111}
+    .catalog-close{width:28px;height:28px;border-radius:50%;background:#F5F5F5;border:none;cursor:pointer;font-size:14px;color:#666;display:flex;align-items:center;justify-content:center}
+    .catalog-body{flex:1;overflow-y:auto;padding:12px 16px 20px}
+    .catalog-cat-label{font-size:10px;font-weight:700;color:#AAA;text-transform:uppercase;letter-spacing:0.06em;margin:12px 0 6px;padding-left:4px}
+    .catalog-cat-label:first-child{margin-top:0}
+    .catalog-items{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+    .catalog-item{background:#F9FAFB;border:1px solid #F0F0F0;border-radius:10px;padding:10px 12px;cursor:pointer;transition:all 0.12s;display:flex;align-items:center;gap:8px}
+    .catalog-item:hover{border-color:#020202;background:#fff}
+    .catalog-item-icon{font-size:20px;flex-shrink:0}
+    .catalog-item-info{min-width:0}
+    .catalog-item-name{font-size:12px;font-weight:700;color:#111;line-height:1.3}
+    .catalog-item-desc{font-size:10px;color:#AAA;margin-top:1px}
+
     /* WORKSPACE */
     .workspace{display:flex;height:calc(100vh - 52px)}
 
@@ -161,6 +179,17 @@
   </div>
 </div>
 
+<!-- CATALOG MODAL -->
+<div class="catalog-overlay" id="catalogOverlay" onclick="closeCatalogOverlay(event)">
+  <div class="catalog-sheet">
+    <div class="catalog-header">
+      <h4 id="catalogTitle">제품 선택</h4>
+      <button class="catalog-close" onclick="closeCatalog()">✕</button>
+    </div>
+    <div class="catalog-body" id="catalogBody"></div>
+  </div>
+</div>
+
 <button class="gear-btn" onclick="openModal()">⚙</button>
 <div class="modal-overlay" id="modalOverlay" onclick="closeModalOverlay(event)">
   <div class="modal">
@@ -182,9 +211,63 @@ let selectedIdx = -1;
 let entranceMode = false;
 let entrance = null; // { side: 'bottom'|'top'|'left'|'right', pos: 0~1 }
 let spaceW = 8, spaceD = 6; // meters
+let catalogMode = null; // 'frame' | 'module'
 
-const TYPE_ICONS = { rack:'🗄', shelf:'📦', counter:'🛒', display:'🖼', hanger:'👔' };
 const DEFAULT_COLORS = ['#DBEAFE','#EDE9FE','#DCFCE7','#FEF3C7','#FFE4E6','#F0FDF4'];
+
+// ── MYP 제품 카탈로그 (스프레드시트 기반) ──
+const CATALOG = [
+  { category: '프레임', items: [
+    { name: '프레임', desc: '기본 / W600×H1800', icon: '🏗' },
+  ]},
+  { category: '박스 모듈', items: [
+    { name: '박스 소', desc: 'W600×H600', icon: '📦' },
+    { name: '박스 중', desc: 'W600×H900', icon: '📦' },
+    { name: '박스 대', desc: 'W600×H1200', icon: '📦' },
+  ]},
+  { category: '테이블 모듈', items: [
+    { name: '카운터 테이블', desc: '', icon: '🛒' },
+    { name: '기본 진열 테이블', desc: '', icon: '🛒' },
+  ]},
+  { category: '커스텀 박스', items: [
+    { name: '디스플레이 박스', desc: '', icon: '🖼' },
+    { name: '행거 박스 (전면거치형)', desc: '', icon: '👔' },
+    { name: '행거 박스 (측면거치형)', desc: '', icon: '👔' },
+    { name: '타공 박스', desc: '', icon: '🔲' },
+    { name: '거울 박스', desc: '', icon: '🪞' },
+    { name: '가챠 박스', desc: '', icon: '🎰' },
+    { name: '재고 수납 박스', desc: '', icon: '🗃' },
+    { name: '라이트닝 간판 박스', desc: '백라이트', icon: '💡' },
+    { name: '경사형 진열 박스', desc: '', icon: '📐' },
+    { name: '계단형 진열 박스', desc: '', icon: '🪜' },
+    { name: '현수막/배너 거치 박스', desc: '', icon: '🚩' },
+    { name: '탈의실', desc: '', icon: '🚿' },
+  ]},
+  { category: '모듈 옵션', items: [
+    { name: '헤드간판', desc: '', icon: '📋' },
+    { name: '선반', desc: '', icon: '🗄' },
+    { name: '전자가격표시기', desc: '', icon: '🏷' },
+    { name: '현수막 인쇄', desc: '', icon: '🖨' },
+    { name: '배너 인쇄', desc: '', icon: '🖨' },
+    { name: '시트지 랩핑', desc: '', icon: '🎨' },
+    { name: '입간판 백라이트지', desc: '', icon: '💡' },
+    { name: '포맥스', desc: '', icon: '📋' },
+  ]},
+  { category: '조명 옵션', items: [
+    { name: '메이크업조명', desc: '', icon: '💄' },
+    { name: '매대조명', desc: '', icon: '💡' },
+  ]},
+];
+
+// icon lookup by name
+function getCatalogIcon(name) {
+  for (const cat of CATALOG) {
+    for (const item of cat.items) {
+      if (item.name === name) return item.icon;
+    }
+  }
+  return '📦';
+}
 const ENTRANCE_SIZE = 40; // px
 
 // ── Init ──
@@ -283,7 +366,7 @@ function renderCanvas() {
     el.style.height = f.height + '%';
     el.style.background = f.color || DEFAULT_COLORS[i % DEFAULT_COLORS.length];
     el.innerHTML = `
-      <div class="canvas-frame-icon">${TYPE_ICONS[f.type] || '📦'}</div>
+      <div class="canvas-frame-icon">${f.icon || getCatalogIcon(f.type) || '📦'}</div>
       <div class="canvas-frame-label">${f.label || f.id}</div>
     `;
 
@@ -590,23 +673,35 @@ function deleteModule(mi) {
 
 function addModule() {
   if (!frames[selectedIdx]) return;
-  frames[selectedIdx].modules.push({ name: '새 모듈', quantity: 1, unitPrice: 10000 });
+  openCatalog('module');
+}
+
+function pickModuleFromCatalog(itemName) {
+  closeCatalog();
+  if (!frames[selectedIdx]) return;
+  frames[selectedIdx].modules.push({ name: itemName, quantity: 1, unitPrice: 0 });
   renderPanel();
   autoSave();
 }
 
 function addFrame() {
+  openCatalog('frame');
+}
+
+function pickFrameFromCatalog(itemName, icon) {
+  closeCatalog();
   const i = frames.length;
   frames.push({
     id: 'f' + Date.now(),
-    type: 'rack',
-    label: '새 프레임',
-    x: 10 + (i % 4) * 20,
-    y: 10 + Math.floor(i / 4) * 30,
+    type: itemName,
+    label: itemName,
+    icon: icon,
+    x: 10 + (i % 3) * 28,
+    y: 10 + Math.floor(i / 3) * 32,
     width: 18,
     height: 22,
     color: DEFAULT_COLORS[i % DEFAULT_COLORS.length],
-    modules: [{ name: '선반', quantity: 1, unitPrice: 15000 }],
+    modules: [],
   });
   selectedIdx = frames.length - 1;
   renderCanvas();
@@ -633,7 +728,42 @@ function goToQuote() {
   window.location.href = 'step5.html';
 }
 
-// ── Modal ──
+// ── Catalog Modal ──
+function openCatalog(mode) {
+  catalogMode = mode;
+  const overlay = document.getElementById('catalogOverlay');
+  const body = document.getElementById('catalogBody');
+  const title = document.getElementById('catalogTitle');
+  title.textContent = mode === 'frame' ? '어떤 제품을 추가할까요?' : '모듈 선택';
+
+  body.innerHTML = CATALOG.map(cat => `
+    <div class="catalog-cat-label">${cat.category}</div>
+    <div class="catalog-items">
+      ${cat.items.map(item => `
+        <div class="catalog-item" onclick="${mode === 'frame' ? `pickFrameFromCatalog('${item.name.replace(/'/g,"\\'")}','${item.icon}')` : `pickModuleFromCatalog('${item.name.replace(/'/g,"\\'")}')` }">
+          <span class="catalog-item-icon">${item.icon}</span>
+          <div class="catalog-item-info">
+            <div class="catalog-item-name">${item.name}</div>
+            ${item.desc ? `<div class="catalog-item-desc">${item.desc}</div>` : ''}
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `).join('');
+
+  overlay.classList.add('open');
+}
+
+function closeCatalog() {
+  document.getElementById('catalogOverlay').classList.remove('open');
+  catalogMode = null;
+}
+
+function closeCatalogOverlay(e) {
+  if (e.target === document.getElementById('catalogOverlay')) closeCatalog();
+}
+
+// ── API Key Modal ──
 function openModal() {
   document.getElementById('apiKeyInput').value = localStorage.getItem('myp_solution_api_key') || localStorage.getItem('apiKey') || '';
   document.getElementById('modalOverlay').classList.add('open');
