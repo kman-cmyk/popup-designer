@@ -308,7 +308,7 @@ html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Sego
 
     <div id="project-actions">
       <button id="add-project-btn" onclick="openAddProject()">＋ 프로젝트 추가</button>
-      <button id="delete-project-link" onclick="deleteCurrentProject()">✕ 현재 프로젝트 삭제</button>
+      <button id="delete-project-link" onclick="showToast('프로젝트 삭제는 GitHub에서 직접 레포지토리를 삭제해주세요')">⚙ 프로젝트 관리</button>
     </div>
 
     <div id="chat"></div>
@@ -335,12 +335,22 @@ html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Sego
         <button class="tab-btn" id="tab-code" onclick="switchTab('code')">코드</button>
       </div>
       <div class="right-actions">
+        <button class="save-btn" id="markup-btn" onclick="toggleMarkup()">✏️ 마크업</button>
         <button class="save-btn" onclick="saveToGitHub()">💾 저장</button>
         <button class="save-btn" style="background:#1f6feb;color:#fff;border-color:#1f6feb" onclick="deployAndShowLink()">🚀 배포</button>
       </div>
     </div>
-    <div id="preview-pane">
+    <div id="preview-pane" style="position:relative">
       <iframe id="preview-iframe" sandbox="allow-scripts allow-same-origin"></iframe>
+      <canvas id="markup-canvas" style="display:none;position:absolute;top:0;left:0;width:100%;height:100%;cursor:crosshair;z-index:10"></canvas>
+      <div id="markup-toolbar" style="display:none;position:absolute;top:8px;left:50%;transform:translateX(-50%);z-index:11;background:#161b22;border:1px solid #30363d;border-radius:8px;padding:6px 10px;display:flex;gap:8px;align-items:center">
+        <button onclick="setMarkupTool('pen')" style="background:none;border:1px solid #30363d;color:#cdd9e5;padding:3px 8px;border-radius:4px;cursor:pointer;font-size:12px">✏️ 펜</button>
+        <button onclick="setMarkupTool('arrow')" style="background:none;border:1px solid #30363d;color:#cdd9e5;padding:3px 8px;border-radius:4px;cursor:pointer;font-size:12px">→ 화살표</button>
+        <button onclick="setMarkupTool('rect')" style="background:none;border:1px solid #30363d;color:#cdd9e5;padding:3px 8px;border-radius:4px;cursor:pointer;font-size:12px">□ 사각형</button>
+        <input type="color" id="markup-color" value="#ff3b30" style="width:24px;height:24px;border:none;cursor:pointer;border-radius:4px">
+        <button onclick="clearMarkup()" style="background:none;border:1px solid #30363d;color:#8b949e;padding:3px 8px;border-radius:4px;cursor:pointer;font-size:12px">🗑 지우기</button>
+        <button onclick="sendMarkup()" style="background:#1f6feb;border:none;color:#fff;padding:3px 10px;border-radius:4px;cursor:pointer;font-size:12px;font-weight:600">▶ AI에 전송</button>
+      </div>
     </div>
     <div id="code-pane">
       <pre id="code-display"></pre>
@@ -1063,6 +1073,75 @@ function showDeployPopup(filename, repo) {
   document.body.appendChild(popup);
   setTimeout(() => popup.remove(), 10000);
 }
+
+// ── MARKUP ──
+let markupActive = false, markupTool = 'pen', markupDrawing = false;
+let markupStart = {x:0,y:0}, markupSnapshot = null;
+
+function toggleMarkup() {
+  markupActive = !markupActive;
+  const canvas = document.getElementById('markup-canvas');
+  const toolbar = document.getElementById('markup-toolbar');
+  const btn = document.getElementById('markup-btn');
+  canvas.style.display = markupActive ? 'block' : 'none';
+  toolbar.style.display = markupActive ? 'flex' : 'none';
+  btn.style.background = markupActive ? '#1f6feb' : '';
+  btn.style.color = markupActive ? '#fff' : '';
+  if (markupActive) {
+    const pane = document.getElementById('preview-pane');
+    canvas.width = pane.offsetWidth;
+    canvas.height = pane.offsetHeight;
+  }
+}
+
+function setMarkupTool(t) { markupTool = t; }
+function clearMarkup() {
+  const c = document.getElementById('markup-canvas');
+  c.getContext('2d').clearRect(0,0,c.width,c.height);
+}
+
+function sendMarkup() {
+  const canvas = document.getElementById('markup-canvas');
+  const b64 = canvas.toDataURL('image/png').split(',')[1];
+  attachedImages.push({ base64: b64, mediaType: 'image/png', name: 'markup.png' });
+  renderImagePreviews();
+  toggleMarkup();
+  showToast('✏️ 마크업이 첨부됐습니다. 프롬프트를 입력해주세요.');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const canvas = document.getElementById('markup-canvas');
+  const ctx = () => canvas.getContext('2d');
+  canvas.addEventListener('mousedown', e => {
+    if (!markupActive) return;
+    markupDrawing = true;
+    const r = canvas.getBoundingClientRect();
+    markupStart = {x: e.clientX-r.left, y: e.clientY-r.top};
+    markupSnapshot = ctx().getImageData(0,0,canvas.width,canvas.height);
+    ctx().strokeStyle = document.getElementById('markup-color').value;
+    ctx().lineWidth = 2;
+    ctx().lineCap = 'round';
+    if (markupTool === 'pen') { ctx().beginPath(); ctx().moveTo(markupStart.x, markupStart.y); }
+  });
+  canvas.addEventListener('mousemove', e => {
+    if (!markupDrawing) return;
+    const r = canvas.getBoundingClientRect();
+    const x = e.clientX-r.left, y = e.clientY-r.top;
+    if (markupTool === 'pen') { ctx().lineTo(x,y); ctx().stroke(); }
+    else {
+      ctx().putImageData(markupSnapshot, 0, 0);
+      ctx().strokeStyle = document.getElementById('markup-color').value;
+      ctx().lineWidth = 2;
+      if (markupTool === 'rect') { ctx().strokeRect(markupStart.x, markupStart.y, x-markupStart.x, y-markupStart.y); }
+      else if (markupTool === 'arrow') {
+        ctx().beginPath(); ctx().moveTo(markupStart.x, markupStart.y); ctx().lineTo(x,y); ctx().stroke();
+        const a = Math.atan2(y-markupStart.y, x-markupStart.x);
+        ctx().beginPath(); ctx().moveTo(x,y); ctx().lineTo(x-12*Math.cos(a-0.4),y-12*Math.sin(a-0.4)); ctx().lineTo(x-12*Math.cos(a+0.4),y-12*Math.sin(a+0.4)); ctx().closePath(); ctx().fillStyle=document.getElementById('markup-color').value; ctx().fill();
+      }
+    }
+  });
+  canvas.addEventListener('mouseup', () => { markupDrawing = false; });
+});
 
 // ── TOAST ──
 let toastTimer;
