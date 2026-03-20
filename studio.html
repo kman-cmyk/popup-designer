@@ -1515,16 +1515,16 @@ async function handleGenerate() {
   const messages = buildMessages(prompt, annotationImage);
 
   try {
-    const html = await callAnthropic(apiKey, messages);
-    currentCode = html;
+    const result = await callAnthropic(apiKey, messages);
+    currentCode = result.code;
 
     const assistantId = Date.now() + 1;
-    addChatMessage({ role: 'assistant', content: '코드가 생성되었습니다.', code: html, id: assistantId, time: nowTime() });
+    addChatMessage({ role: 'assistant', content: result.summary, summary: result.summary, changes: result.changes, issues: result.issues, code: result.code, id: assistantId, time: nowTime() });
     activeMessageId = assistantId;
     highlightActiveMsg(assistantId);
 
-    renderCode(html);
-    renderPreview(html);
+    renderCode(result.code);
+    renderPreview(result.code);
     hideEmptyState();
     switchTab('preview');
     persistChat();
@@ -1623,11 +1623,13 @@ function buildMessages(newPrompt, annotationImage = null) {
 async function callAnthropic(apiKey, messages) {
   const userSysPrompt = document.getElementById('sysprompt-text').value.trim();
 
+  const jsonInstruction = 'Always respond with a JSON object containing: code (the complete HTML starting with <!DOCTYPE html>), summary (one sentence in Korean describing what you did), changes (array of specific changes made in Korean), issues (array of any problems, limitations, or things to watch out for in Korean, empty array if none). Return ONLY valid JSON, no markdown fences, no extra text.';
+
   let baseSystemPrompt;
   if (loadedFileName) {
-    baseSystemPrompt = `You are editing an existing HTML file (${loadedFileName}). The current code is provided in the user message. Return ONLY the complete updated HTML starting with <!DOCTYPE html>. Preserve all existing structure, styles, and functionality unless explicitly asked to change them. No explanations, no markdown fences, no extra text.`;
+    baseSystemPrompt = `You are editing an existing HTML file (${loadedFileName}). The current code is provided in the user message. Preserve all existing structure, styles, and functionality unless explicitly asked to change them. ${jsonInstruction}`;
   } else {
-    baseSystemPrompt = 'You are an expert web developer. Generate complete, self-contained HTML with inline CSS and JS. Return ONLY the raw HTML code starting with <!DOCTYPE html>. No explanations, no markdown fences, no extra text.';
+    baseSystemPrompt = `You are an expert web developer. Generate complete, self-contained HTML with inline CSS and JS. ${jsonInstruction}`;
   }
 
   const systemParts = [baseSystemPrompt];
@@ -1659,17 +1661,29 @@ async function callAnthropic(apiKey, messages) {
 
   const data = await resp.json();
   const raw = data.content?.[0]?.text || '';
-  return extractHTML(raw);
+  return parseAIResponse(raw);
 }
 
-function extractHTML(raw) {
+function parseAIResponse(raw) {
   let s = raw.trim();
   // Strip markdown fences if present
-  s = s.replace(/^```(?:html)?\s*/i, '').replace(/\s*```$/i, '').trim();
-  // Find DOCTYPE start
+  s = s.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+  try {
+    const parsed = JSON.parse(s);
+    if (parsed.code) {
+      return {
+        code: parsed.code,
+        summary: parsed.summary || '코드가 생성되었습니다.',
+        changes: Array.isArray(parsed.changes) ? parsed.changes : [],
+        issues: Array.isArray(parsed.issues) ? parsed.issues : [],
+      };
+    }
+  } catch (_) {}
+  // Fallback: extract HTML directly
+  s = raw.trim().replace(/^```(?:html)?\s*/i, '').replace(/\s*```$/i, '').trim();
   const idx = s.toLowerCase().indexOf('<!doctype');
   if (idx > 0) s = s.slice(idx);
-  return s;
+  return { code: s, summary: '코드가 생성되었습니다.', changes: [], issues: [] };
 }
 
 /* ═════════════════════════════════════════════════════════════
@@ -1699,20 +1713,50 @@ function renderChat() {
       const wrap = document.createElement('div');
       wrap.className = 'msg-assistant-wrap';
 
-      if (msg.code) {
-        const badge = document.createElement('div');
-        badge.className = 'code-badge';
-        badge.innerHTML = '✦ 코드 생성됨';
-        wrap.appendChild(badge);
-      }
-
       const bubble = document.createElement('div');
       bubble.className = 'msg-assistant' + (msg.id === activeMessageId ? ' active' : '');
       bubble.dataset.msgId = msg.id;
-      bubble.textContent = msg.content;
       if (msg.code) {
         bubble.title = '클릭하면 이 버전을 미리보기에 표시합니다';
         bubble.addEventListener('click', () => restoreVersion(msg.id));
+
+        // Rich content: summary + changes + issues
+        const summaryEl = document.createElement('div');
+        summaryEl.style.cssText = 'font-weight:600;margin-bottom:6px;';
+        summaryEl.textContent = msg.summary || msg.content;
+        bubble.appendChild(summaryEl);
+
+        if (msg.changes && msg.changes.length > 0) {
+          const changesLabel = document.createElement('div');
+          changesLabel.style.cssText = 'font-size:11px;color:var(--text-muted,#888);margin-bottom:2px;';
+          changesLabel.textContent = '📝 변경사항';
+          bubble.appendChild(changesLabel);
+          const changesList = document.createElement('ul');
+          changesList.style.cssText = 'margin:0 0 6px 16px;padding:0;font-size:12px;';
+          msg.changes.forEach(c => {
+            const li = document.createElement('li');
+            li.textContent = c;
+            changesList.appendChild(li);
+          });
+          bubble.appendChild(changesList);
+        }
+
+        if (msg.issues && msg.issues.length > 0) {
+          const issuesLabel = document.createElement('div');
+          issuesLabel.style.cssText = 'font-size:11px;color:var(--text-muted,#888);margin-bottom:2px;';
+          issuesLabel.textContent = '⚠️ 주의사항';
+          bubble.appendChild(issuesLabel);
+          const issuesList = document.createElement('ul');
+          issuesList.style.cssText = 'margin:0 0 4px 16px;padding:0;font-size:12px;';
+          msg.issues.forEach(i => {
+            const li = document.createElement('li');
+            li.textContent = i;
+            issuesList.appendChild(li);
+          });
+          bubble.appendChild(issuesList);
+        }
+      } else {
+        bubble.textContent = msg.content;
       }
       wrap.appendChild(bubble);
 
