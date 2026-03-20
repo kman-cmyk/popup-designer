@@ -19,6 +19,9 @@
     .topbar-btn{padding:8px 16px;border-radius:9999px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:all 0.15s;border:none}
     .btn-add{background:#F0F7FF;color:#3B82F6;border:1px dashed #93C5FD}
     .btn-add:hover{background:#DBEAFE}
+    .btn-entrance{background:#FFF7ED;color:#D97706;border:1px dashed #FCD34D}
+    .btn-entrance:hover{background:#FEF3C7}
+    .btn-entrance.active{background:#D97706;color:#fff;border-color:#D97706}
     .btn-quote{background:#020202;color:#fff}
     .btn-quote:hover{background:#1a1a1a}
     .btn-back{background:#fff;color:#555;border:1px solid #E5E7EB}
@@ -27,12 +30,26 @@
     /* WORKSPACE */
     .workspace{display:flex;height:calc(100vh - 52px)}
 
-    /* CANVAS (70%) */
-    .canvas-area{flex:7;background:#F4F5F7;position:relative;overflow:hidden;background-image:radial-gradient(circle,#D1D5DB 1px,transparent 1px);background-size:28px 28px}
-    .canvas-frame{position:absolute;border-radius:8px;cursor:grab;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border:2px solid rgba(0,0,0,0.08);user-select:none;transition:border-color 0.15s,box-shadow 0.15s;min-width:60px;min-height:50px}
+    /* CANVAS AREA (70%) */
+    .canvas-area{flex:7;background:#F4F5F7;position:relative;overflow:hidden;background-image:radial-gradient(circle,#D1D5DB 1px,transparent 1px);background-size:28px 28px;display:flex;align-items:center;justify-content:center}
+
+    /* ROOM */
+    .canvas-room{position:relative;background:#FAFAFA;border:2.5px solid #374151;border-radius:2px;box-shadow:0 4px 20px rgba(0,0,0,0.12);flex-shrink:0}
+    .canvas-room.entrance-mode{border-color:#D97706;box-shadow:0 0 0 3px rgba(217,119,6,0.2),0 4px 20px rgba(0,0,0,0.12);cursor:crosshair}
+    .room-dim-label{position:absolute;font-size:10px;color:#9CA3AF;font-weight:600;pointer-events:none;white-space:nowrap}
+    .room-dim-w{bottom:-18px;left:50%;transform:translateX(-50%)}
+    .room-dim-d{left:-22px;top:50%;transform:translateY(-50%) rotate(-90deg)}
+    .entrance-hint{position:absolute;bottom:-36px;left:50%;transform:translateX(-50%);font-size:11px;color:#D97706;font-weight:600;white-space:nowrap;pointer-events:none}
+
+    /* ENTRANCE MARKER */
+    .entrance-gap{position:absolute;background:#FAFAFA;z-index:4;display:flex;align-items:center;justify-content:center}
+    .entrance-arrow{font-size:14px;line-height:1}
+
+    /* FRAMES */
+    .canvas-frame{position:absolute;border-radius:8px;cursor:grab;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border:2px solid rgba(0,0,0,0.08);user-select:none;min-width:40px;min-height:36px}
     .canvas-frame:active{cursor:grabbing}
     .canvas-frame.selected{border-color:#3B82F6!important;box-shadow:0 0 0 3px rgba(59,130,246,0.25)}
-    .canvas-frame-icon{font-size:22px;pointer-events:none;line-height:1}
+    .canvas-frame-icon{font-size:20px;pointer-events:none;line-height:1}
     .canvas-frame-label{font-size:10px;font-weight:700;color:rgba(0,0,0,0.6);pointer-events:none;text-align:center;padding:0 6px;line-height:1.3;word-break:break-all}
     .canvas-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;color:#CCC;pointer-events:none}
     .canvas-empty-icon{font-size:48px}
@@ -56,6 +73,9 @@
     .info-cell-val{font-size:20px;font-weight:800;color:#111}
     .info-cell-label{font-size:11px;color:#AAA;margin-top:2px}
     .hint-text{font-size:12px;color:#AAA;line-height:1.6;text-align:center;padding:8px 0}
+    .space-info-card{background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:12px 14px;margin-bottom:16px}
+    .space-info-card-label{font-size:10px;font-weight:700;color:#16A34A;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px}
+    .space-info-card-text{font-size:13px;color:#166534;font-weight:600}
 
     /* FRAME EDIT */
     .prop-group{margin-bottom:14px}
@@ -113,6 +133,7 @@
   <span class="topbar-title">STEP 3. 레이아웃 편집</span>
   <div class="topbar-spacer"></div>
   <button class="topbar-btn btn-back" onclick="window.location.href='step2-loading.html'">← 다시 생성</button>
+  <button class="topbar-btn btn-entrance" id="entranceBtn" onclick="toggleEntranceMode()">🚪 입구</button>
   <button class="topbar-btn btn-add" onclick="addFrame()">+ 프레임 추가</button>
   <button class="topbar-btn btn-quote" onclick="goToQuote()">견적 확인하기 →</button>
 </div>
@@ -120,9 +141,13 @@
 <div class="workspace">
   <!-- CANVAS -->
   <div class="canvas-area" id="canvasArea">
-    <div class="canvas-empty" id="canvasEmpty">
-      <div class="canvas-empty-icon">🏗</div>
-      <div class="canvas-empty-text">레이아웃을 불러오는 중...</div>
+    <div class="canvas-room" id="canvasRoom">
+      <div class="canvas-empty" id="canvasEmpty">
+        <div class="canvas-empty-icon">🏗</div>
+        <div class="canvas-empty-text">레이아웃을 불러오는 중...</div>
+      </div>
+      <span class="room-dim-label room-dim-w" id="dimLabelW"></span>
+      <span class="room-dim-label room-dim-d" id="dimLabelD"></span>
     </div>
   </div>
 
@@ -154,12 +179,29 @@
 let frames = [];
 let layoutMeta = {};
 let selectedIdx = -1;
+let entranceMode = false;
+let entrance = null; // { side: 'bottom'|'top'|'left'|'right', pos: 0~1 }
+let spaceW = 8, spaceD = 6; // meters
 
 const TYPE_ICONS = { rack:'🗄', shelf:'📦', counter:'🛒', display:'🖼', hanger:'👔' };
 const DEFAULT_COLORS = ['#DBEAFE','#EDE9FE','#DCFCE7','#FEF3C7','#FFE4E6','#F0FDF4'];
+const ENTRANCE_SIZE = 40; // px
 
 // ── Init ──
 window.addEventListener('load', () => {
+  // Load space dimensions from step1
+  const step1 = JSON.parse(localStorage.getItem('step1Data') || '{}');
+  if (step1.spaceWidth) spaceW = parseFloat(step1.spaceWidth) || 8;
+  if (step1.spaceDepth) spaceD = parseFloat(step1.spaceDepth) || 6;
+
+  // Set room aspect ratio
+  setRoomSize();
+
+  // Load entrance state
+  const savedEntrance = localStorage.getItem('entranceData');
+  if (savedEntrance) entrance = JSON.parse(savedEntrance);
+
+  // Load layout
   const saved = JSON.parse(localStorage.getItem('layoutData') || 'null');
   if (saved && saved.frames && saved.frames.length) {
     layoutMeta = { layout: saved.layout, designConcept: saved.designConcept };
@@ -171,7 +213,36 @@ window.addEventListener('load', () => {
   document.getElementById('canvasEmpty').style.display = 'none';
   renderCanvas();
   renderPanel();
+
+  // Update dim labels
+  document.getElementById('dimLabelW').textContent = spaceW + 'm';
+  document.getElementById('dimLabelD').textContent = spaceD + 'm';
 });
+
+window.addEventListener('resize', setRoomSize);
+
+function setRoomSize() {
+  const area = document.getElementById('canvasArea');
+  const room = document.getElementById('canvasRoom');
+  const areaW = area.clientWidth - 80; // padding
+  const areaH = area.clientHeight - 80;
+
+  const ratio = spaceW / spaceD;
+  let rW, rH;
+
+  if (areaW / areaH > ratio) {
+    // height-constrained
+    rH = areaH;
+    rW = rH * ratio;
+  } else {
+    // width-constrained
+    rW = areaW;
+    rH = rW / ratio;
+  }
+
+  room.style.width = rW + 'px';
+  room.style.height = rH + 'px';
+}
 
 function getDefaultFrames() {
   return [
@@ -186,9 +257,13 @@ function getDefaultFrames() {
 
 // ── Canvas Rendering ──
 function renderCanvas() {
-  const area = document.getElementById('canvasArea');
-  area.querySelectorAll('.canvas-frame').forEach(el => el.remove());
+  const room = document.getElementById('canvasRoom');
+  room.querySelectorAll('.canvas-frame,.entrance-gap').forEach(el => el.remove());
 
+  // Render entrance
+  if (entrance) renderEntrance(room);
+
+  // Render frames
   frames.forEach((f, i) => {
     const el = document.createElement('div');
     el.className = 'canvas-frame' + (i === selectedIdx ? ' selected' : '');
@@ -203,6 +278,7 @@ function renderCanvas() {
     `;
 
     el.addEventListener('mousedown', (e) => {
+      if (entranceMode) return;
       e.preventDefault();
       if (selectedIdx !== i) {
         document.querySelectorAll('.canvas-frame').forEach(fr => fr.classList.remove('selected'));
@@ -213,6 +289,7 @@ function renderCanvas() {
       startDrag(e, el, f);
     });
     el.addEventListener('touchstart', (e) => {
+      if (entranceMode) return;
       e.preventDefault();
       if (selectedIdx !== i) {
         document.querySelectorAll('.canvas-frame').forEach(fr => fr.classList.remove('selected'));
@@ -223,14 +300,112 @@ function renderCanvas() {
       startDragTouch(e, el, f);
     }, { passive: false });
 
-    area.appendChild(el);
+    room.appendChild(el);
   });
+}
+
+// ── Entrance Rendering ──
+function renderEntrance(room) {
+  if (!entrance) return;
+  const { side, pos } = entrance;
+  const rW = room.clientWidth;
+  const rH = room.clientHeight;
+  const size = ENTRANCE_SIZE;
+  const thick = 6; // overlap border
+
+  const gap = document.createElement('div');
+  gap.className = 'entrance-gap';
+
+  const arrows = { top: '⬇', bottom: '⬆', left: '➡', right: '⬅' };
+  gap.innerHTML = `<span class="entrance-arrow">${arrows[side]}</span>`;
+
+  if (side === 'top' || side === 'bottom') {
+    gap.style.width = size + 'px';
+    gap.style.height = thick + 'px';
+    gap.style.left = (pos * 100 - (size / rW * 50)) + '%';
+    gap.style.top = side === 'top' ? '-' + (thick / 2) + 'px' : (rH - thick / 2) + 'px';
+  } else {
+    gap.style.width = thick + 'px';
+    gap.style.height = size + 'px';
+    gap.style.top = (pos * 100 - (size / rH * 50)) + '%';
+    gap.style.left = side === 'left' ? '-' + (thick / 2) + 'px' : (rW - thick / 2) + 'px';
+  }
+
+  room.appendChild(gap);
+}
+
+// ── Entrance Mode ──
+function toggleEntranceMode() {
+  entranceMode = !entranceMode;
+  const btn = document.getElementById('entranceBtn');
+  const room = document.getElementById('canvasRoom');
+  btn.classList.toggle('active', entranceMode);
+  room.classList.toggle('entrance-mode', entranceMode);
+
+  // Show/hide hint
+  let hint = room.querySelector('.entrance-hint');
+  if (entranceMode) {
+    if (!hint) {
+      hint = document.createElement('div');
+      hint.className = 'entrance-hint';
+      hint.textContent = '벽면을 클릭해서 입구 위치를 지정하세요';
+      room.appendChild(hint);
+    }
+    room.addEventListener('click', onRoomClickEntrance);
+    room.addEventListener('touchend', onRoomTouchEntrance);
+  } else {
+    if (hint) hint.remove();
+    room.removeEventListener('click', onRoomClickEntrance);
+    room.removeEventListener('touchend', onRoomTouchEntrance);
+  }
+}
+
+function onRoomClickEntrance(e) {
+  if (!entranceMode) return;
+  if (e.target.classList.contains('canvas-frame') || e.target.classList.contains('canvas-frame-icon') || e.target.classList.contains('canvas-frame-label')) return;
+  placeEntrance(e.clientX, e.clientY);
+}
+
+function onRoomTouchEntrance(e) {
+  if (!entranceMode) return;
+  const t = e.changedTouches[0];
+  placeEntrance(t.clientX, t.clientY);
+}
+
+function placeEntrance(clientX, clientY) {
+  const room = document.getElementById('canvasRoom');
+  const rect = room.getBoundingClientRect();
+  const x = clientX - rect.left;
+  const y = clientY - rect.top;
+  const rW = rect.width;
+  const rH = rect.height;
+
+  // Determine which wall is closest
+  const distTop = y;
+  const distBottom = rH - y;
+  const distLeft = x;
+  const distRight = rW - x;
+  const minDist = Math.min(distTop, distBottom, distLeft, distRight);
+
+  let side, pos;
+  if (minDist === distTop)    { side = 'top';    pos = x / rW; }
+  else if (minDist === distBottom) { side = 'bottom'; pos = x / rW; }
+  else if (minDist === distLeft)   { side = 'left';   pos = y / rH; }
+  else                             { side = 'right';  pos = y / rH; }
+
+  pos = Math.max(0.05, Math.min(0.95, pos));
+  entrance = { side, pos };
+
+  localStorage.setItem('entranceData', JSON.stringify(entrance));
+  renderCanvas();
+  toggleEntranceMode(); // exit entrance mode after placing
+  renderPanel();
 }
 
 // ── Drag ──
 function startDrag(e, el, frame) {
-  const area = document.getElementById('canvasArea');
-  const rect = area.getBoundingClientRect();
+  const room = document.getElementById('canvasRoom');
+  const rect = room.getBoundingClientRect();
   const startXPct = ((e.clientX - rect.left) / rect.width) * 100;
   const startYPct = ((e.clientY - rect.top) / rect.height) * 100;
   const origX = frame.x;
@@ -263,8 +438,8 @@ function startDrag(e, el, frame) {
 }
 
 function startDragTouch(e, el, frame) {
-  const area = document.getElementById('canvasArea');
-  const rect = area.getBoundingClientRect();
+  const room = document.getElementById('canvasRoom');
+  const rect = room.getBoundingClientRect();
   const t0 = e.touches[0];
   const startXPct = ((t0.clientX - rect.left) / rect.width) * 100;
   const startYPct = ((t0.clientY - rect.top) / rect.height) * 100;
@@ -306,12 +481,16 @@ function renderPanel() {
   const closeBtn = document.getElementById('panelCloseBtn');
 
   if (selectedIdx < 0 || !frames[selectedIdx]) {
-    // Overview
     title.textContent = '레이아웃 정보';
     closeBtn.style.display = 'none';
     const concept = layoutMeta.designConcept || '';
     const totalModules = frames.reduce((s, f) => s + (f.modules || []).length, 0);
+    const entranceText = entrance ? `${({top:'위',bottom:'아래',left:'왼쪽',right:'오른쪽'})[entrance.side]} 벽면` : '미지정';
     body.innerHTML = `
+      <div class="space-info-card">
+        <div class="space-info-card-label">공간 정보</div>
+        <div class="space-info-card-text">📐 ${spaceW}m × ${spaceD}m &nbsp;|&nbsp; 🚪 입구: ${entranceText}</div>
+      </div>
       ${concept ? `<div class="concept-card"><div class="concept-card-label">AI 디자인 컨셉</div><div class="concept-card-text">${concept}</div></div>` : ''}
       <div class="info-grid">
         <div class="info-cell"><div class="info-cell-val">${frames.length}</div><div class="info-cell-label">총 프레임 수</div></div>
@@ -320,7 +499,6 @@ function renderPanel() {
       <div class="hint-text">프레임을 클릭하면<br>세부 편집이 가능합니다.</div>
     `;
   } else {
-    // Frame detail
     const f = frames[selectedIdx];
     title.textContent = f.label || '프레임 편집';
     closeBtn.style.display = 'flex';
