@@ -185,91 +185,54 @@ function animateProgress() {
 }
 
 async function callClaude() {
-  const apiKey = localStorage.getItem('apiKey');
+  const API_KEY = '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';
   const step1 = JSON.parse(localStorage.getItem('step1Data') || '{}');
 
-  if (!apiKey) {
-    // No API key — use mock data
-    const mock = getMockStyles(step1);
-    localStorage.setItem('aiStyles', JSON.stringify(mock));
-    aiDone = true;
-    return;
-  }
+  const prompt = `당신은 팝업스토어 인테리어 전문가입니다. 아래 정보를 바탕으로 3가지 서로 다른 팝업스토어 스타일 컨셉을 제안해주세요.
+브랜드명: ${step1.brandName || step1.brand || '미입력'}
+업종: ${step1.industry || step1.category || '미입력'}
+공간크기: ${step1.spaceSize || step1.area || '미입력'}
+분위기 키워드: ${step1.moodKeywords || step1.mood || '미입력'}
+타겟고객: ${step1.targetCustomer || step1.target || '미입력'}
+예산: ${step1.budget || '미입력'}
 
-  const prompt = `팝업스토어 공간 정보:
-- 면적: ${step1.area || '미입력'}
-- 공간 형태: ${step1.spaceType || '미입력'}
-- 브랜드 무드: ${step1.mood || '미입력'}
-- 주요 제품: ${step1.products || '미입력'}
-- 예산: ${step1.budget || '미입력'}
-- 기간: ${step1.period || '미입력'}
-
-위 정보를 바탕으로 팝업스토어를 위한 3가지 스타일 컨셉을 제안해주세요. 반드시 아래 JSON만 반환하세요 (마크다운 없이):
-[
-  {
-    "id": 1,
-    "name": "컨셉 이름 (영문 병기)",
-    "nameKo": "한글 이름",
-    "nameEn": "English Name",
-    "description": "이 컨셉의 특징을 2-3문장으로 설명",
-    "mood": "주요 키워드 3개 (쉼표 구분)",
-    "badge": ""
-  },
-  ...
-]
-첫 번째 컨셉의 badge에는 "BEST"를 넣어주세요. 나머지는 빈 문자열.`;
+각 컨셉은 JSON 형식으로: {title: 컨셉명, description: 2-3문장 설명, keywords: [키워드3개], primaryColor: hex색상, accentColor: hex색상, mood: 분위기한단어} 반드시 JSON 배열로만 응답하세요.`;
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': apiKey,
+        'x-api-key': API_KEY,
         'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-calls': 'true',
+        'anthropic-dangerous-direct-browser-access': 'true'
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
+        model: 'claude-haiku-4-5',
         max_tokens: 1024,
-        messages: [{ role: 'user', content: prompt }],
-      }),
+        messages: [{ role: 'user', content: prompt }]
+      })
     });
 
-    if (!res.ok) throw new Error('API 오류');
-    const data = await res.json();
+    if (!response.ok) throw new Error('API 오류');
+    const data = await response.json();
     let text = (data.content?.[0]?.text || '').trim();
     const m = text.match(/\[[\s\S]*\]/);
     if (m) text = m[0];
-    const styles = JSON.parse(text);
-    localStorage.setItem('aiStyles', JSON.stringify(styles));
+    const concepts = JSON.parse(text);
+    localStorage.setItem('step2Concepts', JSON.stringify(concepts));
   } catch (e) {
     console.error(e);
-    localStorage.setItem('aiStyles', JSON.stringify(getMockStyles(step1)));
+    localStorage.setItem('step2Concepts', JSON.stringify(getDefaultConcepts()));
   }
   aiDone = true;
 }
 
-function getMockStyles(step1) {
-  const mood = step1.mood || '';
+function getDefaultConcepts() {
   return [
-    {
-      id: 1, badge: 'BEST',
-      nameKo: '미니멀 모던', nameEn: 'Minimal Modern',
-      description: '절제된 요소와 무채색의 조화를 통해 공간의 개방감을 극대화합니다. 깔끔한 라인과 레이아웃 배치가 시각적 피로도를 낮추는 것을 목표로 합니다.',
-      mood: '미니멀, 깔끔, 현대적',
-    },
-    {
-      id: 2, badge: '',
-      nameKo: '웜 내추럴', nameEn: 'Warm Natural',
-      description: '무드 톤과 따뜻한 소재를 사용하여 아늑한 분위기를 연출합니다. 자연적인 흐름을 고려한 곡선 조형의 레이아웃 배치가 특징입니다.',
-      mood: '따뜻함, 자연, 편안함',
-    },
-    {
-      id: 3, badge: '',
-      nameKo: '어반 인더스트리얼', nameEn: 'Urban Industrial',
-      description: '거친 질감과 금속 소재를 활용하여 세련된 도시 감각을 구현합니다. 불규칙한 그리드 시스템을 통해 독특한 개성을 표현합니다.',
-      mood: '모던, 도시적, 대담함',
-    },
+    { title: '미니멀 모던', description: '절제된 요소와 무채색의 조화를 통해 공간의 개방감을 극대화합니다. 깔끔한 라인과 레이아웃 배치가 시각적 피로도를 낮춥니다. 브랜드의 핵심 가치를 강조하는 심플한 디스플레이.', keywords: ['미니멀', '깔끔', '현대적'], primaryColor: '#2D2D2D', accentColor: '#F5F5F5', mood: '세련됨' },
+    { title: '웜 내추럴', description: '무드 톤과 따뜻한 소재를 사용하여 아늑한 분위기를 연출합니다. 자연적인 흐름을 고려한 곡선 조형의 레이아웃 배치가 특징입니다. 방문객에게 편안하고 친근한 인상을 줍니다.', keywords: ['따뜻함', '자연', '편안함'], primaryColor: '#8B6F47', accentColor: '#F5ECD7', mood: '아늑함' },
+    { title: '어반 인더스트리얼', description: '거친 질감과 금속 소재를 활용하여 세련된 도시 감각을 구현합니다. 불규칙한 그리드 시스템을 통해 독특한 개성을 표현합니다. 트렌디한 감성으로 젊은 타겟층을 공략합니다.', keywords: ['모던', '도시적', '대담함'], primaryColor: '#374151', accentColor: '#9CA3AF', mood: '강렬함' },
   ];
 }
 

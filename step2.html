@@ -177,68 +177,66 @@
 </div>
 
 <script>
-const CARD_IMAGES = [
-  { bg: 'card-image-1', emoji: '∞', subtext: 'Minimal Life Work' },
-  { bg: 'card-image-2', emoji: '☕', subtext: 'Warm Natural Calm' },
-  { bg: 'card-image-3', emoji: '🏙', subtext: 'Urban Industrial Edge' },
-];
+const CARD_BG_CLASSES = ['card-image-1', 'card-image-2', 'card-image-3'];
 
-function renderCards(styles) {
+function renderCards(concepts) {
   const grid = document.getElementById('conceptsGrid');
   grid.innerHTML = '';
-  styles.forEach((s, i) => {
-    const img = CARD_IMAGES[i % CARD_IMAGES.length];
+  concepts.forEach((c, i) => {
+    const bg = CARD_BG_CLASSES[i % CARD_BG_CLASSES.length];
+    const accentBorder = c.primaryColor ? `border-top: 4px solid ${c.primaryColor}` : '';
+    const keywordBadges = (c.keywords || []).map(k =>
+      `<span style="display:inline-block;background:#F3F4F6;color:#555;font-size:11px;font-weight:600;padding:3px 8px;border-radius:9999px;margin:2px 2px 2px 0">${k}</span>`
+    ).join('');
     const card = document.createElement('div');
     card.className = 'concept-card';
-    card.id = `card-${s.id || i}`;
+    card.id = `card-${i}`;
+    card.style.cssText = accentBorder;
     card.innerHTML = `
-      <div class="card-image ${img.bg}" style="flex-direction:column;gap:8px">
-        <span style="font-size:56px">${img.emoji}</span>
-        <span class="card-image-text">${img.subtext}</span>
+      <div class="card-image ${bg}" style="flex-direction:column;gap:8px;${c.primaryColor ? `background:linear-gradient(135deg,${c.primaryColor}22,${c.accentColor || '#F5F5F5'})` : ''}">
+        <span style="font-size:15px;font-weight:800;color:${c.primaryColor || '#444'};letter-spacing:0.05em;text-transform:uppercase">${c.mood || ''}</span>
+        <span style="font-size:11px;color:#888;font-weight:600">${(c.keywords || []).join(' · ')}</span>
       </div>
       <div class="card-body">
-        <div class="card-label">
-          CONCEPT 0${i+1}
-          ${s.badge ? `<span class="card-badge">${s.badge}</span>` : ''}
-        </div>
-        <div class="card-name">${s.nameKo || s.name} <span style="font-size:14px;font-weight:500;color:#888">(${s.nameEn || ''})</span></div>
-        <div class="card-desc">${s.description}</div>
-        <button class="card-select-btn" onclick="selectStyle(${i}, event)">이 설계 선택하기</button>
+        <div class="card-label">CONCEPT 0${i + 1}</div>
+        <div class="card-name">${c.title || c.name || ''}</div>
+        <div class="card-desc">${c.description || ''}</div>
+        <div style="margin-bottom:16px">${keywordBadges}</div>
+        <button class="card-select-btn" onclick="selectConcept(${i}, event)">이 설계 선택하기</button>
       </div>`;
     grid.appendChild(card);
   });
 }
 
-function selectStyle(idx, e) {
-  const styles = JSON.parse(localStorage.getItem('aiStyles') || '[]');
+function selectConcept(idx, e) {
+  const concepts = JSON.parse(localStorage.getItem('step2Concepts') || '[]');
   document.querySelectorAll('.concept-card').forEach(c => c.classList.remove('selected'));
   e.target.closest('.concept-card').classList.add('selected');
-  localStorage.setItem('selectedStyle', JSON.stringify(styles[idx]));
+  localStorage.setItem('selectedConcept', JSON.stringify(concepts[idx]));
   setTimeout(() => { window.location.href = 'step3-frames.html'; }, 400);
 }
 
 window.addEventListener('load', () => {
-  const styles = JSON.parse(localStorage.getItem('aiStyles') || '[]');
-  if (styles.length) {
-    renderCards(styles);
+  const concepts = JSON.parse(localStorage.getItem('step2Concepts') || '[]');
+  if (concepts.length) {
+    renderCards(concepts);
   } else {
-    // poll for styles
     let tries = 0;
     const poll = setInterval(() => {
-      const s = JSON.parse(localStorage.getItem('aiStyles') || '[]');
-      if (s.length || tries++ > 30) {
+      const c = JSON.parse(localStorage.getItem('step2Concepts') || '[]');
+      if (c.length || tries++ > 30) {
         clearInterval(poll);
-        renderCards(s.length ? s : getDefaultStyles());
+        renderCards(c.length ? c : getDefaultConcepts());
       }
     }, 500);
   }
 });
 
-function getDefaultStyles() {
+function getDefaultConcepts() {
   return [
-    { id:1, badge:'BEST', nameKo:'미니멀 모던', nameEn:'Minimal Modern', description:'절제된 요소와 무채색의 조화를 통해 공간의 개방감을 극대화합니다. 깔끔한 라인과 레이아웃 배치가 시각적 피로도를 낮추는 것을 목표로 합니다.', mood:'미니멀, 깔끔, 현대적' },
-    { id:2, badge:'', nameKo:'웜 내추럴', nameEn:'Warm Natural', description:'무드 톤과 따뜻한 소재를 사용하여 아늑한 분위기를 연출합니다. 자연적인 흐름을 고려한 곡선 조형의 레이아웃 배치가 특징입니다.', mood:'따뜻함, 자연, 편안함' },
-    { id:3, badge:'', nameKo:'어반 인더스트리얼', nameEn:'Urban Industrial', description:'거친 질감과 금속 소재를 활용하여 세련된 도시 감각을 구현합니다. 불규칙한 그리드 시스템을 통해 독특한 개성을 표현합니다.', mood:'모던, 도시적, 대담함' },
+    { title: '미니멀 모던', description: '절제된 요소와 무채색의 조화를 통해 공간의 개방감을 극대화합니다. 깔끔한 라인과 레이아웃 배치가 시각적 피로도를 낮춥니다.', keywords: ['미니멀', '깔끔', '현대적'], primaryColor: '#2D2D2D', accentColor: '#F5F5F5', mood: '세련됨' },
+    { title: '웜 내추럴', description: '무드 톤과 따뜻한 소재를 사용하여 아늑한 분위기를 연출합니다. 자연적인 흐름을 고려한 곡선 조형의 레이아웃 배치가 특징입니다.', keywords: ['따뜻함', '자연', '편안함'], primaryColor: '#8B6F47', accentColor: '#F5ECD7', mood: '아늑함' },
+    { title: '어반 인더스트리얼', description: '거친 질감과 금속 소재를 활용하여 세련된 도시 감각을 구현합니다. 불규칙한 그리드 시스템을 통해 독특한 개성을 표현합니다.', keywords: ['모던', '도시적', '대담함'], primaryColor: '#374151', accentColor: '#9CA3AF', mood: '강렬함' },
   ];
 }
 

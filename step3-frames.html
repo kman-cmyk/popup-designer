@@ -249,53 +249,34 @@ async function generateAILayout() {
   const btn = document.getElementById('regenBtn');
   btn.classList.add('loading');
 
+  const API_KEY = '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';
   const step1 = JSON.parse(localStorage.getItem('step1Data') || '{}');
-  const style = JSON.parse(localStorage.getItem('selectedStyle') || '{}');
-  const apiKey = localStorage.getItem('apiKey');
+  const concept = JSON.parse(localStorage.getItem('selectedConcept') || '{}');
 
   let success = false;
 
-  if (apiKey) {
-    try {
+  try {
       const infoText = [
         step1.spaceSize    ? `공간 크기: ${step1.spaceSize}` : null,
-        step1.brandMood    ? `브랜드 무드: ${step1.brandMood}` : null,
-        step1.products     ? `취급 상품: ${step1.products}` : null,
+        step1.moodKeywords ? `분위기: ${step1.moodKeywords}` : null,
         step1.budget       ? `예산: ${step1.budget}` : null,
-        style.name         ? `선택 스타일: ${style.name}` : null,
-        style.description  ? `스타일 설명: ${style.description}` : null,
+        concept.title      ? `선택 컨셉: ${concept.title}` : null,
+        concept.description ? `컨셉 설명: ${concept.description}` : null,
       ].filter(Boolean).join(', ');
 
-      const prompt = `You are a popup store designer. Based on this info: ${infoText || 'No specific info provided, use defaults'}, generate an optimal 2D layout. Return ONLY valid JSON in this format:
-{
-  "frames": [
-    {
-      "id": "frame-1",
-      "name": "MAIN FRAME A",
-      "x": 200, "y": 80,
-      "modules": [
-        {"type": "선반", "height": 360},
-        {"type": "행거", "height": 540},
-        {"type": "디스플레이박스", "height": 360},
-        {"type": "카운터", "height": 540}
-      ]
-    }
-  ],
-  "concept": "brief description in Korean of why this layout"
-}
-Rules: Frame width is always 600, height is always 1800. Module heights must sum to exactly 1800. Use 3-6 modules per frame. Generate 2-4 frames based on space size. Only use these module types: 선반, 행거, 디스플레이박스, 카운터.`;
+      const prompt = `팝업스토어 레이아웃 전문가입니다. 아래 정보로 최적의 프레임 배치를 JSON으로 생성하세요. 공간크기와 예산 고려. 반드시 JSON만 응답: ${infoText || '기본 설정 사용'}\n응답 형식: {"frames": [{"id": "frame-1", "name": "MAIN FRAME A", "x": 200, "y": 80, "modules": [{"type": "선반", "height": 360}, {"type": "행거", "height": 540}, {"type": "디스플레이박스", "height": 360}, {"type": "카운터", "height": 540}]}], "concept": "한국어로 레이아웃 설명"}\n규칙: 프레임 너비 항상 600, 높이 항상 1800. 모듈 height 합계 반드시 1800. 프레임당 3-6개 모듈. 공간크기 기반 2-4개 프레임. 모듈 타입: 선반, 행거, 디스플레이박스, 카운터만 사용.`;
 
       const res = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-api-key': apiKey,
+          'x-api-key': API_KEY,
           'anthropic-version': '2023-06-01',
           'anthropic-dangerous-direct-browser-access': 'true',
         },
         body: JSON.stringify({
-          model: 'claude-opus-4-6',
-          max_tokens: 1500,
+          model: 'claude-haiku-4-5',
+          max_tokens: 1024,
           messages: [{ role: 'user', content: prompt }],
         }),
       });
@@ -327,10 +308,9 @@ Rules: Frame width is always 600, height is always 1800. Module heights must sum
     } catch (err) {
       console.warn('AI API error:', err);
     }
-  }
 
   if (!success) {
-    useMockData(JSON.parse(localStorage.getItem('step1Data') || '{}'), JSON.parse(localStorage.getItem('selectedStyle') || '{}'));
+    useMockData(JSON.parse(localStorage.getItem('step1Data') || '{}'), JSON.parse(localStorage.getItem('selectedConcept') || '{}'));
   }
 
   hideLoading();
@@ -429,3 +409,222 @@ function renderCanvas() {
     box.className = 'canvas-frame-box' + (fi === activeIdx ? ' active' : '');
 
     const totalH = f.modules.reduce((s, m) => s + m.height, 0) || 1800;
+
+    f.modules.forEach(m => {
+      const block = document.createElement('div');
+      block.className = 'canvas-module-block';
+      const blockH = Math.round((m.height / totalH) * FRAME_PX_H);
+      block.style.height = blockH + 'px';
+      block.style.background = MODULE_COLORS[m.type] || '#F3F4F6';
+      block.textContent = m.type.substring(0, 1);
+      box.appendChild(block);
+    });
+
+    if (f.aiGenerated) {
+      const badge = document.createElement('div');
+      badge.className = 'canvas-frame-badge';
+      badge.textContent = 'AI';
+      box.appendChild(badge);
+    }
+
+    wrap.appendChild(label);
+    wrap.appendChild(box);
+    inner.appendChild(wrap);
+
+    wrap.addEventListener('mousedown', (e) => {
+      if (e.target.tagName === 'BUTTON') return;
+      activeIdx = fi;
+      renderAll();
+      startDrag(e, wrap, f);
+    });
+    wrap.addEventListener('touchstart', (e) => {
+      if (e.target.tagName === 'BUTTON') return;
+      activeIdx = fi;
+      renderAll();
+      startDragTouch(e, wrap, f);
+    }, { passive: false });
+  });
+}
+
+function startDrag(e, el, frame) {
+  const startX = e.clientX - frame.x;
+  const startY = e.clientY - frame.y;
+  function onMove(ev) {
+    frame.x = Math.max(0, Math.round((ev.clientX - startX) / SNAP) * SNAP);
+    frame.y = Math.max(0, Math.round((ev.clientY - startY) / SNAP) * SNAP);
+    el.style.left = frame.x + 'px';
+    el.style.top = frame.y + 'px';
+  }
+  function onUp() {
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('mouseup', onUp);
+    autoSave();
+  }
+  document.addEventListener('mousemove', onMove);
+  document.addEventListener('mouseup', onUp);
+}
+
+function startDragTouch(e, el, frame) {
+  const touch = e.touches[0];
+  const startX = touch.clientX - frame.x;
+  const startY = touch.clientY - frame.y;
+  e.preventDefault();
+  function onMove(ev) {
+    const t = ev.touches[0];
+    frame.x = Math.max(0, Math.round((t.clientX - startX) / SNAP) * SNAP);
+    frame.y = Math.max(0, Math.round((t.clientY - startY) / SNAP) * SNAP);
+    el.style.left = frame.x + 'px';
+    el.style.top = frame.y + 'px';
+  }
+  function onEnd() {
+    document.removeEventListener('touchmove', onMove);
+    document.removeEventListener('touchend', onEnd);
+    autoSave();
+  }
+  document.addEventListener('touchmove', onMove, { passive: false });
+  document.addEventListener('touchend', onEnd);
+}
+
+// ── Right Panel ──
+function renderRightPanel() {
+  const body = document.getElementById('propsBody');
+  if (activeIdx < 0 || !frames[activeIdx]) {
+    body.innerHTML = '<div class="no-selection">프레임을 선택하면<br>여기서 편집할 수 있습니다.</div>';
+    return;
+  }
+  const f = frames[activeIdx];
+  const conceptHtml = aiConcept
+    ? `<div class="concept-box"><div class="concept-box-label">AI 컨셉</div>${aiConcept}</div>` : '';
+  const totalH = f.modules.reduce((s, m) => s + m.height, 0);
+  const warnHtml = totalH !== 1800
+    ? `<div class="height-warning">⚠ 합계: ${totalH}mm (권장: 1800mm)</div>` : '';
+  const moduleRows = f.modules.map((m, mi) => `
+    <div class="module-row">
+      <div class="mod-dot" style="background:${MODULE_COLORS[m.type] || '#F3F4F6'}"></div>
+      <select class="mod-select" onchange="updateModule(${mi},'type',this.value)">
+        ${MODULE_TYPES.map(t => `<option value="${t}"${t === m.type ? ' selected' : ''}>${t}</option>`).join('')}
+      </select>
+      <input class="mod-height" type="number" value="${m.height}" min="120" max="1800" step="60" onchange="updateModule(${mi},'height',+this.value)">
+      <div class="mod-arrows">
+        <button class="mod-arrow" onclick="moveModule(${mi},-1)">▲</button>
+        <button class="mod-arrow" onclick="moveModule(${mi},1)">▼</button>
+      </div>
+      <button class="mod-del" onclick="deleteModule(${mi})">✕</button>
+    </div>`).join('');
+
+  body.innerHTML = `
+    ${conceptHtml}
+    <div class="prop-group">
+      <div class="prop-label">프레임 이름</div>
+      <input class="prop-input" type="text" value="${f.name}" oninput="updateFrameName(this.value)">
+    </div>
+    <div class="prop-group">
+      <div class="prop-label">모듈 구성</div>
+      <div class="module-list">${moduleRows}</div>
+      <button class="add-module-btn" onclick="addModule()">+ 모듈 추가</button>
+      ${warnHtml}
+    </div>`;
+}
+
+// ── Module / Frame editing ──
+function updateFrameName(val) {
+  if (frames[activeIdx]) { frames[activeIdx].name = val; renderFrameList(); renderCanvas(); autoSave(); }
+}
+function updateModule(mi, key, val) {
+  if (!frames[activeIdx]) return;
+  frames[activeIdx].modules[mi][key] = val;
+  renderAll(); autoSave();
+}
+function moveModule(mi, dir) {
+  if (!frames[activeIdx]) return;
+  const mods = frames[activeIdx].modules;
+  const ni = mi + dir;
+  if (ni < 0 || ni >= mods.length) return;
+  [mods[mi], mods[ni]] = [mods[ni], mods[mi]];
+  renderAll(); autoSave();
+}
+function deleteModule(mi) {
+  if (!frames[activeIdx]) return;
+  frames[activeIdx].modules.splice(mi, 1);
+  renderAll(); autoSave();
+}
+function addModule() {
+  if (!frames[activeIdx]) return;
+  frames[activeIdx].modules.push({ type: '선반', height: 360 });
+  renderAll(); autoSave();
+}
+
+function addFrame() {
+  const i = frames.length;
+  frames.push({
+    id: `frame-${Date.now()}`,
+    name: `FRAME ${String.fromCharCode(65 + i % 26)}`,
+    x: 80 + (i % 6) * 120,
+    y: 80 + Math.floor(i / 6) * 240,
+    aiGenerated: false,
+    modules: [{ type: '선반', height: 540 }, { type: '행거', height: 720 }, { type: '카운터', height: 540 }],
+  });
+  activeIdx = frames.length - 1;
+  renderAll(); autoSave();
+}
+
+function deleteFrame(i, e) {
+  e.stopPropagation();
+  frames.splice(i, 1);
+  if (activeIdx >= frames.length) activeIdx = frames.length - 1;
+  renderAll(); autoSave();
+}
+
+function deleteActiveFrame() {
+  if (activeIdx < 0 || !frames[activeIdx]) return;
+  frames.splice(activeIdx, 1);
+  if (activeIdx >= frames.length) activeIdx = frames.length - 1;
+  renderAll(); autoSave();
+}
+
+// ── Canvas controls ──
+function zoom(f) {
+  canvasZoom = Math.min(3, Math.max(0.3, canvasZoom * f));
+  const inner = document.getElementById('canvasInner');
+  inner.style.transform = `scale(${canvasZoom})`;
+  inner.style.transformOrigin = 'top left';
+}
+
+function fitView() {
+  canvasZoom = 1;
+  const inner = document.getElementById('canvasInner');
+  inner.style.transform = '';
+  document.getElementById('canvasArea').scrollTop = 0;
+  document.getElementById('canvasArea').scrollLeft = 0;
+}
+
+function toggleGrid() {
+  gridVisible = !gridVisible;
+  document.getElementById('canvasGrid').classList.toggle('hidden', !gridVisible);
+}
+
+// ── Save ──
+function autoSave() {
+  localStorage.setItem('layoutData', JSON.stringify(frames));
+  document.getElementById('saveStatus').textContent = '● 저장됨';
+}
+
+function saveAndNext() {
+  autoSave();
+  window.location.href = 'step4.html';
+}
+
+// ── Modal ──
+function openModal() {
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function closeModalOverlay(e) {
+  if (e.target === document.getElementById('modalOverlay'))
+    document.getElementById('modalOverlay').classList.remove('open');
+}
+function saveApiKey() {
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+</script>
+</body>
+</html>
