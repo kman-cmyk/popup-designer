@@ -194,9 +194,6 @@ window.addEventListener('load', () => {
   if (step1.spaceWidth) spaceW = parseFloat(step1.spaceWidth) || 8;
   if (step1.spaceDepth) spaceD = parseFloat(step1.spaceDepth) || 6;
 
-  // Set room aspect ratio
-  setRoomSize();
-
   // Load entrance state
   const savedEntrance = localStorage.getItem('entranceData');
   if (savedEntrance) entrance = JSON.parse(savedEntrance);
@@ -211,37 +208,50 @@ window.addEventListener('load', () => {
     frames = getDefaultFrames();
   }
   document.getElementById('canvasEmpty').style.display = 'none';
-  renderCanvas();
-  renderPanel();
 
   // Update dim labels
   document.getElementById('dimLabelW').textContent = spaceW + 'm';
   document.getElementById('dimLabelD').textContent = spaceD + 'm';
+
+  // Defer sizing until layout is painted
+  requestAnimationFrame(() => {
+    setRoomSize();
+    renderCanvas();
+    renderPanel();
+  });
 });
 
-window.addEventListener('resize', setRoomSize);
+window.addEventListener('resize', () => {
+  setRoomSize();
+  renderCanvas();
+});
 
 function setRoomSize() {
   const area = document.getElementById('canvasArea');
   const room = document.getElementById('canvasRoom');
-  const areaW = area.clientWidth - 80; // padding
+
+  const areaW = area.clientWidth - 80;
   const areaH = area.clientHeight - 80;
+
+  // Retry if layout not ready yet
+  if (areaW <= 0 || areaH <= 0) {
+    setTimeout(setRoomSize, 50);
+    return;
+  }
 
   const ratio = spaceW / spaceD;
   let rW, rH;
 
   if (areaW / areaH > ratio) {
-    // height-constrained
     rH = areaH;
     rW = rH * ratio;
   } else {
-    // width-constrained
     rW = areaW;
     rH = rW / ratio;
   }
 
-  room.style.width = rW + 'px';
-  room.style.height = rH + 'px';
+  room.style.width = Math.round(rW) + 'px';
+  room.style.height = Math.round(rH) + 'px';
 }
 
 function getDefaultFrames() {
