@@ -1078,6 +1078,19 @@ function showToast(msg) {
 document.getElementById('modal-backdrop').addEventListener('click', e => {
   if (e.target === document.getElementById('modal-backdrop')) closeSettings();
 });
+
+// ── 1분 자동저장 ──
+let lastAutoSaveCode = null;
+setInterval(async () => {
+  if (!currentCode || currentCode === lastAutoSaveCode) return;
+  const filename = document.getElementById('file-select').value;
+  if (filename === '__all__' || filename.startsWith('__load_')) return;
+  const { ghToken } = getSettings();
+  if (!ghToken) return;
+  lastAutoSaveCode = currentCode;
+  await commitToGitHub(filename, ghToken, true);
+  showToast('🔄 자동저장됨');
+}, 60000);
 </script>
 </body>
 </html>
