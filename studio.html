@@ -746,106 +746,6 @@
     .tool-btn-save:hover { background: #dbeafe; border-color: #93c5fd; }
     .tool-btn-save:disabled { opacity: .4; cursor: not-allowed; }
 
-    /* Deploy button */
-    .tool-btn-deploy {
-      padding: 0 12px;
-      height: 34px;
-      border-radius: var(--radius-xs);
-      border: 1px solid #6ee7b7;
-      background: #ecfdf5;
-      color: #065f46;
-      cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 12px;
-      font-weight: 600;
-      font-family: inherit;
-      gap: 4px;
-      transition: all .15s;
-      white-space: nowrap;
-    }
-    .tool-btn-deploy:hover { background: #d1fae5; border-color: #34d399; }
-    .tool-btn-deploy:disabled { opacity: .4; cursor: not-allowed; }
-
-    /* Undeploy badge */
-    #undeploy-badge {
-      display: none;
-      align-items: center;
-      gap: 3px;
-      background: #431a00;
-      border: 1px solid #f97316;
-      color: #fb923c;
-      border-radius: 99px;
-      padding: 2px 9px;
-      font-size: 11px;
-      font-weight: 600;
-    }
-    #undeploy-badge.visible { display: inline-flex; }
-
-    /* Deploy modal */
-    #deploy-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,.6);
-      backdrop-filter: blur(4px);
-      z-index: 300;
-      display: none;
-      align-items: center;
-      justify-content: center;
-    }
-    #deploy-overlay.open { display: flex; }
-    .deploy-modal {
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 12px;
-      width: 420px;
-      padding: 28px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      box-shadow: 0 24px 64px rgba(0,0,0,.5);
-    }
-    .deploy-modal h2 { font-size: 16px; font-weight: 700; color: var(--text-primary); }
-    .deploy-modal p { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
-    .deploy-file-list {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      max-height: 200px;
-      overflow-y: auto;
-    }
-    .deploy-file-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: #0f172a;
-      border: 1px solid #334155;
-      border-radius: var(--radius-xs);
-      padding: 8px 12px;
-      font-size: 13px;
-      color: var(--text-secondary);
-    }
-    .deploy-file-item .fi-name { font-weight: 500; color: var(--text-primary); }
-    #deploy-progress {
-      font-size: 13px;
-      color: var(--text-secondary);
-      text-align: center;
-      min-height: 20px;
-    }
-    .deploy-actions { display: flex; gap: 8px; justify-content: flex-end; }
-    .btn-deploy-confirm {
-      padding: 8px 18px;
-      border-radius: var(--radius-xs);
-      border: none;
-      font-family: inherit;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      background: #10B981;
-      color: #fff;
-      transition: all .15s;
-    }
-    .btn-deploy-confirm:hover { background: #059669; }
-    .btn-deploy-confirm:disabled { opacity: .5; cursor: not-allowed; }
 
     /* ═══════════════════════════════════════════════════════
        LOCK SCREEN
@@ -1153,7 +1053,6 @@
     <div id="file-status-row">
       <div class="file-badge">✦ 편집 중: <span id="file-badge-name"></span></div>
       <div id="changed-badge">변경됨 ●</div>
-      <div id="undeploy-badge">● 미배포</div>
     </div>
   </div>
 
@@ -1196,8 +1095,7 @@
     </div>
     <button class="tool-btn-markup" id="markup-toggle-btn" onclick="toggleAnnotationMode()" title="마크업 모드">✏️ 마크업</button>
     <div class="toolbar-spacer"></div>
-    <button class="tool-btn-save" id="save-file-btn" onclick="saveCurrentFile()" title="로컬에 임시 저장" disabled>💾 저장</button>
-    <button class="tool-btn-deploy" id="deploy-btn" onclick="deployAllDrafts()" title="GitHub에 배포">🚀 배포</button>
+    <button class="tool-btn-save" id="save-file-btn" onclick="saveCurrentFile()" title="GitHub에 저장" disabled>💾 GitHub에 저장</button>
     <button class="tool-btn" onclick="copyCode()" title="코드 복사">⎘</button>
     <button class="tool-btn" onclick="downloadHTML()" title="HTML 다운로드">↓</button>
     <button class="tool-btn" onclick="openInNewTab()" title="새 탭에서 열기">⎋</button>
@@ -1328,23 +1226,6 @@
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════
-     DEPLOY MODAL
-═══════════════════════════════════════════════════════ -->
-<div id="deploy-overlay" onclick="handleDeployOverlayClick(event)">
-  <div class="deploy-modal">
-    <h2>🚀 배포</h2>
-    <p>아래 파일들을 GitHub에 푸시하고 Pages에 배포합니다.</p>
-    <div class="deploy-file-list" id="deploy-file-list">
-      <!-- Populated by JS -->
-    </div>
-    <div id="deploy-progress"></div>
-    <div class="deploy-actions">
-      <button class="btn-modal btn-cancel" id="deploy-cancel-btn" onclick="closeDeployModal()">취소</button>
-      <button class="btn-deploy-confirm" id="deploy-confirm-btn" onclick="confirmDeploy()">배포하기</button>
-    </div>
-  </div>
-</div>
 
 <script>
 /* ═════════════════════════════════════════════════════════════
@@ -1529,11 +1410,13 @@ async function handleGenerate() {
     switchTab('preview');
     persistChat();
 
-    // If editing a loaded file, mark as changed
+    // If editing a loaded file, auto-commit to GitHub
     if (loadedFileName) {
       hasUnsavedChanges = true;
       document.getElementById('changed-badge').classList.add('visible');
       document.getElementById('save-file-btn').disabled = false;
+      // Auto-save to GitHub
+      commitToGitHub(loadedFileName, result.code);
     }
 
     // Ask to clear markup if annotation was included
@@ -1886,21 +1769,9 @@ async function loadSelectedFile() {
   btn.textContent = '불러오는 중...';
 
   try {
-    // Check localStorage for draft first
-    const draftKey = 'draft_' + filename;
-    const draftHtml = localStorage.getItem(draftKey);
-
-    let html;
-    let fromDraft = false;
-
-    if (draftHtml) {
-      html = draftHtml;
-      fromDraft = true;
-    } else {
-      const resp = await fetch(filename + '?_=' + Date.now());
-      if (!resp.ok) throw new Error(`파일을 찾을 수 없습니다: ${filename}`);
-      html = await resp.text();
-    }
+    const resp = await fetch(filename + '?_=' + Date.now());
+    if (!resp.ok) throw new Error(`파일을 찾을 수 없습니다: ${filename}`);
+    const html = await resp.text();
 
     // Set state
     loadedFileName = filename;
@@ -1922,18 +1793,11 @@ async function loadSelectedFile() {
     document.getElementById('changed-badge').classList.remove('visible');
     document.getElementById('save-file-btn').disabled = true;
 
-    // Show undeploy badge if draft exists in localStorage
-    updateUndeployBadge();
-
     // Update placeholder
     document.getElementById('prompt-textarea').placeholder =
       `${filename} 수정사항을 입력하세요... (Ctrl+Enter)`;
 
-    if (fromDraft) {
-      showToast(`📋 ${filename} 임시저장본 불러옴`, false, '#d97706');
-    } else {
-      showToast(`✓ ${filename} 불러오기 완료`);
-    }
+    showToast(`✓ ${filename} 불러오기 완료`);
     switchTab('preview');
 
   } catch (err) {
@@ -1944,181 +1808,84 @@ async function loadSelectedFile() {
   }
 }
 
-function saveCurrentFile() {
+async function saveCurrentFile() {
   if (!currentCode) { showToast('저장할 코드가 없습니다', true); return; }
   if (!loadedFileName) { showToast('파일을 먼저 불러와주세요', true); return; }
-
-  // Save to localStorage (draft)
-  const draftKey = 'draft_' + loadedFileName;
-  try {
-    localStorage.setItem(draftKey, currentCode);
-  } catch(e) {
-    showToast('저장 실패: 로컬 스토리지 용량 초과', true);
-    return;
-  }
-
-  // Clear "변경됨" badge, show "미배포" badge
-  hasUnsavedChanges = false;
-  document.getElementById('changed-badge').classList.remove('visible');
-  document.getElementById('save-file-btn').disabled = true;
-  updateUndeployBadge();
-
-  showToast('💾 임시 저장됨');
-}
-
-function updateUndeployBadge() {
-  if (!loadedFileName) return;
-  const hasDraft = localStorage.getItem('draft_' + loadedFileName) !== null;
-  document.getElementById('undeploy-badge').classList.toggle('visible', hasDraft);
+  await commitToGitHub(loadedFileName, currentCode);
 }
 
 function getGithubToken() {
   return localStorage.getItem('myp_studio_github_token') || '';
 }
 
-/* ═════════════════════════════════════════════════════════════
-   DEPLOY
-═════════════════════════════════════════════════════════════ */
-function deployAllDrafts() {
-  // Find all draft files in localStorage
-  const drafts = [];
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key && key.startsWith('draft_')) {
-      drafts.push({ key, filename: key.slice(6) }); // remove "draft_" prefix
-    }
-  }
-
-  if (drafts.length === 0) {
-    showToast('배포할 변경사항이 없습니다');
-    return;
-  }
-
-  // Populate modal file list
-  const list = document.getElementById('deploy-file-list');
-  list.innerHTML = '';
-  for (const d of drafts) {
-    const item = document.createElement('div');
-    item.className = 'deploy-file-item';
-    item.innerHTML = `<span>📄</span><span class="fi-name">${d.filename}</span>`;
-    list.appendChild(item);
-  }
-
-  document.getElementById('deploy-progress').textContent = '';
-  document.getElementById('deploy-confirm-btn').disabled = false;
-  document.getElementById('deploy-cancel-btn').disabled = false;
-  document.getElementById('deploy-overlay').classList.add('open');
-}
-
-function closeDeployModal() {
-  document.getElementById('deploy-overlay').classList.remove('open');
-}
-
-function handleDeployOverlayClick(e) {
-  if (e.target === document.getElementById('deploy-overlay')) closeDeployModal();
-}
-
-async function confirmDeploy() {
-  const ghToken = localStorage.getItem('myp_studio_github_token') || '';
+async function commitToGitHub(filename, content) {
+  const ghToken = getGithubToken();
   if (!ghToken) {
-    showToast('설정에서 GitHub 토큰을 먼저 입력해주세요', true);
-    closeDeployModal();
+    showToast('⚙️ 설정에서 GitHub 토큰을 입력해주세요', true);
     openSettings();
-    return;
+    return false;
   }
 
-  // Collect drafts again
-  const drafts = [];
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key && key.startsWith('draft_')) {
-      drafts.push({ key, filename: key.slice(6), content: localStorage.getItem(key) });
-    }
-  }
+  // Disable save button & show saving state
+  const saveBtn = document.getElementById('save-file-btn');
+  const origText = saveBtn.textContent;
+  saveBtn.disabled = true;
+  saveBtn.textContent = '저장 중...';
 
-  const confirmBtn = document.getElementById('deploy-confirm-btn');
-  const cancelBtn  = document.getElementById('deploy-cancel-btn');
-  const progress   = document.getElementById('deploy-progress');
-  confirmBtn.disabled = true;
-  cancelBtn.disabled  = true;
-
-  const owner    = 'kman-cmyk';
-  const repo     = 'popup-designer';
-  const headers  = {
+  const owner   = 'kman-cmyk';
+  const repo    = 'popup-designer';
+  const headers = {
     'Authorization': 'token ' + ghToken,
     'Accept': 'application/vnd.github.v3+json',
     'Content-Type': 'application/json',
   };
+  const apiBase = `https://api.github.com/repos/${owner}/${repo}/contents/${filename}`;
 
-  let successCount = 0;
-  const failed = [];
-
-  for (let idx = 0; idx < drafts.length; idx++) {
-    const { key, filename, content } = drafts[idx];
-    progress.textContent = `배포 중... (${idx + 1}/${drafts.length}) ${filename}`;
-
-    try {
-      const apiBase = `https://api.github.com/repos/${owner}/${repo}/contents/${filename}`;
-
-      // 1. GET current SHA
-      let sha = null;
-      const getResp = await fetch(apiBase, { headers });
-      if (getResp.ok) {
-        const data = await getResp.json();
-        sha = data.sha;
-      } else if (getResp.status !== 404) {
-        const err = await getResp.json();
-        throw new Error(err.message || `GET failed: ${getResp.status}`);
-      }
-
-      // 2. PUT new content
-      const encoded = btoa(unescape(encodeURIComponent(content)));
-      const body = { message: `Update ${filename} via MYP Studio`, content: encoded };
-      if (sha) body.sha = sha;
-
-      const putResp = await fetch(apiBase, {
-        method: 'PUT',
-        headers,
-        body: JSON.stringify(body),
-      });
-
-      if (!putResp.ok) {
-        const err = await putResp.json();
-        throw new Error(err.message || `PUT failed: ${putResp.status}`);
-      }
-
-      // Clear this draft from localStorage
-      localStorage.removeItem(key);
-      successCount++;
-
-    } catch (err) {
-      failed.push(filename + ': ' + err.message);
+  try {
+    // 1. GET current SHA
+    let sha = null;
+    const getResp = await fetch(apiBase, { headers });
+    if (getResp.ok) {
+      const data = await getResp.json();
+      sha = data.sha;
+    } else if (getResp.status !== 404) {
+      const err = await getResp.json();
+      throw new Error(err.message || `GET failed: ${getResp.status}`);
     }
-  }
 
-  confirmBtn.disabled = false;
-  cancelBtn.disabled  = false;
+    // 2. PUT new content
+    const encoded = btoa(unescape(encodeURIComponent(content)));
+    const body = { message: `Update: ${filename} via MYP Studio`, content: encoded };
+    if (sha) body.sha = sha;
 
-  if (failed.length === 0) {
-    // All success
-    progress.textContent = '';
-    closeDeployModal();
+    const putResp = await fetch(apiBase, {
+      method: 'PUT',
+      headers,
+      body: JSON.stringify(body),
+    });
 
-    // Clear undeploy badge if current file was among deployed
-    if (loadedFileName) updateUndeployBadge();
-
-    showToast('🚀 배포 완료! 약 1분 후 사이트에 반영됩니다');
-  } else {
-    // Partial failure
-    progress.textContent = '';
-    closeDeployModal();
-    if (loadedFileName) updateUndeployBadge();
-    if (successCount > 0) showToast(`${successCount}개 배포 완료`);
-    for (const f of failed) {
-      setTimeout(() => showToast('배포 실패: ' + f, true), 300);
+    if (!putResp.ok) {
+      const err = await putResp.json();
+      throw new Error(err.message || `PUT failed: ${putResp.status}`);
     }
+
+    // Success
+    hasUnsavedChanges = false;
+    document.getElementById('changed-badge').classList.remove('visible');
+    saveBtn.textContent = origText;
+    saveBtn.disabled = true;
+    showToast('✅ GitHub에 저장됨');
+    return true;
+
+  } catch (err) {
+    saveBtn.textContent = origText;
+    saveBtn.disabled = false;
+    showToast('❌ 저장 실패 - GitHub 토큰을 확인해주세요', true);
+    console.error('GitHub commit error:', err);
+    return false;
   }
 }
+
 
 /* ═════════════════════════════════════════════════════════════
    EXAMPLE CHIPS
