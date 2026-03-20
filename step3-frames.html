@@ -204,15 +204,22 @@ function renderCanvas() {
 
     el.addEventListener('mousedown', (e) => {
       e.preventDefault();
-      selectedIdx = i;
-      renderCanvas();
-      renderPanel();
+      if (selectedIdx !== i) {
+        document.querySelectorAll('.canvas-frame').forEach(fr => fr.classList.remove('selected'));
+        el.classList.add('selected');
+        selectedIdx = i;
+        renderPanel();
+      }
       startDrag(e, el, f);
     });
     el.addEventListener('touchstart', (e) => {
-      selectedIdx = i;
-      renderCanvas();
-      renderPanel();
+      e.preventDefault();
+      if (selectedIdx !== i) {
+        document.querySelectorAll('.canvas-frame').forEach(fr => fr.classList.remove('selected'));
+        el.classList.add('selected');
+        selectedIdx = i;
+        renderPanel();
+      }
       startDragTouch(e, el, f);
     }, { passive: false });
 
@@ -229,6 +236,11 @@ function startDrag(e, el, frame) {
   const origX = frame.x;
   const origY = frame.y;
 
+  el.style.opacity = '0.85';
+  el.style.boxShadow = '0 8px 24px rgba(0,0,0,0.18)';
+  el.style.zIndex = '10';
+  el.style.transition = 'none';
+
   function onMove(ev) {
     const xPct = ((ev.clientX - rect.left) / rect.width) * 100;
     const yPct = ((ev.clientY - rect.top) / rect.height) * 100;
@@ -240,6 +252,10 @@ function startDrag(e, el, frame) {
   function onUp() {
     document.removeEventListener('mousemove', onMove);
     document.removeEventListener('mouseup', onUp);
+    el.style.opacity = '';
+    el.style.boxShadow = '';
+    el.style.zIndex = '';
+    el.style.transition = '';
     autoSave();
   }
   document.addEventListener('mousemove', onMove);
@@ -254,9 +270,14 @@ function startDragTouch(e, el, frame) {
   const startYPct = ((t0.clientY - rect.top) / rect.height) * 100;
   const origX = frame.x;
   const origY = frame.y;
-  e.preventDefault();
+
+  el.style.opacity = '0.85';
+  el.style.boxShadow = '0 8px 24px rgba(0,0,0,0.18)';
+  el.style.zIndex = '10';
+  el.style.transition = 'none';
 
   function onMove(ev) {
+    ev.preventDefault();
     const t = ev.touches[0];
     const xPct = ((t.clientX - rect.left) / rect.width) * 100;
     const yPct = ((t.clientY - rect.top) / rect.height) * 100;
@@ -268,6 +289,10 @@ function startDragTouch(e, el, frame) {
   function onEnd() {
     document.removeEventListener('touchmove', onMove);
     document.removeEventListener('touchend', onEnd);
+    el.style.opacity = '';
+    el.style.boxShadow = '';
+    el.style.zIndex = '';
+    el.style.transition = '';
     autoSave();
   }
   document.addEventListener('touchmove', onMove, { passive: false });
