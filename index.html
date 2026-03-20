@@ -260,5 +260,18 @@ function saveApiKey(){
   alert('API 키가 저장되었습니다.');
 }
 </script>
+
+<script>
+// API 키 설정 (URL 파라미터로: ?setup=YOUR_API_KEY)
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  const key = params.get('setup');
+  if (key && key.startsWith('sk-ant-')) {
+    localStorage.setItem('myp_solution_api_key', key);
+    alert('✅ API 키가 설정됐습니다!');
+    window.history.replaceState({}, '', window.location.pathname);
+  }
+})();
+</script>
 </body>
 </html>

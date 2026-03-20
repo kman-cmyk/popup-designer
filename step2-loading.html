@@ -185,7 +185,7 @@ function animateProgress() {
 }
 
 async function callClaude() {
-  const API_KEY = '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';
+  const API_KEY = localStorage.getItem('myp_solution_api_key') || '';
   const step1 = JSON.parse(localStorage.getItem('step1Data') || '{}');
 
   const prompt = `당신은 팝업스토어 인테리어 전문가입니다. 아래 정보를 바탕으로 3가지 서로 다른 팝업스토어 스타일 컨셉을 제안해주세요.
