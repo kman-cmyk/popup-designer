@@ -273,6 +273,148 @@ html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Sego
   z-index: 9999; opacity: 0; transition: opacity .25s; pointer-events: none;
 }
 #toast.show { opacity: 1; }
+
+/* ── MOBILE (≤768px) ── */
+@media (max-width: 768px) {
+  html, body { font-size: 15px; }
+
+  #app {
+    flex-direction: column;
+    height: 100vh;
+  }
+
+  /* 미리보기 상단 50% */
+  #right {
+    order: -1;
+    width: 100%;
+    height: 50vh;
+    flex: none;
+    border-bottom: 1px solid var(--border);
+  }
+
+  #right-header {
+    padding: 0 10px;
+    height: auto;
+    min-height: 44px;
+    flex-wrap: wrap;
+    gap: 4px;
+    align-items: center;
+  }
+
+  .tab-btn {
+    height: 44px;
+    padding: 0 14px;
+    font-size: 13px;
+  }
+
+  .right-actions {
+    gap: 4px;
+  }
+
+  .save-btn {
+    padding: 8px 10px;
+    font-size: 12px;
+    min-height: 36px;
+  }
+
+  #preview-pane {
+    height: calc(50vh - 44px);
+  }
+
+  /* 채팅 하단 50% */
+  #left {
+    width: 100%;
+    height: 50vh;
+    flex: none;
+    border-right: none;
+  }
+
+  #left-header {
+    padding: 8px 12px;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .logo { font-size: 14px; }
+
+  .icon-btn {
+    width: 44px;
+    height: 44px;
+    font-size: 16px;
+  }
+
+  #file-row {
+    padding: 4px 10px 2px;
+  }
+
+  #file-select {
+    font-size: 13px;
+    padding: 9px 10px;
+    min-height: 44px;
+  }
+
+  #load-btn {
+    padding: 9px 14px;
+    min-height: 44px;
+    font-size: 13px;
+  }
+
+  #project-actions {
+    padding: 0 10px 6px;
+  }
+
+  #add-project-btn {
+    font-size: 11px;
+    padding: 5px 10px;
+    min-height: 32px;
+  }
+
+  #delete-project-link {
+    font-size: 11px;
+  }
+
+  #chat {
+    padding: 8px 10px;
+    gap: 8px;
+  }
+
+  .msg-bubble {
+    font-size: 14px;
+    padding: 9px 12px;
+  }
+
+  #input-area {
+    padding: 8px 10px 10px;
+  }
+
+  #prompt-box {
+    min-height: 56px;
+    max-height: 100px;
+    font-size: 15px;
+    padding: 10px 12px;
+    margin-bottom: 6px;
+  }
+
+  .attach-btn {
+    min-height: 44px;
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+
+  #send-btn {
+    min-height: 44px;
+    padding: 10px 18px;
+    font-size: 14px;
+  }
+
+  /* 모달 */
+  .modal {
+    width: 92%;
+    padding: 22px 20px;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+}
 </style>
 </head>
 <body>
@@ -1141,6 +1283,46 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
   canvas.addEventListener('mouseup', () => { markupDrawing = false; });
+
+  // Touch 이벤트
+  canvas.addEventListener('touchstart', e => {
+    e.preventDefault();
+    if (!markupActive) return;
+    const touch = e.touches[0];
+    const r = canvas.getBoundingClientRect();
+    markupDrawing = true;
+    markupStart = { x: touch.clientX - r.left, y: touch.clientY - r.top };
+    markupSnapshot = ctx().getImageData(0, 0, canvas.width, canvas.height);
+    ctx().strokeStyle = document.getElementById('markup-color').value;
+    ctx().lineWidth = 2;
+    ctx().lineCap = 'round';
+    if (markupTool === 'pen') { ctx().beginPath(); ctx().moveTo(markupStart.x, markupStart.y); }
+  }, { passive: false });
+
+  canvas.addEventListener('touchmove', e => {
+    e.preventDefault();
+    if (!markupDrawing) return;
+    const touch = e.touches[0];
+    const r = canvas.getBoundingClientRect();
+    const x = touch.clientX - r.left, y = touch.clientY - r.top;
+    if (markupTool === 'pen') { ctx().lineTo(x, y); ctx().stroke(); }
+    else {
+      ctx().putImageData(markupSnapshot, 0, 0);
+      ctx().strokeStyle = document.getElementById('markup-color').value;
+      ctx().lineWidth = 2;
+      if (markupTool === 'rect') { ctx().strokeRect(markupStart.x, markupStart.y, x - markupStart.x, y - markupStart.y); }
+      else if (markupTool === 'arrow') {
+        ctx().beginPath(); ctx().moveTo(markupStart.x, markupStart.y); ctx().lineTo(x, y); ctx().stroke();
+        const a = Math.atan2(y - markupStart.y, x - markupStart.x);
+        ctx().beginPath(); ctx().moveTo(x, y); ctx().lineTo(x - 12*Math.cos(a-0.4), y - 12*Math.sin(a-0.4)); ctx().lineTo(x - 12*Math.cos(a+0.4), y - 12*Math.sin(a+0.4)); ctx().closePath(); ctx().fillStyle = document.getElementById('markup-color').value; ctx().fill();
+      }
+    }
+  }, { passive: false });
+
+  canvas.addEventListener('touchend', e => {
+    e.preventDefault();
+    markupDrawing = false;
+  }, { passive: false });
 });
 
 // ── TOAST ──
