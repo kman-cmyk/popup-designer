@@ -433,7 +433,8 @@ async function loadFile() {
     const res = await fetch(`${GITHUB_API}/repos/${REPO}/contents/${filename}`, { headers });
     if (!res.ok) throw new Error(`GitHub ${res.status}`);
     const data = await res.json();
-    const content = atob(data.content.replace(/\n/g, ''));
+    const raw = atob(data.content.replace(/\n/g, ''));
+    const content = new TextDecoder('utf-8').decode(Uint8Array.from(raw, c => c.charCodeAt(0)));
     currentFileSHA = data.sha;
     setCode(content);
     addSystemMsg(`✅ ${filename} 불러왔습니다`);
