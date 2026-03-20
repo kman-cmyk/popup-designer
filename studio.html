@@ -278,7 +278,7 @@ html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Sego
 <body>
 
 <!-- LOGIN -->
-<div id="login-screen">
+<div id="login-screen" style="display:none">
   <div class="login-box">
     <div class="login-logo">MYP <span>Studio</span></div>
     <div class="login-sub">접근 코드를 입력하세요</div>
@@ -583,7 +583,7 @@ function tryLogin() {
 }
 document.getElementById('code-input').addEventListener('keydown', e => { if (e.key === 'Enter') tryLogin(); });
 
-if (sessionStorage.getItem('myp_auth') === '1') {
+if (true) { // auth disabled
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app').classList.add('visible');
   setTimeout(() => {
