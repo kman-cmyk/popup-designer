@@ -84,10 +84,9 @@
 <div class="step-bar">
   <div class="step-list">
     <div class="step-item active">STEP 1. 정보 입력</div>
-    <div class="step-item">STEP 2. 스타일 선택</div>
-    <div class="step-item">STEP 3. 레이아웃</div>
-    <div class="step-item">STEP 4. 모듈 설정</div>
-    <div class="step-item">STEP 5. 견적 확인</div>
+    <div class="step-item">STEP 2. 도면 생성</div>
+    <div class="step-item">STEP 3. 레이아웃 편집</div>
+    <div class="step-item">STEP 4. 견적 확인</div>
   </div>
 </div>
 
@@ -96,12 +95,41 @@
   <p class="subtitle">정확한 맞춤 제안을 위해 상세한 정보를 입력해주세요.</p>
 
   <div class="form-section">
-    <div class="form-section-title">공간 면적 및 형태</div>
+    <div class="form-section-title">브랜드 정보</div>
     <div class="form-row">
       <div class="form-group">
-        <label>전용 면적 (평/㎡)</label>
-        <input type="text" id="area" placeholder="예: 25평 또는 82㎡">
+        <label>브랜드명</label>
+        <input type="text" id="brandName" placeholder="예: 스튜디오 리프">
       </div>
+      <div class="form-group">
+        <label>업종/카테고리</label>
+        <select id="industry">
+          <option value="">업종을 선택하세요</option>
+          <option value="패션/의류">패션/의류</option>
+          <option value="뷰티/코스메틱">뷰티/코스메틱</option>
+          <option value="라이프스타일">라이프스타일</option>
+          <option value="식음료">식음료</option>
+          <option value="전자/IT">전자/IT</option>
+          <option value="예술/공예">예술/공예</option>
+          <option value="기타">기타</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-section">
+    <div class="form-section-title">공간 정보</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>공간 너비 (m)</label>
+        <input type="number" id="spaceWidth" placeholder="예: 8" min="1" max="50" step="0.5">
+      </div>
+      <div class="form-group">
+        <label>공간 깊이 (m)</label>
+        <input type="number" id="spaceDepth" placeholder="예: 6" min="1" max="50" step="0.5">
+      </div>
+    </div>
+    <div class="form-row" style="margin-top:16px">
       <div class="form-group">
         <label>공간 형태</label>
         <select id="spaceType">
@@ -116,6 +144,20 @@
   </div>
 
   <div class="form-section">
+    <div class="form-section-title">팝업 기간</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>시작일</label>
+        <input type="date" id="startDate">
+      </div>
+      <div class="form-group">
+        <label>종료일</label>
+        <input type="date" id="endDate">
+      </div>
+    </div>
+  </div>
+
+  <div class="form-section">
     <div class="form-section-title">브랜드 무드</div>
     <div class="form-group">
       <label>원하시는 분위기</label>
@@ -124,23 +166,15 @@
   </div>
 
   <div class="form-section">
-    <div class="form-section-title">제품 정보</div>
+    <div class="form-section-title">제품 및 예산</div>
     <div class="form-group">
       <label>주요 취급 품목 또는 비치 가구</label>
       <input type="text" id="products" placeholder="가장 중요하게 생각하는 제품군을 입력해주세요">
     </div>
-  </div>
-
-  <div class="form-section">
-    <div class="form-section-title">예산 및 기간</div>
-    <div class="form-row">
+    <div class="form-row" style="margin-top:16px">
       <div class="form-group">
         <label>예상 예산 범위</label>
-        <input type="text" id="budget" placeholder="예: 2,000만원 내외">
-      </div>
-      <div class="form-group">
-        <label>희망 완료 기간</label>
-        <input type="text" id="period" placeholder="예: 1개월 이내">
+        <input type="text" id="budget" placeholder="예: 500만원 이내">
       </div>
     </div>
   </div>
@@ -174,31 +208,40 @@
 // Load saved data
 window.addEventListener('load', () => {
   const saved = JSON.parse(localStorage.getItem('step1Data') || '{}');
-  if(saved.area) document.getElementById('area').value = saved.area;
+  if(saved.brandName) document.getElementById('brandName').value = saved.brandName;
+  if(saved.industry) document.getElementById('industry').value = saved.industry;
+  if(saved.spaceWidth) document.getElementById('spaceWidth').value = saved.spaceWidth;
+  if(saved.spaceDepth) document.getElementById('spaceDepth').value = saved.spaceDepth;
   if(saved.spaceType) document.getElementById('spaceType').value = saved.spaceType;
+  if(saved.startDate) document.getElementById('startDate').value = saved.startDate;
+  if(saved.endDate) document.getElementById('endDate').value = saved.endDate;
   if(saved.mood) document.getElementById('mood').value = saved.mood;
   if(saved.products) document.getElementById('products').value = saved.products;
   if(saved.budget) document.getElementById('budget').value = saved.budget;
-  if(saved.period) document.getElementById('period').value = saved.period;
 });
 
 function goNext() {
   const data = {
-    area: document.getElementById('area').value.trim(),
+    brandName: document.getElementById('brandName').value.trim(),
+    industry: document.getElementById('industry').value,
+    spaceWidth: document.getElementById('spaceWidth').value.trim(),
+    spaceDepth: document.getElementById('spaceDepth').value.trim(),
     spaceType: document.getElementById('spaceType').value,
+    startDate: document.getElementById('startDate').value,
+    endDate: document.getElementById('endDate').value,
     mood: document.getElementById('mood').value.trim(),
     products: document.getElementById('products').value.trim(),
     budget: document.getElementById('budget').value.trim(),
-    period: document.getElementById('period').value.trim(),
   };
-  if (!data.area) { alert('공간 면적을 입력해주세요.'); return; }
-  if (!data.mood) { alert('브랜드 무드를 입력해주세요.'); return; }
+  if (!data.spaceWidth || !data.spaceDepth) { alert('공간 너비와 깊이를 입력해주세요.'); return; }
+  if (!data.startDate || !data.endDate) { alert('팝업 기간을 선택해주세요.'); return; }
+  if (data.endDate < data.startDate) { alert('종료일은 시작일 이후여야 합니다.'); return; }
   localStorage.setItem('step1Data', JSON.stringify(data));
   window.location.href = 'step2-loading.html';
 }
 
 function openModal(){
-  document.getElementById('apiKeyInput').value = localStorage.getItem('apiKey')||'';
+  document.getElementById('apiKeyInput').value = localStorage.getItem('myp_solution_api_key') || localStorage.getItem('apiKey') || '';
   document.getElementById('modalOverlay').classList.add('open');
 }
 function closeModal(e){
@@ -207,7 +250,7 @@ function closeModal(e){
 }
 function saveApiKey(){
   const k=document.getElementById('apiKeyInput').value.trim();
-  if(k) localStorage.setItem('apiKey',k);
+  if(k){ localStorage.setItem('myp_solution_api_key',k); localStorage.setItem('apiKey',k); }
   document.getElementById('modalOverlay').classList.remove('open');
 }
 </script>

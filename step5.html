@@ -30,9 +30,14 @@
     .section-title{font-size:15px;font-weight:700;color:#111;margin-bottom:16px;padding-left:12px;border-left:3px solid #3B82F6}
     .quote-table{width:100%;border-collapse:collapse}
     .quote-table th{background:#F9FAFB;padding:12px 16px;font-size:13px;font-weight:700;color:#555;text-align:left;border-bottom:2px solid #E5E7EB}
+    .quote-table th:last-child,.quote-table td:last-child{text-align:right}
     .quote-table td{padding:14px 16px;font-size:14px;color:#333;border-bottom:1px solid #F0F0F0}
     .quote-table tr:last-child td{border-bottom:none}
     .qty-badge{display:inline-block;background:#F0F0F0;border-radius:4px;padding:2px 8px;font-size:12px;font-weight:700;color:#555}
+    .period-cell{background:#F9FAFB;border:1px solid #E5E7EB;border-radius:8px;padding:12px 18px;flex:1}
+    .period-cell-label{font-size:11px;font-weight:700;color:#AAA;margin-bottom:4px}
+    .period-cell-val{font-size:15px;font-weight:700;color:#111}
+    .period-days-badge{display:inline-block;background:#EFF6FF;color:#3B82F6;border-radius:9999px;padding:4px 14px;font-size:13px;font-weight:700;align-self:center}
 
     /* CALENDAR SECTION */
     .calendars-row{display:grid;grid-template-columns:1fr 1fr;gap:24px}
@@ -112,35 +117,26 @@
 
   <div class="main-layout">
     <div>
+      <!-- PERIOD INFO -->
+      <div class="table-section">
+        <div class="section-title">팝업 기간</div>
+        <div id="periodInfo" style="display:flex;gap:24px;padding:14px 0"></div>
+      </div>
+
       <!-- TABLE -->
       <div class="table-section">
-        <div class="section-title">선택 내역 자동 집계</div>
+        <div class="section-title">견적 내역 자동 집계</div>
         <table class="quote-table">
           <thead>
             <tr>
-              <th>구분</th>
-              <th>상세 항목</th>
+              <th>항목</th>
               <th>수량</th>
+              <th>단가</th>
+              <th>금액</th>
             </tr>
           </thead>
           <tbody id="quoteTableBody"></tbody>
         </table>
-      </div>
-
-      <!-- CALENDARS -->
-      <div class="table-section">
-        <div class="section-title">설치 및 수거 일정 선택</div>
-        <div class="calendars-row">
-          <div class="calendar-wrap">
-            <h3>설치 예정일</h3>
-            <div id="calInstall"></div>
-          </div>
-          <div class="calendar-wrap">
-            <h3>수거 예정일</h3>
-            <div id="calPickup"></div>
-          </div>
-        </div>
-        <div class="cal-note">* 설치 및 수거 시간은 담당자 배치에 따라 최소 확정됩니다.</div>
       </div>
     </div>
 
@@ -179,220 +175,142 @@
 </div>
 
 <script>
-// ── Module pricing ──
-const MODULE_PRICES = {
-  // Korean names (new format from step3-frames)
-  '선반': 10000, '행거': 15000, '디스플레이박스': 20000, '카운터': 25000,
-  // Legacy English names
-  shelf: 10000, hanger: 15000, display: 20000, counter: 25000,
-};
-const FRAME_RENTAL = 50000;
-const DAYS = ['일','월','화','수','목','금','토'];
+const FRAME_DAILY_RATE = 30000; // 프레임 1개 1일 렌탈료
+const DELIVERY_FEE = 120000;
 
-let installDate = null;
-let pickupDate = null;
-let installMonth = new Date();
-let pickupMonth = new Date();
+let popupDays = 1;
+let frameCount = 0;
 
-function calcCosts() {
-  const layout = JSON.parse(localStorage.getItem('layoutData') || '[]');
-  const moduleData = JSON.parse(localStorage.getItem('moduleData') || '{}');
-  const selectedModules = moduleData.selectedModules || [];
-
-  const frameCount = layout.length || 2;
-  const frameRental = frameCount * FRAME_RENTAL;
-
-  // Count modules by type from layout (supports both Korean and legacy English names)
-  const modCounts = {};
-  layout.forEach(f => (f.modules || []).forEach(m => {
-    if (m.type) modCounts[m.type] = (modCounts[m.type] || 0) + 1;
-  }));
-
-  let moduleCost = 0;
-  Object.entries(modCounts).forEach(([type, cnt]) => {
-    moduleCost += cnt * (MODULE_PRICES[type] || 0);
-  });
-
-  // Extra selected modules from library
-  const extraCost = selectedModules.reduce((s, m) => s + (m.price || 0), 0);
-
-  const subtotal = frameRental + moduleCost + extraCost;
-  const delivery = 120000;
-  const vat = Math.round(subtotal * 0.1);
-  const total = subtotal + delivery + vat;
-
-  return { frameCount, frameRental, modCounts, moduleCost, extraCost, delivery, vat, total };
+function calcPopupDays(step1) {
+  if (!step1.startDate || !step1.endDate) return 3;
+  const start = new Date(step1.startDate);
+  const end = new Date(step1.endDate);
+  const diff = Math.ceil((end - start) / 86400000) + 1;
+  return Math.max(1, diff);
 }
 
-function renderTable() {
-  const { frameCount, modCounts } = calcCosts();
-  const layout = JSON.parse(localStorage.getItem('layoutData') || '[]');
-  const style = JSON.parse(localStorage.getItem('selectedStyle') || '{}');
+function aggregateModules(frames) {
+  const map = {};
+  frames.forEach(f => {
+    (f.modules || []).forEach(m => {
+      const key = m.name;
+      if (!map[key]) map[key] = { name: m.name, quantity: 0, unitPrice: m.unitPrice || 0 };
+      map[key].quantity += (m.quantity || 1);
+    });
+  });
+  return Object.values(map);
+}
+
+function renderPeriodInfo(step1, days) {
+  const el = document.getElementById('periodInfo');
+  el.innerHTML = `
+    <div class="period-cell"><div class="period-cell-label">시작일</div><div class="period-cell-val">${step1.startDate || '미입력'}</div></div>
+    <div class="period-cell"><div class="period-cell-label">종료일</div><div class="period-cell-val">${step1.endDate || '미입력'}</div></div>
+    <div class="period-days-badge">${days}일</div>
+  `;
+}
+
+function renderTable(frames, step1) {
   const tbody = document.getElementById('quoteTableBody');
   const rows = [];
 
-  // Frame
-  rows.push({ type:'프레임', desc:`알루미늄 모듈러 프레임 A타입`, qty:`${frameCount} SET` });
-
-  // Modules
-  const typeNames = {
-    shelf:'선반 모듈', hanger:'행거 모듈', display:'디스플레이 박스 (Black)', counter:'카운터 모듈',
-    '선반':'선반 모듈', '행거':'행거 모듈', '디스플레이박스':'디스플레이 박스 (Black)', '카운터':'카운터 모듈',
-  };
-  Object.entries(modCounts).forEach(([type, cnt]) => {
-    if (cnt > 0) rows.push({ type:'모듈', desc:typeNames[type] || type, qty:`${cnt} EA` });
+  // Frame rental row
+  const fc = frames.length;
+  const frameRentalTotal = fc * popupDays * FRAME_DAILY_RATE;
+  rows.push({
+    name: `알루미늄 모듈러 프레임`,
+    qty: `${fc}개 × ${popupDays}일`,
+    unitPrice: FRAME_DAILY_RATE,
+    amount: frameRentalTotal,
+    note: '일/개'
   });
 
-  // Extra
-  const moduleData = JSON.parse(localStorage.getItem('moduleData') || '{}');
-  (moduleData.selectedModules || []).forEach(m => {
-    rows.push({ type:'옵션', desc:m.name, qty:'1 EA' });
+  // Module rows
+  const modules = aggregateModules(frames);
+  modules.forEach(m => {
+    const amount = m.quantity * m.unitPrice;
+    rows.push({ name: m.name, qty: `${m.quantity}개`, unitPrice: m.unitPrice, amount });
   });
 
-  // LED default
-  rows.push({ type:'옵션', desc:'상단 LED 소프트라이트', qty:'8 EA' });
+  // Delivery
+  rows.push({ name: '배송 및 설치비', qty: '1식', unitPrice: DELIVERY_FEE, amount: DELIVERY_FEE });
 
   tbody.innerHTML = rows.map(r => `
     <tr>
-      <td>${r.type}</td>
-      <td>${r.desc}</td>
+      <td>${r.name}</td>
       <td><span class="qty-badge">${r.qty}</span></td>
+      <td>₩${(r.unitPrice || 0).toLocaleString()}</td>
+      <td style="font-weight:700">₩${(r.amount || 0).toLocaleString()}</td>
     </tr>`).join('');
+
+  return rows;
 }
 
-function renderCostPanel() {
-  const c = calcCosts();
-  const rows = document.getElementById('costRows');
-  const installDays = installDate && pickupDate
-    ? Math.max(1, Math.ceil((pickupDate - installDate) / 86400000))
-    : 3;
-  const extDay = Math.max(0, installDays - 3);
+function renderCostPanel(frames) {
+  const modules = aggregateModules(frames);
+  const frameRentalTotal = frames.length * popupDays * FRAME_DAILY_RATE;
+  const moduleCost = modules.reduce((s, m) => s + m.quantity * m.unitPrice, 0);
+  const subtotal = frameRentalTotal + moduleCost + DELIVERY_FEE;
+  const vat = Math.round(subtotal * 0.1);
+  const total = subtotal + vat;
 
+  const rows = document.getElementById('costRows');
   rows.innerHTML = `
     <div class="cost-row">
-      <span class="cost-row-label">기본 대여료 (3일 기준)</span>
-      <span class="cost-row-val">₩${(c.frameRental + c.moduleCost).toLocaleString()}</span>
+      <span class="cost-row-label">프레임 렌탈료 (${frames.length}개 × ${popupDays}일)</span>
+      <span class="cost-row-val">₩${frameRentalTotal.toLocaleString()}</span>
     </div>
     <div class="cost-row">
-      <span class="cost-row-label">연장 대여료 (1일 추가)</span>
-      <span class="cost-row-val">₩${(extDay * 50000).toLocaleString()}</span>
+      <span class="cost-row-label">모듈 비용</span>
+      <span class="cost-row-val">₩${moduleCost.toLocaleString()}</span>
     </div>
     <div class="cost-row">
       <span class="cost-row-label">배송 및 설치비</span>
-      <span class="cost-row-val">₩${c.delivery.toLocaleString()}</span>
+      <span class="cost-row-val">₩${DELIVERY_FEE.toLocaleString()}</span>
     </div>
     <div class="cost-row">
       <span class="cost-row-label">부가가치세 (10%)</span>
-      <span class="cost-row-val">₩${c.vat.toLocaleString()}</span>
+      <span class="cost-row-val">₩${vat.toLocaleString()}</span>
     </div>`;
 
-  document.getElementById('totalFinalPrice').textContent = c.total.toLocaleString();
-}
-
-// ── Calendar ──
-function buildCalendar(containerId, monthRef, selectedRef, onSelect) {
-  const container = document.getElementById(containerId);
-  const y = monthRef.getFullYear();
-  const m = monthRef.getMonth();
-  const monthNames = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
-  const today = new Date(); today.setHours(0,0,0,0);
-
-  // available dates: weekdays in next 60 days
-  const available = new Set();
-  for (let d = new Date(today); d <= new Date(today.getTime() + 60*86400000); d.setDate(d.getDate()+1)) {
-    if (d.getDay() !== 0 && d.getDay() !== 6) available.add(d.toDateString());
-  }
-
-  let html = `<div class="cal-header">
-    <div class="cal-nav" data-dir="-1" data-cal="${containerId}">‹</div>
-    <span>${y}년 ${monthNames[m]}</span>
-    <div class="cal-nav" data-dir="1" data-cal="${containerId}">›</div>
-  </div>
-  <div class="cal-grid">`;
-
-  DAYS.forEach(d => { html += `<div class="cal-day-name">${d}</div>`; });
-
-  const firstDay = new Date(y, m, 1).getDay();
-  for (let i = 0; i < firstDay; i++) html += `<div class="cal-day empty"></div>`;
-
-  const daysInMonth = new Date(y, m+1, 0).getDate();
-  for (let d = 1; d <= daysInMonth; d++) {
-    const date = new Date(y, m, d);
-    const ds = date.toDateString();
-    const isPast = date < today;
-    const isAvail = available.has(ds);
-    const isSel = selectedRef && date.toDateString() === selectedRef.toDateString();
-    const isToday = date.toDateString() === today.toDateString();
-    let cls = 'cal-day';
-    if (isSel) cls += ' selected';
-    else if (isAvail) cls += ' available';
-    else if (isPast) cls += ' past';
-    if (isToday && !isSel) cls += ' today';
-    html += `<div class="${cls}" data-date="${ds}">${d}</div>`;
-  }
-  html += '</div>';
-  container.innerHTML = html;
-
-  // Events
-  container.querySelectorAll('.cal-day[data-date]').forEach(el => {
-    el.addEventListener('click', () => {
-      const ds = el.dataset.date;
-      const date = new Date(ds);
-      if (date < today) return;
-      onSelect(date);
-    });
-  });
-  container.querySelectorAll('.cal-nav').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const dir = parseInt(btn.dataset.dir);
-      if (containerId === 'calInstall') {
-        installMonth = new Date(installMonth.getFullYear(), installMonth.getMonth() + dir, 1);
-        buildCalendar('calInstall', installMonth, installDate, selectInstall);
-      } else {
-        pickupMonth = new Date(pickupMonth.getFullYear(), pickupMonth.getMonth() + dir, 1);
-        buildCalendar('calPickup', pickupMonth, pickupDate, selectPickup);
-      }
-    });
-  });
-}
-
-function selectInstall(date) {
-  installDate = date;
-  buildCalendar('calInstall', installMonth, installDate, selectInstall);
-  renderCostPanel();
-}
-function selectPickup(date) {
-  pickupDate = date;
-  buildCalendar('calPickup', pickupMonth, pickupDate, selectPickup);
-  renderCostPanel();
+  document.getElementById('totalFinalPrice').textContent = total.toLocaleString();
+  return total;
 }
 
 function goComplete() {
-  if (!installDate) { alert('설치 예정일을 선택해주세요.'); return; }
-  if (!pickupDate) { alert('수거 예정일을 선택해주세요.'); return; }
-  if (pickupDate <= installDate) { alert('수거일은 설치일 이후여야 합니다.'); return; }
+  const frames = JSON.parse(localStorage.getItem('finalLayout') || '[]');
+  const step1 = JSON.parse(localStorage.getItem('step1Data') || '{}');
+  const modules = aggregateModules(frames);
+  const frameRentalTotal = frames.length * popupDays * FRAME_DAILY_RATE;
+  const moduleCost = modules.reduce((s, m) => s + m.quantity * m.unitPrice, 0);
+  const subtotal = frameRentalTotal + moduleCost + DELIVERY_FEE;
+  const vat = Math.round(subtotal * 0.1);
+  const total = subtotal + vat;
 
-  const costs = calcCosts();
   localStorage.setItem('quoteData', JSON.stringify({
-    installDate: installDate.toLocaleDateString('ko-KR'),
-    pickupDate: pickupDate.toLocaleDateString('ko-KR'),
-    total: costs.total,
+    startDate: step1.startDate,
+    endDate: step1.endDate,
+    popupDays,
+    frameCount: frames.length,
+    total,
     timestamp: new Date().toLocaleString('ko-KR'),
   }));
   window.location.href = 'complete.html';
 }
 
 window.addEventListener('load', () => {
-  installMonth = new Date();
-  pickupMonth = new Date();
-  buildCalendar('calInstall', installMonth, installDate, selectInstall);
-  buildCalendar('calPickup', pickupMonth, pickupDate, selectPickup);
-  renderTable();
-  renderCostPanel();
+  const frames = JSON.parse(localStorage.getItem('finalLayout') || '[]');
+  const step1 = JSON.parse(localStorage.getItem('step1Data') || '{}');
+  popupDays = calcPopupDays(step1);
+  frameCount = frames.length;
+
+  renderPeriodInfo(step1, popupDays);
+  renderTable(frames, step1);
+  renderCostPanel(frames);
 });
 
 function openModal(){
-  document.getElementById('apiKeyInput').value = localStorage.getItem('apiKey')||'';
+  document.getElementById('apiKeyInput').value = localStorage.getItem('myp_solution_api_key') || localStorage.getItem('apiKey') || '';
   document.getElementById('modalOverlay').classList.add('open');
 }
 function closeModal(e){
@@ -401,7 +319,7 @@ function closeModal(e){
 }
 function saveApiKey(){
   const k=document.getElementById('apiKeyInput').value.trim();
-  if(k) localStorage.setItem('apiKey',k);
+  if(k){ localStorage.setItem('myp_solution_api_key',k); localStorage.setItem('apiKey',k); }
   document.getElementById('modalOverlay').classList.remove('open');
 }
 </script>

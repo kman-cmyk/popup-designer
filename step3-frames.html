@@ -3,114 +3,85 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>STEP 3. 레이아웃 설계 — makeyourplace</title>
+  <title>STEP 3. 레이아웃 편집 — makeyourplace</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
     html,body{height:100%;font-family:'Pretendard',sans-serif;background:#fff;color:#111;overflow:hidden}
 
-    /* LOADING OVERLAY */
-    #loadingOverlay{position:fixed;inset:0;background:rgba(255,255,255,0.97);z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:24px}
-    .loading-spinner{width:48px;height:48px;border:4px solid #E5E7EB;border-top-color:#3B82F6;border-radius:50%;animation:spin 0.8s linear infinite}
-    @keyframes spin{to{transform:rotate(360deg)}}
-    .loading-text{font-size:16px;font-weight:600;color:#444}
-    .loading-sub{font-size:13px;color:#AAA}
-
-    /* TOP BAR */
-    .topbar{display:flex;align-items:center;height:52px;border-bottom:1px solid #E5E7EB;background:#fff;padding:0 20px;gap:16px;flex-shrink:0;z-index:10;position:relative}
+    /* TOPBAR */
+    .topbar{display:flex;align-items:center;height:52px;border-bottom:1px solid #E5E7EB;background:#fff;padding:0 20px;gap:12px;flex-shrink:0;z-index:10;position:relative}
     .topbar-logo{font-size:15px;font-weight:800;color:#111;text-decoration:none}
-    .topbar-sep{color:#E5E7EB;font-size:18px;margin:0 4px}
-    .topbar-title{font-size:14px;font-weight:600;color:#555}
+    .topbar-sep{color:#E5E7EB;font-size:18px}
+    .topbar-title{font-size:13px;font-weight:600;color:#555}
     .topbar-spacer{flex:1}
-    .topbar-btn{padding:8px 16px;border-radius:9999px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:all 0.15s}
-    .topbar-btn-outline{background:#fff;color:#111;border:1px solid #E5E7EB}
-    .topbar-btn-outline:hover{border-color:#3B82F6;color:#3B82F6}
-    .topbar-btn-primary{background:#3B82F6;color:#fff;border:none}
-    .topbar-btn-primary:hover{background:#2563EB}
+    .topbar-btn{padding:8px 16px;border-radius:9999px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:all 0.15s;border:none}
+    .btn-add{background:#F0F7FF;color:#3B82F6;border:1px dashed #93C5FD}
+    .btn-add:hover{background:#DBEAFE}
+    .btn-quote{background:#3B82F6;color:#fff}
+    .btn-quote:hover{background:#2563EB}
+    .btn-back{background:#fff;color:#555;border:1px solid #E5E7EB}
+    .btn-back:hover{border-color:#3B82F6;color:#3B82F6}
 
-    /* LAYOUT */
+    /* WORKSPACE */
     .workspace{display:flex;height:calc(100vh - 52px)}
 
-    /* LEFT PANEL */
-    .left-panel{width:200px;border-right:1px solid #E5E7EB;display:flex;flex-direction:column;overflow:hidden;flex-shrink:0;background:#fff}
-    .panel-header{padding:12px 16px;font-size:12px;font-weight:700;color:#111;border-bottom:1px solid #F0F0F0;flex-shrink:0}
-    .panel-sub{font-size:11px;color:#AAA;font-weight:400;margin-top:2px}
-    .frame-list{flex:1;overflow-y:auto;padding:8px}
-    .frame-list::-webkit-scrollbar{width:4px}
-    .frame-list::-webkit-scrollbar-thumb{background:#E5E7EB;border-radius:2px}
-    .frame-item{border:1px solid #E5E7EB;border-radius:10px;padding:10px;margin-bottom:8px;cursor:pointer;transition:all 0.15s;position:relative}
-    .frame-item:hover{border-color:#3B82F6}
-    .frame-item.active{border-color:#3B82F6;background:#EFF6FF}
-    .frame-item-name{font-size:12px;font-weight:700;color:#111;margin-bottom:6px;padding-right:20px}
-    .frame-item-size{font-size:10px;font-weight:600;color:#fff;background:#555;border-radius:9999px;padding:2px 6px;display:inline-block}
-    .frame-item.active .frame-item-size{background:#3B82F6}
-    .frame-thumb{width:100%;height:64px;background:#F9FAFB;border-radius:6px;margin-top:8px;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
-    .frame-item-del{position:absolute;top:8px;right:8px;width:20px;height:20px;border-radius:50%;background:#FEE2E2;color:#EF4444;border:none;cursor:pointer;font-size:11px;display:none;align-items:center;justify-content:center;line-height:1}
-    .frame-item:hover .frame-item-del{display:flex}
-    .ai-badge{display:inline-block;font-size:9px;font-weight:700;color:#7C3AED;background:#EDE9FE;border-radius:9999px;padding:1px 5px;margin-left:4px;vertical-align:middle}
-    .panel-buttons{padding:8px;display:flex;flex-direction:column;gap:6px;flex-shrink:0;border-top:1px solid #F0F0F0}
-    .add-frame-btn{width:100%;background:#F0F7FF;color:#3B82F6;border:1px dashed #93C5FD;border-radius:9999px;padding:9px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s}
-    .add-frame-btn:hover{background:#DBEAFE}
-    .regen-btn{width:100%;background:#F5F3FF;color:#7C3AED;border:1px dashed #C4B5FD;border-radius:9999px;padding:9px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s;display:flex;align-items:center;justify-content:center;gap:4px}
-    .regen-btn:hover{background:#EDE9FE}
-    .regen-btn.loading{opacity:0.6;pointer-events:none}
-    .status-bar{padding:0 12px;height:26px;border-top:1px solid #F0F0F0;font-size:10px;color:#AAA;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
-    .status-live{color:#22C55E;font-weight:700}
+    /* CANVAS (70%) */
+    .canvas-area{flex:7;background:#F4F5F7;position:relative;overflow:hidden;background-image:radial-gradient(circle,#D1D5DB 1px,transparent 1px);background-size:28px 28px}
+    .canvas-frame{position:absolute;border-radius:8px;cursor:grab;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border:2px solid rgba(0,0,0,0.08);user-select:none;transition:border-color 0.15s,box-shadow 0.15s;min-width:60px;min-height:50px}
+    .canvas-frame:active{cursor:grabbing}
+    .canvas-frame.selected{border-color:#3B82F6!important;box-shadow:0 0 0 3px rgba(59,130,246,0.25)}
+    .canvas-frame-icon{font-size:22px;pointer-events:none;line-height:1}
+    .canvas-frame-label{font-size:10px;font-weight:700;color:rgba(0,0,0,0.6);pointer-events:none;text-align:center;padding:0 6px;line-height:1.3;word-break:break-all}
+    .canvas-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;color:#CCC;pointer-events:none}
+    .canvas-empty-icon{font-size:48px}
+    .canvas-empty-text{font-size:14px;font-weight:600}
 
-    /* CENTER */
-    .center-panel{flex:1;background:#F4F5F7;display:flex;flex-direction:column;overflow:hidden}
-    .canvas-toolbar{display:flex;align-items:center;justify-content:center;gap:8px;padding:8px 16px;background:#fff;border-bottom:1px solid #E5E7EB;flex-shrink:0}
-    .tool-btn{height:30px;padding:0 10px;border:1px solid #E5E7EB;background:#fff;border-radius:9999px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;transition:all 0.15s;gap:4px;color:#555;font-family:inherit;font-weight:500}
-    .tool-btn:hover{border-color:#3B82F6;color:#3B82F6}
-    .tool-btn.danger:hover{border-color:#EF4444;color:#EF4444}
-    .canvas-area{flex:1;overflow:auto;position:relative}
-    .canvas-area::-webkit-scrollbar{width:6px;height:6px}
-    .canvas-area::-webkit-scrollbar-thumb{background:#D1D5DB;border-radius:3px}
-    .canvas-inner{position:relative;min-width:100%;min-height:100%;width:1200px;height:800px}
-    .canvas-grid{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;background-image:linear-gradient(rgba(0,0,0,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(0,0,0,0.05) 1px,transparent 1px);background-size:40px 40px}
-    .canvas-grid.hidden{background-image:none}
+    /* RIGHT PANEL (30%) */
+    .right-panel{flex:3;border-left:1px solid #E5E7EB;display:flex;flex-direction:column;overflow:hidden;background:#fff;min-width:240px;max-width:320px}
+    .panel-header{padding:14px 16px;font-size:13px;font-weight:700;color:#111;border-bottom:1px solid #F0F0F0;flex-shrink:0;display:flex;align-items:center;justify-content:space-between}
+    .panel-close-btn{width:24px;height:24px;border-radius:50%;background:#F5F5F5;border:none;cursor:pointer;font-size:12px;color:#666;display:flex;align-items:center;justify-content:center}
+    .panel-close-btn:hover{background:#FEE2E2;color:#EF4444}
+    .panel-body{flex:1;overflow-y:auto;padding:14px 16px}
+    .panel-body::-webkit-scrollbar{width:4px}
+    .panel-body::-webkit-scrollbar-thumb{background:#E5E7EB;border-radius:2px}
 
-    /* FRAME ON CANVAS */
-    .canvas-frame-wrap{position:absolute;cursor:grab;user-select:none}
-    .canvas-frame-wrap:active{cursor:grabbing}
-    .canvas-frame-label{font-size:10px;font-weight:700;color:#666;text-align:center;margin-bottom:4px;pointer-events:none;white-space:nowrap}
-    .canvas-frame-box{width:60px;height:180px;border:2px solid #D1D5DB;border-radius:4px;overflow:hidden;display:flex;flex-direction:column;transition:border-color 0.15s;position:relative}
-    .canvas-frame-box.active{border-color:#3B82F6;box-shadow:0 0 0 3px rgba(59,130,246,0.2)}
-    .canvas-module-block{width:100%;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:600;color:#555;overflow:hidden;border-bottom:1px solid rgba(0,0,0,0.06);flex-shrink:0}
-    .canvas-module-block:last-child{border-bottom:none}
-    .canvas-frame-badge{position:absolute;top:3px;right:3px;font-size:8px;font-weight:700;color:#7C3AED;background:#EDE9FE;border-radius:9999px;padding:1px 4px;pointer-events:none}
+    /* OVERVIEW */
+    .concept-card{background:#F5F3FF;border:1px solid #DDD6FE;border-radius:10px;padding:12px 14px;margin-bottom:16px}
+    .concept-card-label{font-size:10px;font-weight:700;color:#7C3AED;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px}
+    .concept-card-text{font-size:12px;color:#5B21B6;line-height:1.65}
+    .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+    .info-cell{background:#F9FAFB;border:1px solid #F0F0F0;border-radius:8px;padding:10px 12px;text-align:center}
+    .info-cell-val{font-size:20px;font-weight:800;color:#111}
+    .info-cell-label{font-size:11px;color:#AAA;margin-top:2px}
+    .hint-text{font-size:12px;color:#AAA;line-height:1.6;text-align:center;padding:8px 0}
 
-    /* RIGHT PANEL */
-    .right-panel{width:240px;border-left:1px solid #E5E7EB;display:flex;flex-direction:column;overflow:hidden;flex-shrink:0;background:#fff}
-    .right-panel-header{padding:12px 16px;font-size:12px;font-weight:700;color:#111;border-bottom:1px solid #F0F0F0;flex-shrink:0}
-    .props-body{flex:1;overflow-y:auto;padding:12px 14px}
-    .props-body::-webkit-scrollbar{width:4px}
-    .props-body::-webkit-scrollbar-thumb{background:#E5E7EB;border-radius:2px}
-    .concept-box{background:#F5F3FF;border:1px solid #DDD6FE;border-radius:8px;padding:10px 12px;font-size:11px;color:#5B21B6;line-height:1.6;margin-bottom:14px}
-    .concept-box-label{font-size:10px;font-weight:700;color:#7C3AED;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.06em}
+    /* FRAME EDIT */
     .prop-group{margin-bottom:14px}
     .prop-label{font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:5px}
-    .prop-input{width:100%;border:1px solid #E5E7EB;border-radius:6px;padding:7px 10px;font-size:13px;font-family:inherit;outline:none}
+    .prop-input{width:100%;border:1px solid #E5E7EB;border-radius:7px;padding:8px 10px;font-size:13px;font-family:inherit;outline:none;color:#111}
     .prop-input:focus{border-color:#3B82F6}
-
-    /* MODULE LIST */
-    .module-list{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
-    .module-row{display:flex;align-items:center;gap:6px;background:#F9FAFB;border:1px solid #F0F0F0;border-radius:7px;padding:6px 8px}
-    .mod-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
-    .mod-select{flex:1;border:1px solid #E5E7EB;border-radius:5px;padding:4px 6px;font-size:11px;font-family:inherit;outline:none;background:#fff;color:#111;cursor:pointer}
-    .mod-select:focus{border-color:#3B82F6}
-    .mod-height{width:44px;border:1px solid #E5E7EB;border-radius:5px;padding:4px 6px;font-size:11px;font-family:inherit;outline:none;text-align:center;color:#111}
-    .mod-height:focus{border-color:#3B82F6}
-    .mod-arrows{display:flex;flex-direction:column;gap:1px}
-    .mod-arrow{width:16px;height:12px;border:1px solid #E5E7EB;background:#fff;border-radius:3px;cursor:pointer;font-size:9px;display:flex;align-items:center;justify-content:center;color:#666;line-height:1}
-    .mod-arrow:hover{border-color:#3B82F6;color:#3B82F6}
-    .mod-del{width:18px;height:18px;border-radius:9999px;background:#FEE2E2;color:#EF4444;border:none;cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1}
-    .mod-del:hover{background:#FCA5A5}
-    .add-module-btn{width:100%;background:#F0FDF4;color:#16A34A;border:1px dashed #86EFAC;border-radius:9999px;padding:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s}
-    .add-module-btn:hover{background:#DCFCE7}
-    .height-warning{font-size:10px;color:#EF4444;margin-top:4px}
-    .no-selection{padding:20px;text-align:center;font-size:12px;color:#CCC;line-height:1.8}
+    .module-list{display:flex;flex-direction:column;gap:6px;margin-bottom:8px}
+    .module-row{background:#F9FAFB;border:1px solid #F0F0F0;border-radius:8px;padding:8px 10px}
+    .module-row-top{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+    .mod-name-input{flex:1;border:1px solid #E5E7EB;border-radius:5px;padding:4px 7px;font-size:12px;font-family:inherit;outline:none;color:#111;min-width:0}
+    .mod-name-input:focus{border-color:#3B82F6}
+    .mod-del-btn{width:20px;height:20px;border-radius:50%;background:#FEE2E2;color:#EF4444;border:none;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1}
+    .mod-del-btn:hover{background:#FCA5A5}
+    .module-row-bottom{display:flex;align-items:center;gap:6px}
+    .mod-qty-wrap{display:flex;align-items:center;gap:4px;border:1px solid #E5E7EB;border-radius:6px;padding:3px 6px;background:#fff}
+    .mod-qty-btn{width:18px;height:18px;border:none;background:none;cursor:pointer;font-size:14px;color:#555;display:flex;align-items:center;justify-content:center;border-radius:3px;flex-shrink:0}
+    .mod-qty-btn:hover{background:#F0F0F0}
+    .mod-qty-val{font-size:12px;font-weight:700;min-width:18px;text-align:center}
+    .mod-price-wrap{display:flex;align-items:center;gap:4px;flex:1}
+    .mod-price-label{font-size:10px;color:#AAA;flex-shrink:0}
+    .mod-price-input{flex:1;border:1px solid #E5E7EB;border-radius:5px;padding:4px 6px;font-size:11px;font-family:inherit;outline:none;color:#111;min-width:0}
+    .mod-price-input:focus{border-color:#3B82F6}
+    .add-mod-btn{width:100%;background:#F0FDF4;color:#16A34A;border:1px dashed #86EFAC;border-radius:9999px;padding:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s;margin-bottom:14px}
+    .add-mod-btn:hover{background:#DCFCE7}
+    .del-frame-btn{width:100%;background:#FFF1F2;color:#EF4444;border:1px solid #FECDD3;border-radius:9999px;padding:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s}
+    .del-frame-btn:hover{background:#FEE2E2}
 
     /* GEAR / MODAL */
     .gear-btn{position:fixed;bottom:24px;right:24px;width:38px;height:38px;background:#fff;border:1px solid #E5E7EB;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,0.1);z-index:200;transition:transform 0.2s}
@@ -125,77 +96,51 @@
     .modal-btns{display:flex;gap:8px}
     .modal-save{flex:1;background:#3B82F6;color:#fff;border:none;padding:12px;border-radius:9999px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit}
     .modal-cancel{flex:1;background:#F5F5F5;color:#444;border:none;padding:12px;border-radius:9999px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
+
+    @media(max-width:768px){
+      .canvas-area{flex:none;width:100%;height:55vh}
+      .workspace{flex-direction:column}
+      .right-panel{flex:none;max-width:none;border-left:none;border-top:1px solid #E5E7EB;height:45vh}
+    }
   </style>
 </head>
 <body>
 
-<!-- LOADING OVERLAY -->
-<div id="loadingOverlay">
-  <div class="loading-spinner"></div>
-  <div class="loading-text">AI가 최적의 팝업 레이아웃을 설계하고 있습니다...</div>
-  <div class="loading-sub">잠시만 기다려주세요</div>
-</div>
-
-<!-- TOP BAR -->
+<!-- TOPBAR -->
 <div class="topbar">
   <a href="index.html" class="topbar-logo">makeyourplace</a>
   <span class="topbar-sep">|</span>
-  <span class="topbar-title">STEP 3. 레이아웃 설계</span>
+  <span class="topbar-title">STEP 3. 레이아웃 편집</span>
   <div class="topbar-spacer"></div>
-  <button class="topbar-btn topbar-btn-outline" onclick="window.location.href='step2.html'">이전 단계</button>
-  <button class="topbar-btn topbar-btn-primary" onclick="saveAndNext()">저장 후 다음</button>
+  <button class="topbar-btn btn-back" onclick="window.location.href='step2-loading.html'">← 다시 생성</button>
+  <button class="topbar-btn btn-add" onclick="addFrame()">+ 프레임 추가</button>
+  <button class="topbar-btn btn-quote" onclick="goToQuote()">견적 확인하기 →</button>
 </div>
 
 <div class="workspace">
-
-  <!-- LEFT PANEL -->
-  <div class="left-panel">
-    <div class="panel-header">
-      프레임 목록
-      <div class="panel-sub">클릭하여 선택·편집</div>
-    </div>
-    <div class="frame-list" id="frameList"></div>
-    <div class="panel-buttons">
-      <button class="add-frame-btn" onclick="addFrame()">+ 프레임 추가</button>
-      <button class="regen-btn" id="regenBtn" onclick="regenerate()">✦ AI 재생성</button>
-    </div>
-    <div class="status-bar">
-      <span id="canvasInfo">프레임 0개</span>
-      <span class="status-live" id="saveStatus">● 저장됨</span>
-    </div>
-  </div>
-
-  <!-- CENTER CANVAS -->
-  <div class="center-panel">
-    <div class="canvas-toolbar">
-      <div class="tool-btn" onclick="zoom(1.25)">＋ 확대</div>
-      <div class="tool-btn" onclick="zoom(0.8)">－ 축소</div>
-      <div class="tool-btn" onclick="fitView()">⊡ 맞춤</div>
-      <div class="tool-btn" onclick="toggleGrid()">⊞ 그리드</div>
-      <div class="tool-btn danger" onclick="deleteActiveFrame()">🗑 삭제</div>
-    </div>
-    <div class="canvas-area" id="canvasArea">
-      <div class="canvas-inner" id="canvasInner">
-        <div class="canvas-grid" id="canvasGrid"></div>
-      </div>
+  <!-- CANVAS -->
+  <div class="canvas-area" id="canvasArea">
+    <div class="canvas-empty" id="canvasEmpty">
+      <div class="canvas-empty-icon">🏗</div>
+      <div class="canvas-empty-text">레이아웃을 불러오는 중...</div>
     </div>
   </div>
 
   <!-- RIGHT PANEL -->
   <div class="right-panel">
-    <div class="right-panel-header">속성 편집</div>
-    <div class="props-body" id="propsBody">
-      <div class="no-selection">프레임을 선택하면<br>여기서 편집할 수 있습니다.</div>
+    <div class="panel-header">
+      <span id="panelTitle">레이아웃 정보</span>
+      <button class="panel-close-btn" id="panelCloseBtn" onclick="deselectFrame()" style="display:none">✕</button>
     </div>
+    <div class="panel-body" id="panelBody"></div>
   </div>
-
 </div>
 
 <button class="gear-btn" onclick="openModal()">⚙</button>
 <div class="modal-overlay" id="modalOverlay" onclick="closeModalOverlay(event)">
   <div class="modal">
     <h3>API 키 설정</h3>
-    <p>Claude API 키를 입력하면 AI 레이아웃 자동생성 기능이 활성화됩니다.</p>
+    <p>Claude API 키를 입력하면 AI 레이아웃 생성이 활성화됩니다.</p>
     <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-...">
     <div class="modal-btns">
       <button class="modal-cancel" onclick="document.getElementById('modalOverlay').classList.remove('open')">취소</button>
@@ -205,255 +150,92 @@
 </div>
 
 <script>
-// ── Constants ──
-const MODULE_TYPES = ['선반', '행거', '디스플레이박스', '카운터'];
-const MODULE_COLORS = {
-  '선반': '#DBEAFE',
-  '행거': '#EDE9FE',
-  '디스플레이박스': '#DCFCE7',
-  '카운터': '#FEF3C7',
-};
-const SNAP = 40;
-const SCALE = 10; // 1:10 → 600px real = 60px canvas, 1800px real = 180px canvas
-const FRAME_PX_W = 60;
-const FRAME_PX_H = 180;
-
 // ── State ──
 let frames = [];
-let activeIdx = -1;
-let aiConcept = '';
-let gridVisible = true;
-let canvasZoom = 1;
+let layoutMeta = {};
+let selectedIdx = -1;
+
+const TYPE_ICONS = { rack:'🗄', shelf:'📦', counter:'🛒', display:'🖼', hanger:'👔' };
+const DEFAULT_COLORS = ['#DBEAFE','#EDE9FE','#DCFCE7','#FEF3C7','#FFE4E6','#F0FDF4'];
 
 // ── Init ──
-window.addEventListener('load', async () => {
+window.addEventListener('load', () => {
   const saved = JSON.parse(localStorage.getItem('layoutData') || 'null');
-  if (saved && saved.length && saved[0].modules && saved[0].modules.length) {
-    frames = saved;
-    aiConcept = localStorage.getItem('aiConcept') || '';
-    hideLoading();
-    activeIdx = 0;
-    renderAll();
+  if (saved && saved.frames && saved.frames.length) {
+    layoutMeta = { layout: saved.layout, designConcept: saved.designConcept };
+    frames = saved.frames;
   } else {
-    await generateAILayout();
+    layoutMeta = { designConcept: '' };
+    frames = getDefaultFrames();
   }
+  document.getElementById('canvasEmpty').style.display = 'none';
+  renderCanvas();
+  renderPanel();
 });
 
-function hideLoading() {
-  document.getElementById('loadingOverlay').style.display = 'none';
-}
-
-// ── AI Generation ──
-async function generateAILayout() {
-  document.getElementById('loadingOverlay').style.display = 'flex';
-  const btn = document.getElementById('regenBtn');
-  btn.classList.add('loading');
-
-  const API_KEY = localStorage.getItem('myp_solution_api_key') || '';
-  const step1 = JSON.parse(localStorage.getItem('step1Data') || '{}');
-  const concept = JSON.parse(localStorage.getItem('selectedConcept') || '{}');
-
-  let success = false;
-
-  try {
-      const infoText = [
-        step1.spaceSize    ? `공간 크기: ${step1.spaceSize}` : null,
-        step1.moodKeywords ? `분위기: ${step1.moodKeywords}` : null,
-        step1.budget       ? `예산: ${step1.budget}` : null,
-        concept.title      ? `선택 컨셉: ${concept.title}` : null,
-        concept.description ? `컨셉 설명: ${concept.description}` : null,
-      ].filter(Boolean).join(', ');
-
-      const prompt = `팝업스토어 레이아웃 전문가입니다. 아래 정보로 최적의 프레임 배치를 JSON으로 생성하세요. 공간크기와 예산 고려. 반드시 JSON만 응답: ${infoText || '기본 설정 사용'}\n응답 형식: {"frames": [{"id": "frame-1", "name": "MAIN FRAME A", "x": 200, "y": 80, "modules": [{"type": "선반", "height": 360}, {"type": "행거", "height": 540}, {"type": "디스플레이박스", "height": 360}, {"type": "카운터", "height": 540}]}], "concept": "한국어로 레이아웃 설명"}\n규칙: 프레임 너비 항상 600, 높이 항상 1800. 모듈 height 합계 반드시 1800. 프레임당 3-6개 모듈. 공간크기 기반 2-4개 프레임. 모듈 타입: 선반, 행거, 디스플레이박스, 카운터만 사용.`;
-
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': API_KEY,
-          'anthropic-version': '2023-06-01',
-          'anthropic-dangerous-direct-browser-access': 'true',
-        },
-        body: JSON.stringify({
-          model: 'claude-haiku-4-5',
-          max_tokens: 1024,
-          messages: [{ role: 'user', content: prompt }],
-        }),
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        const text = data.content && data.content[0] && data.content[0].text || '';
-        const match = text.match(/\{[\s\S]*\}/);
-        if (match) {
-          const parsed = JSON.parse(match[0]);
-          if (parsed.frames && parsed.frames.length) {
-            frames = parsed.frames.map((f, i) => ({
-              id: f.id || `frame-${Date.now()}-${i}`,
-              name: f.name || `FRAME ${String.fromCharCode(65+i)}`,
-              x: typeof f.x === 'number' ? f.x : 80 + i * 120,
-              y: typeof f.y === 'number' ? f.y : 80,
-              aiGenerated: true,
-              modules: (f.modules || []).map(m => ({
-                type: MODULE_TYPES.includes(m.type) ? m.type : '선반',
-                height: parseInt(m.height) || 360,
-              })),
-            }));
-            aiConcept = parsed.concept || '';
-            localStorage.setItem('aiConcept', aiConcept);
-            success = true;
-          }
-        }
-      }
-    } catch (err) {
-      console.warn('AI API error:', err);
-    }
-
-  if (!success) {
-    useMockData(JSON.parse(localStorage.getItem('step1Data') || '{}'), JSON.parse(localStorage.getItem('selectedConcept') || '{}'));
-  }
-
-  hideLoading();
-  btn.classList.remove('loading');
-  activeIdx = 0;
-  renderAll();
-  autoSave();
-}
-
-function useMockData(step1, style) {
-  const size = (step1.spaceSize || '').toString();
-  const count = (size.includes('대') || parseInt(size) >= 20) ? 4
-              : (size.includes('소') || parseInt(size) <= 8) ? 2 : 3;
-
-  const letters = 'ABCDEFGH';
-  const presets = [
-    [{ type:'선반',height:360 },{ type:'행거',height:540 },{ type:'선반',height:360 },{ type:'카운터',height:540 }],
-    [{ type:'행거',height:600 },{ type:'디스플레이박스',height:600 },{ type:'카운터',height:600 }],
-    [{ type:'선반',height:450 },{ type:'선반',height:450 },{ type:'행거',height:450 },{ type:'카운터',height:450 }],
-    [{ type:'디스플레이박스',height:600 },{ type:'행거',height:720 },{ type:'카운터',height:480 }],
+function getDefaultFrames() {
+  return [
+    { id: 'f1', type: 'rack', label: '메인 진열대', x: 5, y: 5, width: 22, height: 28, color: '#DBEAFE',
+      modules: [{ name: '선반', quantity: 3, unitPrice: 15000 }] },
+    { id: 'f2', type: 'counter', label: '카운터', x: 70, y: 5, width: 22, height: 18, color: '#FEF3C7',
+      modules: [{ name: '카운터 유닛', quantity: 1, unitPrice: 50000 }] },
+    { id: 'f3', type: 'display', label: '디스플레이 존', x: 5, y: 60, width: 35, height: 28, color: '#DCFCE7',
+      modules: [{ name: '진열 선반', quantity: 4, unitPrice: 12000 }] },
   ];
-
-  frames = Array.from({ length: count }, (_, i) => ({
-    id: `frame-${i+1}`,
-    name: `MAIN FRAME ${letters[i]}`,
-    x: 80 + i * 120,
-    y: 80,
-    aiGenerated: true,
-    modules: presets[i % presets.length].map(m => ({ ...m })),
-  }));
-
-  aiConcept = `${style.name || '기본'} 스타일 기반으로 동선과 진열 효율을 고려한 레이아웃을 자동 생성했습니다.`;
-  localStorage.setItem('aiConcept', aiConcept);
 }
 
-async function regenerate() {
-  await generateAILayout();
-}
+// ── Canvas Rendering ──
+function renderCanvas() {
+  const area = document.getElementById('canvasArea');
+  area.querySelectorAll('.canvas-frame').forEach(el => el.remove());
 
-// ── Render ──
-function renderAll() {
-  renderFrameList();
-  renderCanvas();
-  renderRightPanel();
-  document.getElementById('canvasInfo').textContent = `프레임 ${frames.length}개`;
-}
-
-function renderFrameList() {
-  const list = document.getElementById('frameList');
-  list.innerHTML = '';
   frames.forEach((f, i) => {
     const el = document.createElement('div');
-    el.className = 'frame-item' + (i === activeIdx ? ' active' : '');
-    el.onclick = () => { activeIdx = i; renderAll(); };
-
-    const thumbCanvas = buildThumbSVG(f);
-
+    el.className = 'canvas-frame' + (i === selectedIdx ? ' selected' : '');
+    el.style.left = f.x + '%';
+    el.style.top = f.y + '%';
+    el.style.width = f.width + '%';
+    el.style.height = f.height + '%';
+    el.style.background = f.color || DEFAULT_COLORS[i % DEFAULT_COLORS.length];
     el.innerHTML = `
-      <button class="frame-item-del" onclick="deleteFrame(${i},event)">✕</button>
-      <div class="frame-item-name">${f.name}${f.aiGenerated ? '<span class="ai-badge">AI</span>' : ''}</div>
-      <span class="frame-item-size">600 × 1800</span>
-      <div class="frame-thumb">${thumbCanvas}</div>`;
-    list.appendChild(el);
-  });
-}
+      <div class="canvas-frame-icon">${TYPE_ICONS[f.type] || '📦'}</div>
+      <div class="canvas-frame-label">${f.label || f.id}</div>
+    `;
 
-function buildThumbSVG(f) {
-  const totalH = f.modules.reduce((s, m) => s + m.height, 0) || 1800;
-  const svgH = 56;
-  const svgW = 24;
-  let y = 0;
-  const rects = f.modules.map(m => {
-    const h = (m.height / totalH) * svgH;
-    const r = `<rect x="0" y="${y.toFixed(1)}" width="${svgW}" height="${h.toFixed(1)}" fill="${MODULE_COLORS[m.type] || '#F3F4F6'}" />`;
-    y += h;
-    return r;
-  }).join('');
-  return `<svg width="${svgW}" height="${svgH}" style="border-radius:3px;overflow:hidden">${rects}</svg>`;
-}
-
-function renderCanvas() {
-  const inner = document.getElementById('canvasInner');
-  inner.querySelectorAll('.canvas-frame-wrap').forEach(el => el.remove());
-
-  frames.forEach((f, fi) => {
-    const wrap = document.createElement('div');
-    wrap.className = 'canvas-frame-wrap';
-    wrap.style.left = f.x + 'px';
-    wrap.style.top = f.y + 'px';
-
-    const label = document.createElement('div');
-    label.className = 'canvas-frame-label';
-    label.textContent = f.name;
-
-    const box = document.createElement('div');
-    box.className = 'canvas-frame-box' + (fi === activeIdx ? ' active' : '');
-
-    const totalH = f.modules.reduce((s, m) => s + m.height, 0) || 1800;
-
-    f.modules.forEach(m => {
-      const block = document.createElement('div');
-      block.className = 'canvas-module-block';
-      const blockH = Math.round((m.height / totalH) * FRAME_PX_H);
-      block.style.height = blockH + 'px';
-      block.style.background = MODULE_COLORS[m.type] || '#F3F4F6';
-      block.textContent = m.type.substring(0, 1);
-      box.appendChild(block);
+    el.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      selectedIdx = i;
+      renderCanvas();
+      renderPanel();
+      startDrag(e, el, f);
     });
-
-    if (f.aiGenerated) {
-      const badge = document.createElement('div');
-      badge.className = 'canvas-frame-badge';
-      badge.textContent = 'AI';
-      box.appendChild(badge);
-    }
-
-    wrap.appendChild(label);
-    wrap.appendChild(box);
-    inner.appendChild(wrap);
-
-    wrap.addEventListener('mousedown', (e) => {
-      if (e.target.tagName === 'BUTTON') return;
-      activeIdx = fi;
-      renderAll();
-      startDrag(e, wrap, f);
-    });
-    wrap.addEventListener('touchstart', (e) => {
-      if (e.target.tagName === 'BUTTON') return;
-      activeIdx = fi;
-      renderAll();
-      startDragTouch(e, wrap, f);
+    el.addEventListener('touchstart', (e) => {
+      selectedIdx = i;
+      renderCanvas();
+      renderPanel();
+      startDragTouch(e, el, f);
     }, { passive: false });
+
+    area.appendChild(el);
   });
 }
 
+// ── Drag ──
 function startDrag(e, el, frame) {
-  const startX = e.clientX - frame.x;
-  const startY = e.clientY - frame.y;
+  const area = document.getElementById('canvasArea');
+  const rect = area.getBoundingClientRect();
+  const startXPct = ((e.clientX - rect.left) / rect.width) * 100;
+  const startYPct = ((e.clientY - rect.top) / rect.height) * 100;
+  const origX = frame.x;
+  const origY = frame.y;
+
   function onMove(ev) {
-    frame.x = Math.max(0, Math.round((ev.clientX - startX) / SNAP) * SNAP);
-    frame.y = Math.max(0, Math.round((ev.clientY - startY) / SNAP) * SNAP);
-    el.style.left = frame.x + 'px';
-    el.style.top = frame.y + 'px';
+    const xPct = ((ev.clientX - rect.left) / rect.width) * 100;
+    const yPct = ((ev.clientY - rect.top) / rect.height) * 100;
+    frame.x = Math.max(0, Math.min(100 - frame.width, origX + (xPct - startXPct)));
+    frame.y = Math.max(0, Math.min(100 - frame.height, origY + (yPct - startYPct)));
+    el.style.left = frame.x + '%';
+    el.style.top = frame.y + '%';
   }
   function onUp() {
     document.removeEventListener('mousemove', onMove);
@@ -465,16 +247,23 @@ function startDrag(e, el, frame) {
 }
 
 function startDragTouch(e, el, frame) {
-  const touch = e.touches[0];
-  const startX = touch.clientX - frame.x;
-  const startY = touch.clientY - frame.y;
+  const area = document.getElementById('canvasArea');
+  const rect = area.getBoundingClientRect();
+  const t0 = e.touches[0];
+  const startXPct = ((t0.clientX - rect.left) / rect.width) * 100;
+  const startYPct = ((t0.clientY - rect.top) / rect.height) * 100;
+  const origX = frame.x;
+  const origY = frame.y;
   e.preventDefault();
+
   function onMove(ev) {
     const t = ev.touches[0];
-    frame.x = Math.max(0, Math.round((t.clientX - startX) / SNAP) * SNAP);
-    frame.y = Math.max(0, Math.round((t.clientY - startY) / SNAP) * SNAP);
-    el.style.left = frame.x + 'px';
-    el.style.top = frame.y + 'px';
+    const xPct = ((t.clientX - rect.left) / rect.width) * 100;
+    const yPct = ((t.clientY - rect.top) / rect.height) * 100;
+    frame.x = Math.max(0, Math.min(100 - frame.width, origX + (xPct - startXPct)));
+    frame.y = Math.max(0, Math.min(100 - frame.height, origY + (yPct - startYPct)));
+    el.style.left = frame.x + '%';
+    el.style.top = frame.y + '%';
   }
   function onEnd() {
     document.removeEventListener('touchmove', onMove);
@@ -486,136 +275,154 @@ function startDragTouch(e, el, frame) {
 }
 
 // ── Right Panel ──
-function renderRightPanel() {
-  const body = document.getElementById('propsBody');
-  if (activeIdx < 0 || !frames[activeIdx]) {
-    body.innerHTML = '<div class="no-selection">프레임을 선택하면<br>여기서 편집할 수 있습니다.</div>';
-    return;
-  }
-  const f = frames[activeIdx];
-  const conceptHtml = aiConcept
-    ? `<div class="concept-box"><div class="concept-box-label">AI 컨셉</div>${aiConcept}</div>` : '';
-  const totalH = f.modules.reduce((s, m) => s + m.height, 0);
-  const warnHtml = totalH !== 1800
-    ? `<div class="height-warning">⚠ 합계: ${totalH}mm (권장: 1800mm)</div>` : '';
-  const moduleRows = f.modules.map((m, mi) => `
-    <div class="module-row">
-      <div class="mod-dot" style="background:${MODULE_COLORS[m.type] || '#F3F4F6'}"></div>
-      <select class="mod-select" onchange="updateModule(${mi},'type',this.value)">
-        ${MODULE_TYPES.map(t => `<option value="${t}"${t === m.type ? ' selected' : ''}>${t}</option>`).join('')}
-      </select>
-      <input class="mod-height" type="number" value="${m.height}" min="120" max="1800" step="60" onchange="updateModule(${mi},'height',+this.value)">
-      <div class="mod-arrows">
-        <button class="mod-arrow" onclick="moveModule(${mi},-1)">▲</button>
-        <button class="mod-arrow" onclick="moveModule(${mi},1)">▼</button>
+function renderPanel() {
+  const body = document.getElementById('panelBody');
+  const title = document.getElementById('panelTitle');
+  const closeBtn = document.getElementById('panelCloseBtn');
+
+  if (selectedIdx < 0 || !frames[selectedIdx]) {
+    // Overview
+    title.textContent = '레이아웃 정보';
+    closeBtn.style.display = 'none';
+    const concept = layoutMeta.designConcept || '';
+    const totalModules = frames.reduce((s, f) => s + (f.modules || []).length, 0);
+    body.innerHTML = `
+      ${concept ? `<div class="concept-card"><div class="concept-card-label">AI 디자인 컨셉</div><div class="concept-card-text">${concept}</div></div>` : ''}
+      <div class="info-grid">
+        <div class="info-cell"><div class="info-cell-val">${frames.length}</div><div class="info-cell-label">총 프레임 수</div></div>
+        <div class="info-cell"><div class="info-cell-val">${totalModules}</div><div class="info-cell-label">총 모듈 수</div></div>
       </div>
-      <button class="mod-del" onclick="deleteModule(${mi})">✕</button>
-    </div>`).join('');
+      <div class="hint-text">프레임을 클릭하면<br>세부 편집이 가능합니다.</div>
+    `;
+  } else {
+    // Frame detail
+    const f = frames[selectedIdx];
+    title.textContent = f.label || '프레임 편집';
+    closeBtn.style.display = 'flex';
 
-  body.innerHTML = `
-    ${conceptHtml}
-    <div class="prop-group">
-      <div class="prop-label">프레임 이름</div>
-      <input class="prop-input" type="text" value="${f.name}" oninput="updateFrameName(this.value)">
-    </div>
-    <div class="prop-group">
-      <div class="prop-label">모듈 구성</div>
-      <div class="module-list">${moduleRows}</div>
-      <button class="add-module-btn" onclick="addModule()">+ 모듈 추가</button>
-      ${warnHtml}
-    </div>`;
+    const moduleRows = (f.modules || []).map((m, mi) => `
+      <div class="module-row">
+        <div class="module-row-top">
+          <input class="mod-name-input" type="text" value="${escHtml(m.name)}" onchange="updateModule(${mi},'name',this.value)" placeholder="모듈명">
+          <button class="mod-del-btn" onclick="deleteModule(${mi})">✕</button>
+        </div>
+        <div class="module-row-bottom">
+          <div class="mod-qty-wrap">
+            <button class="mod-qty-btn" onclick="changeQty(${mi},-1)">−</button>
+            <span class="mod-qty-val">${m.quantity || 1}</span>
+            <button class="mod-qty-btn" onclick="changeQty(${mi},1)">+</button>
+          </div>
+          <div class="mod-price-wrap">
+            <span class="mod-price-label">단가</span>
+            <input class="mod-price-input" type="number" value="${m.unitPrice || 0}" onchange="updateModule(${mi},'unitPrice',+this.value)" placeholder="원">
+          </div>
+        </div>
+      </div>
+    `).join('');
+
+    body.innerHTML = `
+      <div class="prop-group">
+        <div class="prop-label">프레임 이름</div>
+        <input class="prop-input" type="text" value="${escHtml(f.label)}" oninput="updateFrameLabel(this.value)">
+      </div>
+      <div class="prop-group">
+        <div class="prop-label">모듈 목록</div>
+        <div class="module-list">${moduleRows}</div>
+        <button class="add-mod-btn" onclick="addModule()">+ 모듈 추가</button>
+      </div>
+      <button class="del-frame-btn" onclick="deleteFrame()">이 프레임 삭제</button>
+    `;
+  }
 }
 
-// ── Module / Frame editing ──
-function updateFrameName(val) {
-  if (frames[activeIdx]) { frames[activeIdx].name = val; renderFrameList(); renderCanvas(); autoSave(); }
+function escHtml(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
+
+function deselectFrame() {
+  selectedIdx = -1;
+  renderCanvas();
+  renderPanel();
+}
+
+// ── Frame / Module Editing ──
+function updateFrameLabel(val) {
+  if (frames[selectedIdx]) {
+    frames[selectedIdx].label = val;
+    renderCanvas();
+    autoSave();
+  }
+}
+
 function updateModule(mi, key, val) {
-  if (!frames[activeIdx]) return;
-  frames[activeIdx].modules[mi][key] = val;
-  renderAll(); autoSave();
+  if (!frames[selectedIdx]) return;
+  frames[selectedIdx].modules[mi][key] = val;
+  autoSave();
 }
-function moveModule(mi, dir) {
-  if (!frames[activeIdx]) return;
-  const mods = frames[activeIdx].modules;
-  const ni = mi + dir;
-  if (ni < 0 || ni >= mods.length) return;
-  [mods[mi], mods[ni]] = [mods[ni], mods[mi]];
-  renderAll(); autoSave();
+
+function changeQty(mi, delta) {
+  if (!frames[selectedIdx]) return;
+  const mod = frames[selectedIdx].modules[mi];
+  mod.quantity = Math.max(1, (mod.quantity || 1) + delta);
+  renderPanel();
+  autoSave();
 }
+
 function deleteModule(mi) {
-  if (!frames[activeIdx]) return;
-  frames[activeIdx].modules.splice(mi, 1);
-  renderAll(); autoSave();
+  if (!frames[selectedIdx]) return;
+  frames[selectedIdx].modules.splice(mi, 1);
+  renderPanel();
+  autoSave();
 }
+
 function addModule() {
-  if (!frames[activeIdx]) return;
-  frames[activeIdx].modules.push({ type: '선반', height: 360 });
-  renderAll(); autoSave();
+  if (!frames[selectedIdx]) return;
+  frames[selectedIdx].modules.push({ name: '새 모듈', quantity: 1, unitPrice: 10000 });
+  renderPanel();
+  autoSave();
 }
 
 function addFrame() {
   const i = frames.length;
   frames.push({
-    id: `frame-${Date.now()}`,
-    name: `FRAME ${String.fromCharCode(65 + i % 26)}`,
-    x: 80 + (i % 6) * 120,
-    y: 80 + Math.floor(i / 6) * 240,
-    aiGenerated: false,
-    modules: [{ type: '선반', height: 540 }, { type: '행거', height: 720 }, { type: '카운터', height: 540 }],
+    id: 'f' + Date.now(),
+    type: 'rack',
+    label: '새 프레임',
+    x: 10 + (i % 4) * 20,
+    y: 10 + Math.floor(i / 4) * 30,
+    width: 18,
+    height: 22,
+    color: DEFAULT_COLORS[i % DEFAULT_COLORS.length],
+    modules: [{ name: '선반', quantity: 1, unitPrice: 15000 }],
   });
-  activeIdx = frames.length - 1;
-  renderAll(); autoSave();
-}
-
-function deleteFrame(i, e) {
-  e.stopPropagation();
-  frames.splice(i, 1);
-  if (activeIdx >= frames.length) activeIdx = frames.length - 1;
-  renderAll(); autoSave();
-}
-
-function deleteActiveFrame() {
-  if (activeIdx < 0 || !frames[activeIdx]) return;
-  frames.splice(activeIdx, 1);
-  if (activeIdx >= frames.length) activeIdx = frames.length - 1;
-  renderAll(); autoSave();
-}
-
-// ── Canvas controls ──
-function zoom(f) {
-  canvasZoom = Math.min(3, Math.max(0.3, canvasZoom * f));
-  const inner = document.getElementById('canvasInner');
-  inner.style.transform = `scale(${canvasZoom})`;
-  inner.style.transformOrigin = 'top left';
-}
-
-function fitView() {
-  canvasZoom = 1;
-  const inner = document.getElementById('canvasInner');
-  inner.style.transform = '';
-  document.getElementById('canvasArea').scrollTop = 0;
-  document.getElementById('canvasArea').scrollLeft = 0;
-}
-
-function toggleGrid() {
-  gridVisible = !gridVisible;
-  document.getElementById('canvasGrid').classList.toggle('hidden', !gridVisible);
-}
-
-// ── Save ──
-function autoSave() {
-  localStorage.setItem('layoutData', JSON.stringify(frames));
-  document.getElementById('saveStatus').textContent = '● 저장됨';
-}
-
-function saveAndNext() {
+  selectedIdx = frames.length - 1;
+  renderCanvas();
+  renderPanel();
   autoSave();
-  window.location.href = 'step4.html';
+}
+
+function deleteFrame() {
+  if (selectedIdx < 0 || !frames[selectedIdx]) return;
+  frames.splice(selectedIdx, 1);
+  selectedIdx = -1;
+  renderCanvas();
+  renderPanel();
+  autoSave();
+}
+
+// ── Save & Navigate ──
+function autoSave() {
+  localStorage.setItem('layoutData', JSON.stringify({ ...layoutMeta, frames }));
+}
+
+function goToQuote() {
+  localStorage.setItem('finalLayout', JSON.stringify(frames));
+  window.location.href = 'step5.html';
 }
 
 // ── Modal ──
 function openModal() {
+  document.getElementById('apiKeyInput').value = localStorage.getItem('myp_solution_api_key') || localStorage.getItem('apiKey') || '';
   document.getElementById('modalOverlay').classList.add('open');
 }
 function closeModalOverlay(e) {
@@ -623,6 +430,8 @@ function closeModalOverlay(e) {
     document.getElementById('modalOverlay').classList.remove('open');
 }
 function saveApiKey() {
+  const k = document.getElementById('apiKeyInput').value.trim();
+  if (k) { localStorage.setItem('myp_solution_api_key', k); localStorage.setItem('apiKey', k); }
   document.getElementById('modalOverlay').classList.remove('open');
 }
 </script>
