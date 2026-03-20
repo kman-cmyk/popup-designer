@@ -43,14 +43,14 @@ html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Sego
 .login-logo span { color: var(--accent); }
 .login-sub { color: var(--text-2); font-size: 13px; margin-bottom: 28px; }
 .login-input {
-  width: 100%; padding: 10px 14px; border-radius: 999px;
+  width: 100%; padding: 10px 14px; border-radius: var(--r-sm);
   background: var(--input-bg); border: 1px solid var(--border);
   color: var(--text); font-size: 15px; text-align: center;
   letter-spacing: 4px; outline: none; margin-bottom: 12px;
 }
 .login-input:focus { border-color: var(--accent); }
 .login-btn {
-  width: 100%; padding: 10px; border-radius: 999px;
+  width: 100%; padding: 10px; border-radius: var(--r-sm);
   background: var(--accent); border: none; color: #fff;
   font-size: 14px; font-weight: 600; cursor: pointer;
 }
@@ -58,7 +58,7 @@ html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Sego
 .login-err { color: #f85149; font-size: 12px; margin-top: 8px; min-height: 16px; }
 
 /* ── MAIN LAYOUT ── */
-#app { display: flex; height: 100vh; }
+#app { display: none; height: 100vh; }
 #app.visible { display: flex; }
 
 /* ── LEFT PANEL ── */
@@ -77,7 +77,7 @@ html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Sego
 .logo span { color: var(--accent); }
 .header-actions { display: flex; gap: 6px; }
 .icon-btn {
-  width: 30px; height: 30px; border-radius: 999px;
+  width: 30px; height: 30px; border-radius: var(--r-sm);
   border: 1px solid var(--border); background: transparent;
   color: var(--text-2); cursor: pointer;
   display: flex; align-items: center; justify-content: center;
@@ -92,13 +92,13 @@ html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Sego
   display: flex; align-items: center; gap: 8px;
 }
 #file-select {
-  flex: 1; padding: 7px 10px; border-radius: 999px;
+  flex: 1; padding: 7px 10px; border-radius: var(--r-sm);
   background: var(--input-bg); border: 1px solid var(--border);
   color: var(--text); font-size: 13px; outline: none; cursor: pointer;
 }
 #file-select:focus { border-color: var(--accent); }
 #load-btn {
-  padding: 7px 12px; border-radius: 999px;
+  padding: 7px 12px; border-radius: var(--r-sm);
   background: var(--hover); border: 1px solid var(--border);
   color: var(--text-2); font-size: 12px; cursor: pointer; white-space: nowrap;
   transition: all .15s;
@@ -113,7 +113,7 @@ html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Sego
   display: flex; align-items: center; justify-content: space-between;
 }
 #add-project-btn {
-  padding: 4px 9px; border-radius: 999px;
+  padding: 4px 9px; border-radius: var(--r-sm);
   background: transparent; border: 1px solid var(--border);
   color: var(--text-2); font-size: 11px; cursor: pointer;
   transition: all .15s;
@@ -167,7 +167,7 @@ html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Sego
 }
 #prompt-box {
   width: 100%; min-height: 72px; max-height: 160px; resize: vertical;
-  padding: 10px 12px; border-radius: 999px;
+  padding: 10px 12px; border-radius: var(--r-sm);
   background: var(--input-bg); border: 1px solid var(--border);
   color: var(--text); font-size: 13px; line-height: 1.6;
   outline: none; font-family: inherit; margin-bottom: 8px;
@@ -177,14 +177,14 @@ html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Sego
 #input-actions { display: flex; align-items: center; justify-content: space-between; }
 #input-left { display: flex; gap: 6px; align-items: center; }
 .attach-btn {
-  padding: 6px 10px; border-radius: 999px;
+  padding: 6px 10px; border-radius: var(--r-sm);
   background: transparent; border: 1px solid var(--border);
   color: var(--text-2); font-size: 13px; cursor: pointer;
 }
 .attach-btn:hover { color: var(--text); background: var(--hover); }
 #img-count { font-size: 11px; color: var(--text-3); }
 #send-btn {
-  padding: 7px 16px; border-radius: 999px;
+  padding: 7px 16px; border-radius: var(--r-sm);
   background: var(--accent); border: none; color: #fff;
   font-size: 13px; font-weight: 600; cursor: pointer;
 }
@@ -210,7 +210,7 @@ html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Sego
 .tab-btn:hover:not(.active) { color: var(--text); }
 .right-actions { display: flex; gap: 6px; }
 .save-btn {
-  padding: 5px 12px; border-radius: 999px;
+  padding: 5px 12px; border-radius: var(--r-sm);
   background: transparent; border: 1px solid var(--border);
   color: var(--text-2); font-size: 12px; cursor: pointer;
 }
@@ -240,19 +240,19 @@ html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Sego
 .field { margin-bottom: 16px; }
 .field label { display: block; font-size: 12px; color: var(--text-2); margin-bottom: 6px; }
 .field input, .field select {
-  width: 100%; padding: 9px 12px; border-radius: 999px;
+  width: 100%; padding: 9px 12px; border-radius: var(--r-sm);
   background: var(--input-bg); border: 1px solid var(--border);
   color: var(--text); font-size: 13px; outline: none;
 }
 .field input:focus, .field select:focus { border-color: var(--accent); }
 .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 8px; }
 .btn-cancel {
-  padding: 8px 16px; border-radius: 999px;
+  padding: 8px 16px; border-radius: var(--r-sm);
   background: transparent; border: 1px solid var(--border);
   color: var(--text-2); font-size: 13px; cursor: pointer;
 }
 .btn-save {
-  padding: 8px 16px; border-radius: 999px;
+  padding: 8px 16px; border-radius: var(--r-sm);
   background: var(--accent); border: none; color: #fff;
   font-size: 13px; font-weight: 600; cursor: pointer;
 }
@@ -269,7 +269,7 @@ html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Sego
 #toast {
   position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
   background: #1f2937; border: 1px solid var(--border); color: var(--text);
-  padding: 10px 20px; border-radius: 999px; font-size: 13px;
+  padding: 10px 20px; border-radius: var(--r); font-size: 13px;
   z-index: 9999; opacity: 0; transition: opacity .25s; pointer-events: none;
 }
 #toast.show { opacity: 1; }
@@ -583,7 +583,7 @@ function tryLogin() {
 }
 document.getElementById('code-input')?.addEventListener('keydown', e => { if (e.key === 'Enter') tryLogin(); });
 
-if (true) { // auth disabled
+if (true) {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app').classList.add('visible');
   setTimeout(() => {
@@ -619,4 +619,478 @@ async function loadFile() {
   btn.textContent = '로딩...';
   btn.disabled = true;
   try {
-    const headers =
+    const headers = { 'Accept': 'application/vnd.github.v3+json' };
+    if (ghToken) headers['Authorization'] = `token ${ghToken}`;
+    const res = await fetch(`${GITHUB_API}/repos/${repo}/contents/${filename}`, { headers });
+    if (!res.ok) throw new Error(`GitHub ${res.status}`);
+    const data = await res.json();
+    const raw = atob(data.content.replace(/\n/g, ''));
+    const content = new TextDecoder('utf-8').decode(Uint8Array.from(raw, c => c.charCodeAt(0)));
+    currentFileSHA = data.sha;
+    setCode(content);
+    addSystemMsg(`✅ ${filename} 불러왔습니다`);
+  } catch (e) {
+    showToast(`파일 로드 실패: ${e.message}`);
+  } finally {
+    btn.textContent = '불러오기';
+    btn.disabled = false;
+  }
+}
+
+async function loadProjectFiles(pIdx) {
+  const projects = getProjects();
+  const proj = projects[pIdx];
+  if (!proj) return;
+
+  const { ghToken } = getSettings();
+  const btn = document.getElementById('load-btn');
+  btn.textContent = '조회 중...';
+  btn.disabled = true;
+  try {
+    const headers = { 'Accept': 'application/vnd.github.v3+json' };
+    if (ghToken) headers['Authorization'] = `token ${ghToken}`;
+    const res = await fetch(`${GITHUB_API}/repos/${proj.repo}/contents/`, { headers });
+    if (!res.ok) throw new Error(`GitHub ${res.status}`);
+    const data = await res.json();
+    const htmlFiles = data
+      .filter(f => f.type === 'file' && f.name.endsWith('.html'))
+      .map(f => f.name);
+    if (htmlFiles.length === 0) { showToast('HTML 파일을 찾을 수 없습니다'); return; }
+    projects[pIdx].files = htmlFiles;
+    saveProjects(projects);
+    renderProjectDropdown();
+    showToast(`✅ ${proj.name}: ${htmlFiles.length}개 파일 로드됨`);
+  } catch (e) {
+    showToast(`파일 목록 조회 실패: ${e.message}`);
+  } finally {
+    btn.textContent = '불러오기';
+    btn.disabled = false;
+  }
+}
+
+function ensureCharset(html) {
+  if (/<meta\s[^>]*charset/i.test(html)) return html;
+  if (/<head[^>]*>/i.test(html)) {
+    return html.replace(/(<head[^>]*>)/i, '$1\n  <meta charset="utf-8">');
+  }
+  if (/<html[^>]*>/i.test(html)) {
+    return html.replace(/(<html[^>]*>)/i, '$1\n<head><meta charset="utf-8"></head>');
+  }
+  return '<meta charset="utf-8">\n' + html;
+}
+
+function setCode(html) {
+  const safeHtml = ensureCharset(html);
+  currentCode = html;
+  const iframe = document.getElementById('preview-iframe');
+  const blob = new Blob([safeHtml], { type: 'text/html; charset=utf-8' });
+  const blobUrl = URL.createObjectURL(blob);
+  if (iframe._blobUrl) URL.revokeObjectURL(iframe._blobUrl);
+  iframe._blobUrl = blobUrl;
+  iframe.src = blobUrl;
+  document.getElementById('code-display').textContent = html;
+}
+
+// ── CHAT ──
+function addSystemMsg(text) {
+  addMsg('ai', text);
+}
+
+function addMsg(role, text, images) {
+  const chat = document.getElementById('chat');
+  const div = document.createElement('div');
+  div.className = `msg ${role}`;
+
+  if (images && images.length > 0) {
+    const row = document.createElement('div');
+    row.className = 'msg-thumb-row';
+    images.forEach(img => {
+      const el = document.createElement('img');
+      el.className = 'msg-thumb';
+      el.src = `data:${img.mediaType};base64,${img.base64}`;
+      row.appendChild(el);
+    });
+    div.appendChild(row);
+  }
+
+  const bubble = document.createElement('div');
+  bubble.className = 'msg-bubble';
+  bubble.textContent = text;
+  div.appendChild(bubble);
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+  return div;
+}
+
+function addThinking() {
+  const chat = document.getElementById('chat');
+  const div = document.createElement('div');
+  div.className = 'msg ai';
+  div.innerHTML = '<div class="thinking"><span></span><span></span><span></span></div>';
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+  return div;
+}
+
+// ── IMAGE ATTACH ──
+function addImages(files) {
+  const remaining = 5 - attachedImages.length;
+  const toAdd = Array.from(files).slice(0, remaining);
+  toAdd.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const b64 = e.target.result.split(',')[1];
+      attachedImages.push({ base64: b64, mediaType: file.type, name: file.name });
+      renderImagePreviews();
+    };
+    reader.readAsDataURL(file);
+  });
+  document.getElementById('img-input').value = '';
+}
+
+function removeImage(idx) {
+  attachedImages.splice(idx, 1);
+  renderImagePreviews();
+}
+
+function renderImagePreviews() {
+  const container = document.getElementById('image-previews');
+  container.innerHTML = '';
+  attachedImages.forEach((img, i) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'img-prev-wrap';
+    wrap.innerHTML = `
+      <img class="img-prev" src="data:${img.mediaType};base64,${img.base64}" />
+      <button class="img-prev-rm" onclick="removeImage(${i})">×</button>
+    `;
+    container.appendChild(wrap);
+  });
+  document.getElementById('img-count').textContent = attachedImages.length > 0 ? `${attachedImages.length}/5` : '';
+}
+
+// Drop on textarea
+const promptBox = document.getElementById('prompt-box');
+promptBox.addEventListener('dragover', e => e.preventDefault());
+promptBox.addEventListener('drop', e => {
+  e.preventDefault();
+  const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+  if (files.length) addImages(files);
+});
+promptBox.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && e.ctrlKey) { e.preventDefault(); sendMessage(); }
+});
+promptBox.addEventListener('paste', e => {
+  const items = Array.from(e.clipboardData?.items || []);
+  const imgItems = items.filter(i => i.type.startsWith('image/'));
+  if (imgItems.length === 0) return;
+  e.preventDefault();
+  const files = imgItems.map(i => i.getAsFile()).filter(Boolean);
+  if (files.length) addImages(files);
+  showToast(`🖼 이미지 ${files.length}장 첨부됨`);
+});
+
+// ── SEND ──
+async function sendMessage() {
+  if (isGenerating) return;
+  const { apiKey, model } = getSettings();
+  if (!apiKey) { openSettings(); showToast('API 키를 먼저 설정해주세요'); return; }
+
+  const text = promptBox.value.trim();
+  if (!text && attachedImages.length === 0) return;
+
+  const filename = document.getElementById('file-select').value;
+  const userText = text || '(이미지 첨부)';
+  const sentImages = [...attachedImages];
+  addMsg('user', userText, sentImages);
+
+  promptBox.value = '';
+  attachedImages = [];
+  renderImagePreviews();
+
+  isGenerating = true;
+  document.getElementById('send-btn').disabled = true;
+
+  // ── 전체 솔루션 일괄 적용 ──
+  if (filename === '__all__') {
+    try {
+      await sendAllFiles(apiKey, model, text, sentImages);
+    } finally {
+      isGenerating = false;
+      document.getElementById('send-btn').disabled = false;
+    }
+    return;
+  }
+
+  const thinking = addThinking();
+  try {
+    const html = await callAI(apiKey, model, text, sentImages, filename);
+    thinking.remove();
+    if (html) {
+      setCode(html);
+      addMsg('ai', `✅ ${filename} 업데이트됐습니다. 코드가 적용됐어요.`);
+      autoSave();
+    } else {
+      addMsg('ai', '코드를 생성하지 못했습니다. 다시 시도해주세요.');
+    }
+  } catch (e) {
+    thinking.remove();
+    addMsg('ai', `오류: ${e.message}`);
+  } finally {
+    isGenerating = false;
+    document.getElementById('send-btn').disabled = false;
+  }
+}
+
+// ── BATCH: 전체 솔루션 일괄 적용 ──
+async function sendAllFiles(apiKey, model, text, images) {
+  const proj = getCurrentProject();
+  if (!proj) { addMsg('ai', '현재 프로젝트를 찾을 수 없습니다.'); return; }
+
+  const { ghToken } = getSettings();
+  const files = proj.files;
+
+  if (files.length === 0) {
+    addMsg('ai', '처리할 파일이 없습니다. 먼저 파일을 선택해 목록을 불러오세요.');
+    return;
+  }
+
+  const statusDiv = addMsg('ai', `⏳ 전체 솔루션 처리 시작... (0/${files.length})`);
+  const bubble = statusDiv.querySelector('.msg-bubble');
+
+  let successCount = 0;
+  for (let i = 0; i < files.length; i++) {
+    const fname = files[i];
+    bubble.textContent = `⏳ 처리 중 (${i + 1}/${files.length}): ${fname}...`;
+    document.getElementById('chat').scrollTop = document.getElementById('chat').scrollHeight;
+
+    try {
+      // 1. 파일 로드
+      const headers = { 'Accept': 'application/vnd.github.v3+json' };
+      if (ghToken) headers['Authorization'] = `token ${ghToken}`;
+      const res = await fetch(`${GITHUB_API}/repos/${proj.repo}/contents/${fname}`, { headers });
+      if (!res.ok) throw new Error(`GitHub ${res.status}`);
+      const data = await res.json();
+      const raw = atob(data.content.replace(/\n/g, ''));
+      const content = new TextDecoder('utf-8').decode(Uint8Array.from(raw, c => c.charCodeAt(0)));
+      currentFileSHA = data.sha;
+      currentCode = content;
+
+      // 2. AI 호출
+      const html = await callAI(apiKey, model, text, images, fname);
+      if (!html) throw new Error('AI가 코드를 반환하지 않았습니다');
+
+      // 3. GitHub 커밋
+      currentCode = html;
+      await commitToGitHub(fname, ghToken, true, proj.repo);
+      successCount++;
+    } catch (e) {
+      console.warn(`[batch] ${fname} 실패:`, e.message);
+    }
+  }
+
+  bubble.textContent = `✅ 전체 솔루션 ${successCount}/${files.length}개 파일 업데이트 완료`;
+  document.getElementById('chat').scrollTop = document.getElementById('chat').scrollHeight;
+}
+
+// ── AI CALL ──
+async function callAI(apiKey, model, text, images, filename) {
+  filename = filename || document.getElementById('file-select').value;
+  const systemPrompt = `You are a web developer editing "${filename}".
+Return ONLY complete HTML code, nothing else.
+No JSON. No markdown fences. No explanation. No comments outside HTML.
+Start your response directly with <!DOCTYPE html> or <html.
+The user may send images for reference.`;
+
+  const userContent = [];
+  if (images && images.length > 0) {
+    images.forEach(img => {
+      userContent.push({ type: 'image', source: { type: 'base64', media_type: img.mediaType, data: img.base64 } });
+    });
+  }
+
+  let userText = text || 'Update this file as shown in the image.';
+  if (currentCode) {
+    userText += `\n\nCurrent file content:\n\`\`\`html\n${currentCode}\n\`\`\``;
+  }
+  userContent.push({ type: 'text', text: userText });
+
+  const body = {
+    model,
+    max_tokens: 8192,
+    system: systemPrompt,
+    messages: [{ role: 'user', content: userContent }],
+  };
+
+  const res = await fetch(ANTHROPIC_API, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true',
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error?.message || `API ${res.status}`);
+  }
+
+  const data = await res.json();
+  const raw = data.content?.[0]?.text || '';
+  return extractHTML(raw);
+}
+
+// ── HTML EXTRACTION ──
+function extractHTML(raw) {
+  if (!raw) return null;
+
+  const fenceMatch = raw.match(/```(?:html)?\s*([\s\S]*?)```/i);
+  if (fenceMatch) {
+    const candidate = fenceMatch[1].trim();
+    if (looksLikeHTML(candidate)) return candidate;
+  }
+
+  const doctypeIdx = raw.search(/<!DOCTYPE\s+html/i);
+  if (doctypeIdx !== -1) return raw.slice(doctypeIdx).trim();
+
+  const htmlIdx = raw.search(/<html[\s>]/i);
+  if (htmlIdx !== -1) return raw.slice(htmlIdx).trim();
+
+  const trimmed = raw.trim();
+  if (trimmed.startsWith('<')) return trimmed;
+
+  return null;
+}
+
+function looksLikeHTML(str) {
+  return /<!DOCTYPE\s+html/i.test(str) || /<html[\s>]/i.test(str) || /<head[\s>]/i.test(str);
+}
+
+// ── GITHUB SAVE ──
+async function saveToGitHub() {
+  const filename = document.getElementById('file-select').value;
+  if (filename === '__all__' || filename.startsWith('__load_')) { showToast('파일을 먼저 선택해주세요'); return; }
+  const { ghToken } = getSettings();
+  if (!ghToken) { openSettings(); showToast('GitHub 토큰을 먼저 설정해주세요'); return; }
+  if (!currentCode) { showToast('저장할 코드가 없습니다'); return; }
+  await commitToGitHub(filename, ghToken);
+}
+
+async function deployAndShowLink() {
+  const filename = document.getElementById('file-select').value;
+  if (filename === '__all__' || filename.startsWith('__load_')) { showToast('파일을 먼저 선택해주세요'); return; }
+  const { ghToken } = getSettings();
+  if (!ghToken) { openSettings(); showToast('GitHub 토큰을 먼저 설정해주세요'); return; }
+  if (!currentCode) { showToast('저장할 코드가 없습니다'); return; }
+  showToast('🚀 배포 중...');
+  await commitToGitHub(filename, ghToken, true);
+  showDeployPopup(filename);
+}
+
+async function autoSave() {
+  const filename = document.getElementById('file-select').value;
+  if (filename === '__all__' || filename.startsWith('__load_')) return;
+  const { ghToken } = getSettings();
+  if (!ghToken || !currentCode) return;
+  await commitToGitHub(filename, ghToken, true);
+}
+
+async function commitToGitHub(filename, token, silent = false, repo = null) {
+  repo = repo || getCurrentRepo();
+  try {
+    const content = btoa(unescape(encodeURIComponent(currentCode)));
+    const body = {
+      message: `Update: ${filename} via MYP Studio`,
+      content,
+    };
+    if (currentFileSHA) body.sha = currentFileSHA;
+
+    const res = await fetch(`${GITHUB_API}/repos/${repo}/contents/${filename}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `token ${token}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/vnd.github.v3+json',
+      },
+      body: JSON.stringify(body),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || `GitHub ${res.status}`);
+    }
+
+    const data = await res.json();
+    currentFileSHA = data.content?.sha || currentFileSHA;
+    if (!silent) showDeployPopup(filename, repo);
+  } catch (e) {
+    if (!silent) showToast(`저장 실패: ${e.message}`);
+    else console.warn('Auto-save failed:', e.message);
+  }
+}
+
+function showDeployPopup(filename, repo) {
+  repo = repo || getCurrentRepo();
+  const [owner, repoName] = repo.split('/');
+  const url = `https://${owner}.github.io/${repoName}/${filename}`;
+  const existing = document.getElementById('deploy-popup');
+  if (existing) existing.remove();
+  const popup = document.createElement('div');
+  popup.id = 'deploy-popup';
+  popup.style.cssText = `
+    position:fixed; bottom:60px; right:20px; z-index:9999;
+    background:#161b22; border:1px solid #30363d; border-radius:12px;
+    padding:16px 20px; min-width:320px; box-shadow:0 8px 32px rgba(0,0,0,0.5);
+    font-family:sans-serif;
+  `;
+  popup.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <span style="color:#3fb950;font-weight:600;font-size:14px">✅ 저장 완료!</span>
+      <button onclick="this.closest('#deploy-popup').remove()" style="background:none;border:none;color:#8b949e;cursor:pointer;font-size:16px">✕</button>
+    </div>
+    <div style="background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:8px 12px;margin-bottom:10px;display:flex;align-items:center;gap:8px">
+      <span style="color:#8b949e;font-size:12px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${url}</span>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button onclick="navigator.clipboard.writeText('${url}').then(()=>{this.textContent='✅ 복사됨!';setTimeout(()=>this.textContent='🔗 링크 복사',1500)})"
+        style="flex:1;padding:8px;background:#1f6feb;border:none;border-radius:6px;color:#fff;cursor:pointer;font-size:13px;font-weight:600">🔗 링크 복사</button>
+      <button onclick="window.open('${url}','_blank')"
+        style="padding:8px 14px;background:#21262d;border:1px solid #30363d;border-radius:6px;color:#cdd9e5;cursor:pointer;font-size:13px">열기</button>
+    </div>
+  `;
+  document.body.appendChild(popup);
+  setTimeout(() => popup.remove(), 10000);
+}
+
+// ── TOAST ──
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ── MODAL CLOSE ON BACKDROP CLICK ──
+document.getElementById('modal-backdrop').addEventListener('click', e => {
+  if (e.target === document.getElementById('modal-backdrop')) closeSettings();
+});
+
+// ── 1분 자동저장 ──
+let lastAutoSaveCode = null;
+setInterval(async () => {
+  if (!currentCode || currentCode === lastAutoSaveCode) return;
+  const filename = document.getElementById('file-select').value;
+  if (!filename || filename === '__all__' || filename.startsWith('__load_')) return;
+  const { ghToken } = getSettings();
+  if (!ghToken) return;
+  lastAutoSaveCode = currentCode;
+  await commitToGitHub(filename, ghToken, true);
+  showToast('🔄 자동저장됨');
+}, 60000);
+</script>
+</body>
+</html>
