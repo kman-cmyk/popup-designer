@@ -64,7 +64,12 @@ export default function ChatPage() {
         setMsgs(p => p.map(m => m.id === aid ? { ...m, content: full } : m));
         bottomRef.current?.scrollIntoView({ behavior: "smooth" });
       }
-      if (checkDone(full)) { setDone(true); setTimeout(() => router.push("/brief"), 1000); }
+      if (checkDone(full)) {
+        // 전체 대화 내역 저장 (brief 생성에 사용)
+        sessionStorage.setItem("mona-messages", JSON.stringify([...history, { role: "assistant", content: full }]));
+        setDone(true);
+        setTimeout(() => router.push("/brief"), 1000);
+      }
     } catch { setMsgs(p => [...p, { id: uid(), role: "assistant", content: "잠깐 오류가 생겼어요. 다시 시도해 주세요." }]); }
     finally { setLoading(false); inputRef.current?.focus(); }
   }

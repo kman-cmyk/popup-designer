@@ -1,20 +1,27 @@
 "use client";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AppBar } from "@/components/ui/AppBar";
 
-const MODULES = [
-  { id: "M01", name: "체험 카운터", spec: "1200×600mm", price: "120만원", note: "발색 테스트용 상판, POS 1대 포함" },
-  { id: "M02", name: "백라이트 패널", spec: "600×2400mm", price: "85만원", note: "브랜드 컬러 RGB LED 내장" },
-  { id: "M03", name: "셀피 미러", spec: "600×1800mm", price: "65만원", note: "전신 미러, 자연광 LED 프레임" },
-  { id: "M04", name: "선반 2단", spec: "600×1800mm", price: "70만원", note: "신제품 디스플레이용, 조각 조명 포함" },
-  { id: "M05", name: "행거 랙", spec: "900×1800mm", price: "55만원", note: "의류·굿즈 보조 디스플레이" },
-  { id: "M06", name: "포토월 반쪽", spec: "1200×2400mm", price: "95만원", note: "아크릴 브랜드 로고 부착 가능" },
-];
+// 모듈 데이터는 sessionStorage에서 로드
+const EMPTY_MODULES: {id:string;name:string;spec:string;price:string;note:string}[] = [];
+
+interface ProposalModule { name: string; spec: string; price: string; note: string }
+interface Proposal { id: string; tier: string; price: string; priceNum?: number; concept: string; desc: string; tags: string[]; modules: ProposalModule[]; flow: string; highlight: boolean; strengths?: string[] }
 
 export default function ProposalDetailPage() {
   const [viewMode, setViewMode] = useState<"2d" | "3d">("2d");
   const [activeSection, setActiveSection] = useState<"overview" | "modules" | "flow" | "schedule">("overview");
+  const [proposal, setProposal] = useState<Proposal | null>(null);
+
+  useEffect(() => {
+    const raw = sessionStorage.getItem("selected-proposal");
+    if (raw) { try { setProposal(JSON.parse(raw)); } catch { /* ignore */ } }
+  }, []);
+
+  const modules: {id:string;name:string;spec:string;price:string;note:string}[] = proposal?.modules?.length
+    ? proposal.modules.map((m, i) => ({ id: `M${String(i+1).padStart(2,"0")}`, ...m }))
+    : EMPTY_MODULES;
 
   return (
     <div style={{ minHeight: "100vh", background: "var(--bg)" }}>
@@ -109,10 +116,11 @@ export default function ProposalDetailPage() {
 
           {activeSection === "modules" && (
             <div className="fade-up">
-              <div className="row gap-2"><span className="accent-dot" /><span className="t-eyebrow">모듈 구성 · {MODULES.length}개</span></div>
+              <div className="row gap-2"><span className="accent-dot" /><span className="t-eyebrow">모듈 구성 · {modules.length}개</span></div>
               <h2 className="t-h2" style={{ marginTop: 8 }}>사용 모듈 상세</h2>
+              {modules.length === 0 && <p className="t-body" style={{ marginTop: 16, color: "var(--ink-3)" }}>모듈 상세 정보가 없어요. 제안 목록에서 다시 선택해 주세요.</p>}
               <div className="col gap-3" style={{ marginTop: 20 }}>
-                {MODULES.map((m, i) => (
+                {modules.map((m, i) => (
                   <div key={m.id} className="surface fade-up" style={{ padding: "16px 18px", display: "flex", gap: 16, alignItems: "center" }}>
                     <div className="imgph" style={{ width: 72, height: 72, flexShrink: 0, fontSize: 10 }}>3D</div>
                     <div className="grow">
@@ -135,11 +143,12 @@ export default function ProposalDetailPage() {
           {activeSection === "flow" && (
             <div className="fade-up">
               <div className="row gap-2"><span className="accent-dot" /><span className="t-eyebrow">고객 동선 분석</span></div>
-              <h2 className="t-h2" style={{ marginTop: 8 }}>3단계 동선으로 설계했어요</h2>
+              <h2 className="t-h2" style={{ marginTop: 8 }}>설계된 동선</h2>
+              {proposal?.flow && <p className="t-body" style={{ marginTop: 8, color: "var(--ink-2)", fontWeight: 600 }}>{proposal.flow}</p>}
               <div className="col gap-3" style={{ marginTop: 20 }}>
-                {[{ step: "01", title: "입구 → 첫인상 (1분)", color: "#FF6B35", desc: "백라이트 패널과 선반이 입구 정면에서 브랜드 첫인상을 만들어요. 발걸음이 자연스럽게 안쪽으로 이어져요." },
-                  { step: "02", title: "체험 존 (3-5분)", color: "#6B8FFF", desc: "발색 테스트 카운터와 셀피 미러가 나란히 있어요. '발라보고 찍는' 패턴이 자연스럽게 만들어져요." },
-                  { step: "03", title: "포토 → 카운터 (2-3분)", color: "#22c55e", desc: "포토월 촬영 후 바로 카운터로 이어지는 동선이에요. 충동 구매 전환율이 높아요." }].map(s => (
+                {[{ step: "01", title: "입구 → 첫인상", color: "#FF6B35", desc: "입구에서 브랜드 첫인상을 만드는 주요 모듈이 배치돼요." },
+                  { step: "02", title: "핵심 체험 존", color: "#6B8FFF", desc: "고객이 제품을 직접 체험하고 SNS에 공유할 수 있는 공간이에요." },
+                  { step: "03", title: "카운터 / 결제", color: "#22c55e", desc: "자연스럽게 구매로 이어지는 마지막 동선이에요." }].map(s => (
                   <div key={s.step} className="surface" style={{ padding: "18px 20px", borderLeft: `3px solid ${s.color}` }}>
                     <div className="row gap-3">
                       <span className="t-mono" style={{ fontSize: 13, fontWeight: 800, color: s.color }}>{s.step}</span>
@@ -182,19 +191,23 @@ export default function ProposalDetailPage() {
         {/* 오른쪽 요약 */}
         <aside style={{ borderLeft: "1px solid var(--line)", padding: "24px 22px", background: "var(--bg-soft)", display: "flex", flexDirection: "column", overflowY: "auto" }}>
           <span className="t-eyebrow">선택된 안</span>
-          <div className="t-h3" style={{ marginTop: 6 }}>스탠다드 안 B</div>
-          <div style={{ fontFamily: "var(--font-en)", fontSize: 28, fontWeight: 800, marginTop: 4, letterSpacing: "-0.02em" }}>490만원</div>
+          <div className="t-h3" style={{ marginTop: 6 }}>{proposal ? `${proposal.tier} 안 ${proposal.id}` : "—"}</div>
+          <div style={{ fontFamily: "var(--font-en)", fontSize: 28, fontWeight: 800, marginTop: 4, letterSpacing: "-0.02em" }}>{proposal?.price ?? "—"}</div>
           <div className="divider" />
           <div className="col gap-2">
-            {MODULES.map(m => (
+            {modules.length > 0 ? modules.map(m => (
               <div key={m.id} className="row" style={{ padding: "7px 0", borderBottom: "1px solid var(--line)" }}>
                 <span style={{ fontSize: 12, flex: 1 }}>{m.name}</span>
                 <span className="t-mono" style={{ fontSize: 12, color: "var(--ink-3)" }}>{m.price}</span>
               </div>
+            )) : proposal?.tags?.map(t => (
+              <div key={t} className="row" style={{ padding: "7px 0", borderBottom: "1px solid var(--line)" }}>
+                <span style={{ fontSize: 12, flex: 1 }}>{t}</span>
+              </div>
             ))}
             <div className="row" style={{ padding: "10px 0" }}>
               <span style={{ fontSize: 13, fontWeight: 700, flex: 1 }}>합계</span>
-              <span className="t-mono" style={{ fontWeight: 800, fontSize: 14 }}>490만원</span>
+              <span className="t-mono" style={{ fontWeight: 800, fontSize: 14 }}>{proposal?.price ?? "—"}</span>
             </div>
           </div>
           <div style={{ flex: 1 }} />
