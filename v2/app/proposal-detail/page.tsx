@@ -28,7 +28,7 @@ export default function ProposalDetailPage() {
       <AppBar active="" right={
         <div className="row gap-2">
           <button className="btn btn-ghost btn-sm">PDF 다운로드</button>
-          <Link href="/complete"><button className="btn btn-accent btn-sm">예약하기 →</button></Link>
+          <Link href="/complete" className="btn btn-accent btn-sm" style={{ textDecoration:"none" }}>예약하기 →</Link>
         </div>
       } />
 
@@ -211,8 +211,8 @@ export default function ProposalDetailPage() {
             </div>
           </div>
           <div style={{ flex: 1 }} />
-          <Link href="/complete"><button className="btn btn-accent btn-lg" style={{ width: "100%" }}>이 안으로 예약하기 →</button></Link>
-          <Link href="/proposal"><button className="btn btn-ghost" style={{ width: "100%", marginTop: 8 }}>다른 안 비교하기</button></Link>
+          <Link href="/complete" className="btn btn-accent btn-lg" style={{ width:"100%", textDecoration:"none" }}>이 안으로 예약하기 →</Link>
+          <Link href="/proposal" className="btn btn-ghost" style={{ width:"100%", marginTop:8, textDecoration:"none" }}>다른 안 비교하기</Link>
         </aside>
       </div>
     </div>

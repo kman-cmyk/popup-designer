@@ -44,7 +44,7 @@ export default function Editor3DPage() {
         <button onClick={() => setShowGrid(g => !g)} style={{ height: 28, padding: "0 10px", border: "1px solid rgba(255,255,255,0.12)", borderRadius: "var(--r-xs)", background: showGrid ? "rgba(107,143,255,0.2)" : "transparent", color: showGrid ? "#6B8FFF" : "rgba(255,255,255,0.4)", fontSize: 12, cursor: "pointer" }}>
           그리드
         </button>
-        <Link href="/complete"><button style={{ height: 32, padding: "0 14px", border: "none", borderRadius: "var(--r-sm)", background: "var(--accent)", color: "#fff", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>이 구성 확정하기 →</button></Link>
+        <Link href="/complete" style={{ height:32, padding:"0 14px", border:"none", borderRadius:"var(--r-sm)", background:"var(--accent)", color:"#fff", fontSize:13, fontWeight:600, cursor:"pointer", display:"inline-flex", alignItems:"center", textDecoration:"none" }}>이 구성 확정하기 →</Link>
       </div>
 
       <div style={{ flex: 1, display: "grid", gridTemplateColumns: "240px 1fr 220px", overflow: "hidden" }}>

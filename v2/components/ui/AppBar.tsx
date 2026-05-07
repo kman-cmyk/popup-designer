@@ -18,7 +18,7 @@ export function AppBar({ active = "home", right }: { active?: string; right?: Re
       {right ?? (
         <div className="row gap-2">
           <button className="btn btn-ghost btn-sm">로그인</button>
-          <Link href="/chat"><button className="btn btn-sm">설계 받기</button></Link>
+          <Link href="/chat" className="btn btn-sm" style={{ textDecoration: "none" }}>설계 받기</Link>
         </div>
       )}
     </div>

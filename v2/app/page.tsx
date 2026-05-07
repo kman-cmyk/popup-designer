@@ -84,13 +84,16 @@ function LayoutAnim() {
 }
 
 export default function HomePage() {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   return (
     <main style={{ minHeight: "100vh", background: "var(--bg)" }}>
       <AppBar active="home" />
 
       {/* Hero */}
       <section style={{ padding: "72px 80px 40px", textAlign: "center" }}>
-        <div className="stagger" style={{ maxWidth: 760, margin: "0 auto" }}>
+        <div className={mounted ? "stagger" : ""} style={{ maxWidth: 760, margin: "0 auto" }}>
           <div className="row gap-2" style={{ justifyContent: "center" }}>
             <span className="accent-dot" />
             <span className="t-eyebrow" style={{ color: "var(--ink-2)" }}>FOR BRAND TEAMS · 팝업·전시·매장</span>
@@ -105,7 +108,7 @@ export default function HomePage() {
             <span style={{ display: "block", fontSize: 13, marginTop: 8, color: "var(--ink-4)" }}>※ 접수 건이 많을 때는 조금 더 걸릴 수 있어요.</span>
           </p>
           <div className="row gap-3" style={{ marginTop: 32, justifyContent: "center" }}>
-            <Link href="/chat"><button className="btn btn-accent btn-lg">설계 받아보기 →</button></Link>
+            <Link href="/chat" className="btn btn-accent btn-lg" style={{ textDecoration: "none" }}>설계 받아보기 →</Link>
           </div>
           <div style={{ marginTop: 48 }}><LayoutAnim /></div>
         </div>
